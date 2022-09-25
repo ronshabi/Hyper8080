@@ -1,0 +1,9 @@
+BasedOnStyle: Microsoft
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortIfStatementsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+AlignTrailingComments: true
+UseTab: Always
+IndentWidth: 4
+TabWidth: 4
+ColumnLimit: 80
