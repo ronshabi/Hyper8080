@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CPU_H
+#define CPU_H
 
 #include <stdint.h>
 
@@ -26,6 +27,7 @@ typedef struct cpu
 } cpu;
 
 void cpu_init(cpu *c);
+void cpu_set_memory(cpu *c, uint8_t *memory_ptr);
 
 uint8_t cpu_get_byte(cpu *c, uint16_t address);
 uint16_t cpu_get_word(cpu *c, uint16_t address);
@@ -46,3 +48,5 @@ uint16_t cpu_deref_hl(cpu *c);
 
 void cpu_stack_push(cpu *c, uint16_t val);
 uint16_t cpu_stack_pop(cpu *c);
+
+#endif // CPU_H

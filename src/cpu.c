@@ -56,6 +56,11 @@ void cpu_init(cpu *c)
 	c->shift_amt = 0;
 }
 
+void cpu_set_memory(cpu *c, uint8_t *memory_ptr)
+{
+	c->memory = memory_ptr;
+}
+
 uint8_t cpu_get_byte(cpu *c, uint16_t address)
 {
 	return c->memory[address];
