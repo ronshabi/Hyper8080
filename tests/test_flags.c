@@ -10,25 +10,21 @@ int main(void)
 	uint8_t *memory = malloc(2000);
 	cpu_set_memory(&c, memory);
 
-	int i = 0;
+	c.a = 0x22;
+	c.b = 0xdf;
 
-	while (i < ITER)
+	// Addition should be 0x101
+	// Subtraction should be -0xbd
+
+	uint8_t result = c.a + c.b;
+
+	cpu_set_flags_all(&c, c.a, c.b, 0);
+
+	if (c.flag_z == 0 && c.flag_s == 0 && c.flag_p == 0 && // Parity Odd
+		c.flag_c == 1 && c.flag_ac == 0)
 	{
-		cpu_stack_push(&c, (uint16_t)VALUE + i);
-		i++;
+		return 0;
 	}
 
-	i--;
-
-	while (i != 0)
-	{
-		if (cpu_stack_pop(&c) != (uint16_t)VALUE + i)
-		{
-			return 1;
-		}
-
-		i--;
-	}
-
-	return 0;
+	return 1;
 }

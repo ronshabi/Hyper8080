@@ -51,8 +51,8 @@ uint16_t cpu_stack_pop(cpu *c);
 
 uint8_t cpu_get_flags(cpu *c);
 void cpu_set_flags_zsp(cpu *c, uint8_t val);
-void cpu_set_flags_c(cpu *c, uint8_t new_val, uint8_t old_val, uint8_t modulator);
-void cpu_set_flags_ac(cpu *c, uint8_t new_val, uint8_t old_val, uint8_t modulator);
-void cpu_set_flags_all(cpu *c, uint8_t new_val, uint8_t old_val, uint8_t modulator);
+void cpu_set_flags_c(cpu *c, uint8_t f, uint8_t g, uint8_t modulator);
+void cpu_set_flags_ac(cpu *c, uint8_t f, uint8_t g, uint8_t modulator);
+void cpu_set_flags_all(cpu *c, uint8_t f, uint8_t g, uint8_t modulator);
 
 #endif // CPU_H
