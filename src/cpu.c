@@ -249,6 +249,42 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0x2e: mvi (c, REG (l)); break;
 		case 0x36: mvi_m (c); break;
 
+		// DATA TRANSFER
+		case 0x0a: ldax_b (c); break;
+		case 0x1a: ldax_d (c); break;
+		case 0x77: mov_m (c, REG (a)); break;
+		case 0x70: mov_m (c, REG (b)); break;
+		case 0x71: mov_m (c, REG (c)); break;
+		case 0x72: mov_m (c, REG (d)); break;
+		case 0x73: mov_m (c, REG (e)); break;
+		case 0x74: mov_m (c, REG (h)); break;
+		case 0x75: mov_m (c, REG (l)); break;
+
+		// REGISTER PAIR INSTRUCTIONS
+		case 0xc5: push_b (c); break;	// PUSH B
+		case 0xd5: push_d (c); break;	// PUSH D
+		case 0xe5: push_h (c); break;	// PUSH H
+		case 0xf5: push_psw (c); break; // PUSH PSW
+		case 0xc1: pop_b (c); break;	// POP B
+		case 0xd1: pop_d (c); break;	// POP D
+		case 0xe1: pop_h (c); break;	// POP H
+		case 0xf1: pop_psw (c); break;	// POP PSW
+		case 0x09: dad_b (c); break;	// DAD B	Double add
+		case 0x19: dad_d (c); break;	// DAD D
+		case 0x29: dad_h (c); break;	// DAD H
+		case 0x39: dad_sp (c); break;	// DAD SP
+		case 0x03: inx_b (c); break;	// INX B	Increment register pair
+		case 0x13: inx_d (c); break;	// INX D
+		case 0x23: inx_h (c); break;	// INX H
+		case 0x33: inx_sp (c); break;	// INX SP
+		case 0x0b: dcx_b (c); break;	// DCX B	Decrement register pair
+		case 0x1b: dcx_d (c); break;	// DCX D
+		case 0x2b: dcx_h (c); break;	// DCX H
+		case 0x3b: dcx_sp (c); break;	// DCX SP
+		case 0xeb: xchg (c); break;		// XCHG		Exchange Registers
+		case 0xe3: xhtl (c); break;		// XHTL		Exchange Stack
+		case 0xf9: sphl (c); break;		// SPHL		Load SP from H and L
+
 		default: cpu_unimplemented (c); break;
 	}
 }

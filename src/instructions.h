@@ -38,4 +38,34 @@ void lxi_sp (cpu *c);			 // LXI SP
 void mvi (cpu *c, uint8_t *reg); // MVI 	Move immediate data
 void mvi_m (cpu *c);			 // MVI M
 
+/* DATA TRANSFER */
+void ldax_b (cpu *c); // LDAX B		Load accumulator
+void ldax_d (cpu *c); // LDAX D
+void mov_m (cpu *c, const uint8_t *reg);
+
+/* REGISTER PAIR INSTRUCTIONS */
+void push_b (cpu *c);	// PUSH B
+void push_d (cpu *c);	// PUSH D
+void push_h (cpu *c);	// PUSH H
+void push_psw (cpu *c); // PUSH PSW
+void pop_b (cpu *c);	// POP B
+void pop_d (cpu *c);	// POP D
+void pop_h (cpu *c);	// POP H
+void pop_psw (cpu *c);	// POP PSW
+void dad_b (cpu *c);	// DAD B		Double add
+void dad_d (cpu *c);	// DAD D
+void dad_h (cpu *c);	// DAD H
+void dad_sp (cpu *c);	// DAD SP
+void inx_b (cpu *c);	// INX B		Increment register pair
+void inx_d (cpu *c);	// INX D
+void inx_h (cpu *c);	// INX H
+void inx_sp (cpu *c);	// INX SP
+void dcx_b (cpu *c);	// DCX B		Decrement register pair
+void dcx_d (cpu *c);	// DCX D
+void dcx_h (cpu *c);	// DCX H
+void dcx_sp (cpu *c);	// DCX SP
+void xchg (cpu *c);		// XCHG		Exchange Registers
+void xhtl (cpu *c);		// XHTL		Exchange Stack
+void sphl (cpu *c);		// SPHL		Load SP from H and L
+
 #endif // INSTRUCTIONS_H

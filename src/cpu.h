@@ -63,6 +63,8 @@ void	cpu_set_flags_all (cpu *c, uint8_t f, uint8_t g, uint8_t modulator);
 // Stack
 void	 stack_push (cpu *c, uint16_t val);
 uint16_t stack_pop (cpu *c);
+void	 stack_push_psw (cpu *c);
+void	 stack_pop_psw (cpu *c);
 
 // Emulation
 void cpu_emulate (cpu *c, uint8_t opcode);

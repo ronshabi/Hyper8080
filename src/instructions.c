@@ -123,3 +123,78 @@ void mvi_m (cpu *c)
 	cpu_set_byte (c, cpu_deref_hl (c), cpu_get_byte (c, c->pc + 1));
 	PC1;
 }
+
+/* DATA TRANSFER */
+void ldax_b (cpu *c)
+{
+	c->a = cpu_deref_bc (c);
+	PC1;
+}
+void ldax_d (cpu *c)
+{
+	c->a = cpu_deref_de (c);
+	PC1;
+}
+void mov_m (cpu *c, const uint8_t *reg)
+{
+	cpu_set_byte (c, cpu_deref_hl (c), *reg);
+	PC1;
+}
+
+/* REGISTER PAIR INSTRUCTIONS */
+void push_b (cpu *c)
+{
+	stack_push (c, cpu_get_bc (c));
+	PC1;
+}
+void push_d (cpu *c)
+{
+	stack_push (c, cpu_get_de (c));
+	PC1;
+}
+void push_h (cpu *c)
+{
+	stack_push (c, cpu_get_hl (c));
+	PC1;
+}
+void push_psw (cpu *c)
+{
+	stack_push_psw (c);
+	PC1;
+}
+void pop_b (cpu *c)
+{
+	cpu_set_bc (c, stack_pop (c));
+	PC1;
+}
+
+void pop_d (cpu *c)
+{
+	cpu_set_de (c, stack_pop (c));
+	PC1;
+}
+void pop_h (cpu *c)
+{
+	cpu_set_hl (c, stack_pop (c));
+	PC1;
+}
+void pop_psw (cpu *c)
+{
+	stack_pop_psw (c);
+	PC1;
+}
+void dad_b (cpu *c) {}
+void dad_d (cpu *c) {}
+void dad_h (cpu *c) {}
+void dad_sp (cpu *c) {}
+void inx_b (cpu *c) {}
+void inx_d (cpu *c) {}
+void inx_h (cpu *c) {}
+void inx_sp (cpu *c) {}
+void dcx_b (cpu *c) {}
+void dcx_d (cpu *c) {}
+void dcx_h (cpu *c) {}
+void dcx_sp (cpu *c) {}
+void xchg (cpu *c) {}
+void xhtl (cpu *c) {}
+void sphl (cpu *c) {}
