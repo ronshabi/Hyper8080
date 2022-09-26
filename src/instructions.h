@@ -5,8 +5,9 @@
 
 #include "cpu.h"
 
-/* JUMPS */
 // https://en.wikipedia.org/wiki/FLAGS_register
+
+/* JUMP */
 void pchl (cpu *c); // PCHL		Load program counter
 void jmp (cpu *c);	// JMP		Jump
 void jc (cpu *c);	// JC		JMP carry
@@ -17,6 +18,17 @@ void jm (cpu *c);	// JM		JMP minus
 void jp (cpu *c);	// JP		JMP positive
 void jpe (cpu *c);	// JPE		JMP parity even
 void jpo (cpu *c);	// JPO		JMP parity odd
+
+/* CALL */
+void call (cpu *c); // CALL
+void cc (cpu *c);	// CC       CALL carry
+void cnc (cpu *c);	// CNC      CALL not carry
+void cz (cpu *c);	// CZ       CALL zero
+void cnz (cpu *c);	// CNZ      CALL not zero
+void cm (cpu *c);	// CM       CALL minus
+void cp (cpu *c);	// CP       CALL positive
+void cpe (cpu *c);	// CPE      CALL parity even
+void cpo (cpu *c);	// CPO      CALL parity odd
 
 /* IMMEDIATE INSTRUCTIONS */
 void lxi_b (cpu *c);			 // LXI B	Load register pair immediate

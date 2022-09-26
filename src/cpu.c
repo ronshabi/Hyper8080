@@ -211,7 +211,7 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0xed:
 		case 0xfd: PC1; break;
 
-		// JUMP INSTRUCTIONS
+		// JUMP
 		case 0xe9: pchl (c); break;
 		case 0xc3: jmp (c); break;
 		case 0xda: jc (c); break;
@@ -222,6 +222,17 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0xf2: jp (c); break;
 		case 0xea: jpe (c); break;
 		case 0xe2: jpo (c); break;
+
+		// CALL
+		case 0xcd: call (c); break;
+		case 0xdc: cc (c); break;
+		case 0xd4: cnc (c); break;
+		case 0xcc: cz (c); break;
+		case 0xc4: cnz (c); break;
+		case 0xfc: cm (c); break;
+		case 0xf4: cp (c); break;
+		case 0xec: cpe (c); break;
+		case 0xe4: cpo (c); break;
 
 		// IMMEDIATE INSTRUCTIONS
 		case 0x01: lxi_b (c); break;

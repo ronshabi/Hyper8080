@@ -1,6 +1,6 @@
 #include "instructions.h"
 
-/* JUMPS */
+/* JUMP */
 void pchl (cpu *c) { cpu_unimplemented (c); }
 void jmp (cpu *c) { c->pc = cpu_get_word (c, c->pc + 1); }
 void jc (cpu *c)
@@ -41,6 +41,53 @@ void jpe (cpu *c)
 void jpo (cpu *c)
 {
 	if (!c->flag_p) { jmp (c); }
+	else { PC3; }
+}
+
+/* CALL */
+void call (cpu *c)
+{
+	stack_push (c, c->pc);
+	jmp (c);
+}
+void cc (cpu *c)
+{
+	if (c->flag_c) { call (c); }
+	else { PC3; }
+}
+void cnc (cpu *c)
+{
+	if (!c->flag_c) { call (c); }
+	else { PC3; }
+}
+void cz (cpu *c)
+{
+	if (c->flag_z) { call (c); }
+	else { PC3; }
+}
+void cnz (cpu *c)
+{
+	if (!c->flag_z) { call (c); }
+	else { PC3; }
+}
+void cm (cpu *c)
+{
+	if (!c->flag_s) { call (c); }
+	else { PC3; }
+}
+void cp (cpu *c)
+{
+	if (!c->flag_s) { call (c); }
+	else { PC3; }
+}
+void cpe (cpu *c)
+{
+	if (c->flag_p) { call (c); }
+	else { PC3; }
+}
+void cpo (cpu *c)
+{
+	if (!c->flag_p) { call (c); }
 	else { PC3; }
 }
 
