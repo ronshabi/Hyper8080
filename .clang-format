@@ -1,8 +1,26 @@
 BasedOnStyle: Microsoft
-AllowShortCaseLabelsOnASingleLine: true
-AllowShortIfStatementsOnASingleLine: true
+Language: Cpp
+
+SpaceBeforeParens: Always
+
+# ALLOW ONE-LINERS
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: Always
+AllowShortFunctionsOnASingleLine: All
 AllowShortLoopsOnASingleLine: true
+AllowShortBlocksOnASingleLine: Always
+# ALIGNMENT
 AlignTrailingComments: true
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveBitFields: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveMacros: Consecutive
+AlignEscapedNewlines: Left
+AlignOperands: Align
+# INDENTATION
+IndentCaseLabels: true
+# USE TABS
 UseTab: Always
 IndentWidth: 4
 TabWidth: 4

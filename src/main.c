@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 	fclose(f);
 
 	cpu c;
-	cpu_init(&c);
+	cpu_init (&c);
 	c.memory = buffer;
 
 	// ===================================
@@ -48,8 +48,8 @@ int main(int argc, char *argv[])
 	// ===================================
 
 	// Test ground :p
-	cpu_stack_push(&c, 0xface);
-	uint16_t someshit = cpu_stack_pop(&c);
+	stack_push (&c, 0xface);
+	uint16_t someshit = stack_pop (&c);
 
 	return 0;
 }

@@ -17,7 +17,7 @@ int main(void)
 
 	while (i < ITER)
 	{
-		cpu_stack_push(&c, (uint16_t)VALUE + i);
+		stack_push (&c, (uint16_t)VALUE + i);
 		i++;
 	}
 
@@ -25,10 +25,7 @@ int main(void)
 
 	while (i != 0)
 	{
-		if (cpu_stack_pop(&c) != (uint16_t)VALUE + i)
-		{
-			return 1;
-		}
+		if (stack_pop (&c) != (uint16_t)VALUE + i) { return 1; }
 
 		i--;
 	}

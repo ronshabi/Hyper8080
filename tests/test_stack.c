@@ -8,13 +8,10 @@ int main(void)
 	cpu_init(&c);
 
 	uint8_t *memory = malloc(10000);
-	cpu_set_memory(&c, memory);
-	cpu_stack_push(&c, 0xcafe);
+	cpu_set_memory (&c, memory);
+	stack_push (&c, 0xcafe);
 
-	if (cpu_stack_pop(&c) == 0xcafe)
-	{
-		return 0;
-	}
+	if (stack_pop (&c) == 0xcafe) { return 0; }
 
 	return 1;
 }
