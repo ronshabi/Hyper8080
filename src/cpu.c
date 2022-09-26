@@ -1,4 +1,6 @@
 #include "cpu.h"
+#include "instructions.h"
+#include <stdio.h>
 #include <stdlib.h>
 
 const uint8_t CYCLES[] = {
@@ -31,8 +33,10 @@ void cpu_init (cpu *c)
 	c->pc = 0;
 	c->sp = 0;
 
+	c->cycles		= 0;
+	c->instructions = 0;
+
 	c->memory			  = NULL;
-	c->cycle_count		  = 0;
 	c->halt				  = 0;
 	c->interrupts_enabled = 0;
 
@@ -175,4 +179,65 @@ void cpu_set_flags_all (cpu *c, uint8_t f, uint8_t g, uint8_t modulator)
 	cpu_set_flags_zsp (c, f);
 	cpu_set_flags_c (c, f, g, modulator);
 	cpu_set_flags_ac (c, f, g, modulator);
+}
+
+// Emualtion
+void cpu_unimplemented (cpu *c)
+{
+	printf ("UNIMPLEMENTED INSTRUCTION %02x\n", cpu_get_byte (c, c->pc));
+	exit (1);
+}
+
+void cpu_emulate (cpu *c, uint8_t opcode)
+{
+	/* READ HEADER FILES FOR INSTRUCTION DOCUMENTATION */
+	c->instructions++;
+	c->cycles += CYCLES[opcode];
+
+	switch (opcode)
+	{
+		// NOP
+		case 0x00:
+		case 0x08:
+		case 0x10:
+		case 0x18:
+		case 0x20:
+		case 0x28:
+		case 0x30:
+		case 0x38:
+		case 0xcb:
+		case 0xd9:
+		case 0xdd:
+		case 0xed:
+		case 0xfd: PC1; break;
+
+		// JUMP INSTRUCTIONS
+		case 0xe9: pchl (c); break;
+		case 0xc3: jmp (c); break;
+		case 0xda: jc (c); break;
+		case 0xd2: jnc (c); break;
+		case 0xca: jz (c); break;
+		case 0xc2: jnz (c); break;
+		case 0xfa: jm (c); break;
+		case 0xf2: jp (c); break;
+		case 0xea: jpe (c); break;
+		case 0xe2: jpo (c); break;
+
+		// IMMEDIATE INSTRUCTIONS
+		case 0x01: lxi_b (c); break;
+		case 0x11: lxi_d (c); break;
+		case 0x21: lxi_h (c); break;
+		case 0x31: lxi_sp (c); break;
+
+		case 0x3e: mvi (c, REG (a)); break;
+		case 0x06: mvi (c, REG (b)); break;
+		case 0x0e: mvi (c, REG (c)); break;
+		case 0x16: mvi (c, REG (d)); break;
+		case 0x1e: mvi (c, REG (e)); break;
+		case 0x26: mvi (c, REG (h)); break;
+		case 0x2e: mvi (c, REG (l)); break;
+		case 0x36: mvi_m (c); break;
+
+		default: cpu_unimplemented (c); break;
+	}
 }

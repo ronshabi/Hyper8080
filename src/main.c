@@ -32,24 +32,24 @@ int main(int argc, char *argv[])
 	// Get file size and read it into mem buffer
 	fseek(f, 0L, SEEK_END);
 	long fsize = ftell(f);
-	fseek(f, 0L, SEEK_SET);
+	fseek (f, 0L, SEEK_SET);
 
-	unsigned char *buffer =
-		calloc(10000, 1); // TODO: Change to match the CPU parameter
-	fread(buffer, fsize, 1, f);
-	fclose(f);
+	unsigned char *buffer = calloc (10000, 1); // TODO: Change to match the CPU parameter
+	fread (buffer, fsize, 1, f);
+	fclose (f);
 
 	cpu c;
 	cpu_init (&c);
 	c.memory = buffer;
 
-	// ===================================
-	// START
-	// ===================================
+	uint8_t current_opcode;
 
-	// Test ground :p
-	stack_push (&c, 0xface);
-	uint16_t someshit = stack_pop (&c);
+	// Emulation loop
+	while (!c.halt)
+	{
+		current_opcode = cpu_get_byte (&c, c.pc);
+		cpu_emulate (&c, current_opcode);
+	}
 
 	return 0;
 }

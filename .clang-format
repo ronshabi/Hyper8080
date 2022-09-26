@@ -2,9 +2,9 @@ BasedOnStyle: Microsoft
 Language: Cpp
 
 SpaceBeforeParens: Always
-
+ReflowComments: true
 # ALLOW ONE-LINERS
-AllowShortCaseLabelsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
 AllowShortIfStatementsOnASingleLine: Always
 AllowShortFunctionsOnASingleLine: All
 AllowShortLoopsOnASingleLine: true
