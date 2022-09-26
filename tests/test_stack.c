@@ -1,5 +1,5 @@
 #include "../src/cpu.c"
-#include "../src/cpu.h"
+#include "../src/cpu.h"s
 #include <stdlib.h>
 
 int main(void)
