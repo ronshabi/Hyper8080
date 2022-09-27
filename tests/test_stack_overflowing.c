@@ -1,16 +1,18 @@
-#include "../src/cpu.c"
-#include "../src/cpu.h"
 #include <stdlib.h>
+#include "../src/instructions.h"
+#include "../src/instructions.c"
+#include "../src/cpu.h"
+#include "../src/cpu.c"
 
-#define ITER 10000
+#define ITER  10000
 #define VALUE 0xaabbcc
 
-int main(void)
+int main (void)
 {
 	cpu c;
-	cpu_init(&c);
+	cpu_init (&c);
 
-	uint8_t *memory = malloc(2000);
+	uint8_t *memory = malloc (2000);
 	cpu_set_memory(&c, memory);
 
 	int i = 0;

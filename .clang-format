@@ -1,6 +1,6 @@
 BasedOnStyle: Microsoft
 Language: Cpp
-
+SortIncludes: Never
 SpaceBeforeParens: Always
 ReflowComments: true
 # ALLOW ONE-LINERS

@@ -1,13 +1,15 @@
-#include "../src/cpu.c"
-#include "../src/cpu.h"s
 #include <stdlib.h>
+#include "../src/instructions.h"
+#include "../src/instructions.c"
+#include "../src/cpu.h"
+#include "../src/cpu.c"
 
-int main(void)
+int main (void)
 {
 	cpu c;
-	cpu_init(&c);
+	cpu_init (&c);
 
-	uint8_t *memory = malloc(10000);
+	uint8_t *memory = malloc (10000);
 	cpu_set_memory (&c, memory);
 	stack_push (&c, 0xcafe);
 

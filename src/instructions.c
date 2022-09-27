@@ -183,14 +183,58 @@ void pop_psw (cpu *c)
 	stack_pop_psw (c);
 	PC1;
 }
-void dad_b (cpu *c) {}
-void dad_d (cpu *c) {}
-void dad_h (cpu *c) {}
-void dad_sp (cpu *c) {}
-void inx_b (cpu *c) {}
-void inx_d (cpu *c) {}
-void inx_h (cpu *c) {}
-void inx_sp (cpu *c) {}
+void dad_b (cpu *c)
+{
+	uint32_t result = cpu_get_bc (c) + cpu_get_hl (c);
+	if (result > 0xffff) { c->flag_c = 1; }
+	else { c->flag_c = 0; }
+	cpu_set_hl (c, result & 0xffff);
+	PC1;
+}
+void dad_d (cpu *c)
+{
+	uint32_t result = cpu_get_de (c) + cpu_get_hl (c);
+	if (result > 0xffff) { c->flag_c = 1; }
+	else { c->flag_c = 0; }
+	cpu_set_hl (c, result & 0xffff);
+	PC1;
+}
+void dad_h (cpu *c)
+{
+	uint32_t result = cpu_get_hl (c) + cpu_get_hl (c);
+	if (result > 0xffff) { c->flag_c = 1; }
+	else { c->flag_c = 0; }
+	cpu_set_hl (c, result & 0xffff);
+	PC1;
+}
+void dad_sp (cpu *c)
+{
+	uint32_t result = c->sp + cpu_get_hl (c);
+	if (result > 0xffff) { c->flag_c = 1; }
+	else { c->flag_c = 0; }
+	cpu_set_hl (c, result & 0xffff);
+	PC1;
+}
+void inx_b (cpu *c)
+{
+	cpu_set_bc (c, cpu_get_bc (c) + 1);
+	PC1;
+}
+void inx_d (cpu *c)
+{
+	cpu_set_de (c, cpu_get_de (c) + 1);
+	PC1;
+}
+void inx_h (cpu *c)
+{
+	cpu_set_hl (c, cpu_get_hl (c) + 1);
+	PC1;
+}
+void inx_sp (cpu *c)
+{
+	c->sp++;
+	PC1;
+}
 void dcx_b (cpu *c) {}
 void dcx_d (cpu *c) {}
 void dcx_h (cpu *c) {}
