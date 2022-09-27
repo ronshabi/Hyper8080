@@ -101,6 +101,7 @@ void cpu_set_hl (cpu *c, uint16_t val)
 uint16_t cpu_deref_bc (cpu *c) { return cpu_get_byte (c, cpu_get_bc (c)); }
 uint16_t cpu_deref_de (cpu *c) { return cpu_get_byte (c, cpu_get_de (c)); }
 uint16_t cpu_deref_hl (cpu *c) { return cpu_get_byte (c, cpu_get_hl (c)); }
+uint16_t cpu_deref_sp (cpu *c, uint16_t offset) { return cpu_get_byte (c, c->sp + offset); }
 
 // Stack
 void stack_push (cpu *c, uint16_t val)
@@ -282,7 +283,7 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0x2b: dcx_h (c); break;	// DCX H
 		case 0x3b: dcx_sp (c); break;	// DCX SP
 		case 0xeb: xchg (c); break;		// XCHG		Exchange Registers
-		case 0xe3: xhtl (c); break;		// XHTL		Exchange Stack
+		case 0xe3: xthl (c); break;		// XHTL		Exchange Stack
 		case 0xf9: sphl (c); break;		// SPHL		Load SP from H and L
 
 		default: cpu_unimplemented (c); break;

@@ -65,7 +65,7 @@ void dcx_d (cpu *c);	// DCX D
 void dcx_h (cpu *c);	// DCX H
 void dcx_sp (cpu *c);	// DCX SP
 void xchg (cpu *c);		// XCHG		Exchange Registers
-void xhtl (cpu *c);		// XHTL		Exchange Stack
+void xthl (cpu *c);		// XHTL		Exchange Stack
 void sphl (cpu *c);		// SPHL		Load SP from H and L
 
 #endif // INSTRUCTIONS_H

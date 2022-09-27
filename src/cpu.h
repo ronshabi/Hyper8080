@@ -52,6 +52,7 @@ void	 cpu_set_hl (cpu *c, uint16_t val);
 uint16_t cpu_deref_bc (cpu *c);
 uint16_t cpu_deref_de (cpu *c);
 uint16_t cpu_deref_hl (cpu *c);
+uint16_t cpu_deref_sp (cpu *c, uint16_t offset);
 
 // Flags
 uint8_t cpu_get_flags (cpu *c);

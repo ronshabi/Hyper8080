@@ -235,10 +235,50 @@ void inx_sp (cpu *c)
 	c->sp++;
 	PC1;
 }
-void dcx_b (cpu *c) {}
-void dcx_d (cpu *c) {}
-void dcx_h (cpu *c) {}
-void dcx_sp (cpu *c) {}
-void xchg (cpu *c) {}
-void xhtl (cpu *c) {}
-void sphl (cpu *c) {}
+void dcx_b (cpu *c)
+{
+	cpu_set_bc (c, cpu_get_bc (c) - 1);
+	PC1;
+}
+void dcx_d (cpu *c)
+{
+	cpu_set_de (c, cpu_get_de (c) - 1);
+	PC1;
+}
+void dcx_h (cpu *c)
+{
+	cpu_set_hl (c, cpu_get_hl (c) - 1);
+	PC1;
+}
+void dcx_sp (cpu *c) { c->sp--; }
+void xchg (cpu *c)
+{
+	uint8_t temp;
+	temp = c->h;
+	c->h = c->d;
+	c->d = temp;
+
+	temp = c->l;
+	c->l = c->e;
+	c->e = temp;
+
+	PC1;
+}
+void xthl (cpu *c)
+{
+	uint8_t l = c->l;
+	uint8_t h = c->h;
+
+	c->l = cpu_deref_sp (c, 0);
+	c->h = cpu_deref_sp (c, 1);
+
+	cpu_set_byte (c, c->sp, l);
+	cpu_set_byte (c, c->sp + 1, h);
+
+	PC1;
+}
+void sphl (cpu *c)
+{
+	c->sp = cpu_get_hl (c);
+	PC1;
+}
