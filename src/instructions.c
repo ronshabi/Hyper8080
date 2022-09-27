@@ -1,8 +1,12 @@
 #include "instructions.h"
-
+#include <stdio.h>
 /* JUMP */
 void pchl (cpu *c) { cpu_unimplemented (c); }
-void jmp (cpu *c) { c->pc = cpu_get_word (c, c->pc + 1); }
+void jmp (cpu *c)
+{
+	printf (" $%04x", cpu_get_word (c, c->pc + 1));
+	c->pc = cpu_get_word (c, c->pc + 1);
+}
 void jc (cpu *c)
 {
 	if (c->flag_c) { jmp (c); }
@@ -47,7 +51,8 @@ void jpo (cpu *c)
 /* CALL */
 void call (cpu *c)
 {
-	stack_push (c, c->pc);
+	// <!> PROBABLY INCORRECT TO PC+1 INSTEAD OF PC
+	stack_push (c, c->pc + 1);
 	jmp (c);
 }
 void cc (cpu *c)
@@ -91,6 +96,53 @@ void cpo (cpu *c)
 	else { PC3; }
 }
 
+/* RET */
+void ret (cpu *c)
+{
+	printf (" $%04x", cpu_get_word (c, c->pc + 1));
+	c->pc = stack_pop (c);
+}
+void rc (cpu *c)
+{
+	if (c->flag_c) { ret (c); }
+	else { PC1; }
+}
+void rnc (cpu *c)
+{
+	if (!c->flag_c) { ret (c); }
+	else { PC1; }
+}
+void rz (cpu *c)
+{
+	if (c->flag_z) { ret (c); }
+	else { PC1; }
+}
+void rnz (cpu *c)
+{
+	if (!c->flag_z) { ret (c); }
+	else { PC1; }
+}
+void rm (cpu *c)
+{
+	if (c->flag_s) { ret (c); }
+	else { PC1; }
+}
+void rp (cpu *c)
+{
+	if (!c->flag_s) { ret (c); }
+	else { PC1; }
+}
+void rpe (cpu *c)
+{
+	if (c->flag_p) { ret (c); }
+	else { PC1; }
+}
+void rpo (cpu *c)
+{
+	if (!c->flag_p) { ret (c); }
+	else { PC1; }
+}
+
 /* IMMEDIATE INSTRUCTIONS */
 void lxi_b (cpu *c)
 {
@@ -116,12 +168,12 @@ void lxi_sp (cpu *c)
 void mvi (cpu *c, uint8_t *reg)
 {
 	*reg = cpu_get_byte (c, c->pc + 1);
-	PC1;
+	PC2;
 }
 void mvi_m (cpu *c)
 {
 	cpu_set_byte (c, cpu_deref_hl (c), cpu_get_byte (c, c->pc + 1));
-	PC1;
+	PC2;
 }
 
 /* DATA TRANSFER */
@@ -280,5 +332,42 @@ void xthl (cpu *c)
 void sphl (cpu *c)
 {
 	c->sp = cpu_get_hl (c);
+	PC1;
+}
+
+/* SINGLE REGISTER INSTRUCTIONS */
+void inr (cpu *c, uint8_t *reg)
+{
+	*reg += 1;
+	cpu_set_flags_zsp (c, *reg);
+	cpu_set_flags_ac (c, *reg, 1, 0);
+	PC1;
+}
+void inr_m (cpu *c)
+{
+	uint8_t m = cpu_deref_hl (c);
+	cpu_set_byte (c, cpu_get_hl (c), m + 1);
+	cpu_set_flags_zsp (c, m + 1);
+	cpu_set_flags_ac (c, m, 1, 0);
+	PC1;
+}
+void dcr (cpu *c, uint8_t *reg)
+{
+	uint16_t precision = *reg;
+	precision--;
+	*reg = precision & 0xff;
+	cpu_set_flags_zsp (c, *reg);
+	// cpu_set_flags_ac (c, *reg, -1, 0);
+
+	if (*reg == 0) { printf ("\nREG HIT ZERO\n"); }
+
+	PC1;
+}
+void dcr_m (cpu *c)
+{
+	uint8_t m = cpu_deref_hl (c);
+	cpu_set_byte (c, cpu_get_hl (c), m - 1);
+	cpu_set_flags_zsp (c, m - 1);
+	cpu_set_flags_ac (c, m, -1, 0);
 	PC1;
 }

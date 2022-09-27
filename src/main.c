@@ -6,6 +6,7 @@
 #define ANSI_COLOR_RESET "\x1b[0m"
 
 #include "cpu.h"
+#include "debug.h"
 
 int main(int argc, char *argv[])
 {
@@ -44,12 +45,29 @@ int main(int argc, char *argv[])
 
 	uint8_t current_opcode;
 
+#ifdef DEBUG_MODE_REGULAR
+	printf ("PC\t\tOpcode\tA |B |C |D |E |H |L |SP  |CP  |ZSPCA\tInstruction\targs\n");
+	printf ("--\t\t------\t--|--|--|--|--|--|--|----|----|-----\t-----------\t----\n");
+#endif
+
 	// Emulation loop
 	while (!c.halt)
 	{
 		current_opcode = cpu_get_byte (&c, c.pc);
+		cpu_disasm (&c);
 		cpu_emulate (&c, current_opcode);
+#ifdef DEBUG_MODE_REGULAR
+		printf ("\n");
+#endif
+#ifdef DEBUG_MODE_STOP
+		if (c.instructions == DEBUG_MODE_STOP_AFTER_INSTRUCTION)
+		{
+			printf ("STOPPED AT %d\n", DEBUG_MODE_STOP_AFTER_INSTRUCTION);
+			printf ("Instructions executed: %lu\n", c.instructions);
+			printf ("Cycles: %lu\n", c.cycles);
+			break;
+		}
+#endif
 	}
-
 	return 0;
 }

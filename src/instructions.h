@@ -30,6 +30,17 @@ void cp (cpu *c);	// CP       CALL positive
 void cpe (cpu *c);	// CPE      CALL parity even
 void cpo (cpu *c);	// CPO      CALL parity odd
 
+/* RET */
+void ret (cpu *c); // RET
+void rc (cpu *c);  // RC       RET carry
+void rnc (cpu *c); // RNC      RET not carry
+void rz (cpu *c);  // RZ       RET zero
+void rnz (cpu *c); // RNZ      RET not zero
+void rm (cpu *c);  // RM       RET minus
+void rp (cpu *c);  // RP       RET positive
+void rpe (cpu *c); // RPE      RET parity even
+void rpo (cpu *c); // RPO      RET parity odd
+
 /* IMMEDIATE INSTRUCTIONS */
 void lxi_b (cpu *c);			 // LXI B	Load register pair immediate
 void lxi_d (cpu *c);			 // LXI D
@@ -65,7 +76,13 @@ void dcx_d (cpu *c);	// DCX D
 void dcx_h (cpu *c);	// DCX H
 void dcx_sp (cpu *c);	// DCX SP
 void xchg (cpu *c);		// XCHG		Exchange Registers
-void xthl (cpu *c);		// XHTL		Exchange Stack
+void xthl (cpu *c);		// XTHL		Exchange Stack
 void sphl (cpu *c);		// SPHL		Load SP from H and L
+
+/* SINGLE REGISTER INSTRUCTIONS */
+void inr (cpu *c, uint8_t *reg); // INR	Increment
+void inr_m (cpu *c);			 // INR M
+void dcr (cpu *c, uint8_t *reg); // DCR	Increment
+void dcr_m (cpu *c);			 // DCR M
 
 #endif // INSTRUCTIONS_H

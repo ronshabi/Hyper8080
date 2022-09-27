@@ -13,6 +13,28 @@ const uint8_t CYCLES[] = {
 	7, 11, 5, 10, 10, 18, 11, 11, 7,  11, 5,  5,  10, 5,  11, 11, 7,  11, 5,  10, 10, 4,  11, 11, 7,  11, 5,  5,  10, 4, 11, 11, 7,	 11,
 };
 
+const char *INSTRUCTIONS[] = {
+	"NOP",	   "LXI B",	  "STAX B",	 "INX B",	"INR B",   "DCR B",	  "MVI B",	 "RLC",		"NOP",	   "DAD B",	  "LDAX B",	 "DCX B",	 "INR C",
+	"DCR C",   "MVI C",	  "RRCC",	 "NOP",		"LXI D",   "STAX D",  "INX D",	 "INR D",	"DCR D",   "MVI D",	  "RALC",	 "NOP",		 "DAD D",
+	"LDAX D",  "DCX D",	  "INR E",	 "DCR E",	"MVI E",   "RAR",	  "NOP",	 "LXI H",	"SHLD",	   "INX H",	  "INR H",	 "DCR H",	 "MVI H",
+	"DAA",	   "NOP",	  "DAD H",	 "LHLD",	"DCX H",   "INR L",	  "DCR L",	 "MVI L",	"CMA",	   "NOP",	  "LXI SP",	 "STA",		 "INX SP",
+	"INR M",   "DCR M",	  "MVI M",	 "STCC",	"NOP",	   "DAD SP",  "LDA",	 "DCX SP",	"INR A",   "DCR A",	  "MVI A",	 "CMCC",	 "MOV B,B",
+	"MOV B,C", "MOV B,D", "MOV B,E", "MOV B,H", "MOV B,L", "MOV B,M", "MOV B,A", "MOV C,B", "MOV C,C", "MOV C,D", "MOV C,E", "MOV C,H",	 "MOV C,L",
+	"MOV C,M", "MOV C,A", "MOV D,B", "MOV D,C", "MOV D,D", "MOV D,E", "MOV D,H", "MOV D,L", "MOV D,M", "MOV D,A", "MOV E,B", "MOV E,C",	 "MOV E,D",
+	"MOV E,E", "MOV E,H", "MOV E,L", "MOV E,M", "MOV E,A", "MOV H,B", "MOV H,C", "MOV H,D", "MOV H,E", "MOV H,H", "MOV H,L", "MOV H,M",	 "MOV H,A",
+	"MOV L,B", "MOV L,C", "MOV L,D", "MOV L,E", "MOV L,H", "MOV L,L", "MOV L,M", "MOV L,A", "MOV M,B", "MOV M,C", "MOV M,D", "MOV M,E",	 "MOV M,H",
+	"MOV M,L", "HLT",	  "MOV M,A", "MOV A,B", "MOV A,C", "MOV A,D", "MOV A,E", "MOV A,H", "MOV A,L", "MOV A,M", "MOV A,A", "ADD B",	 "ADD C",
+	"ADD D",   "ADD E",	  "ADD H",	 "ADD L",	"ADD M",   "ADD A",	  "ADC B",	 "ADC C",	"ADC D",   "ADC E",	  "ADC H",	 "ADC L",	 "ADC M",
+	"ADC A",   "SUB B",	  "SUB C",	 "SUB D",	"SUB E",   "SUB H",	  "SUB L",	 "SUB M",	"SUB A",   "SBB B",	  "SBB C",	 "SBB D",	 "SBB E",
+	"SBB H",   "SBB L",	  "SBB M",	 "SBB A",	"ANA B",   "ANA C",	  "ANA D",	 "ANA E",	"ANA H",   "ANA L",	  "ANA M",	 "ANA A",	 "XRA B",
+	"XRA C",   "XRA D",	  "XRA E",	 "XRA H",	"XRA L",   "XRA M",	  "XRA A",	 "ORA B",	"ORA C",   "ORA D",	  "ORA E",	 "ORA H",	 "ORA L",
+	"ORA M",   "ORA A",	  "CMP B",	 "CMP C",	"CMP D",   "CMP E",	  "CMP H",	 "CMP L",	"CMP M",   "CMP A",	  "RNZ",	 "POP B",	 "JNZ",
+	"JMP",	   "CNZ",	  "PUSH B",	 "ADI",		"RST 0",   "RZ",	  "RET",	 "JZ",		"NOP",	   "CZ",	  "CALL",	 "ACI",		 "RST 1",
+	"RNC",	   "POP D",	  "JNC",	 "OUT",		"CNC",	   "PUSH D",  "SUI",	 "RST 2",	"RC",	   "NOP",	  "JC",		 "IN",		 "CC",
+	"NOP",	   "SBI",	  "RST 3",	 "RPO",		"POP H",   "JPO",	  "XTHL",	 "CPO",		"PUSH H",  "ANI",	  "RST 4",	 "RPE",		 "PCHL",
+	"JPE",	   "XCHG",	  "CPE",	 "NOP",		"XRI",	   "RST 5",	  "RP",		 "POP PSW", "JP",	   "DI",	  "CP",		 "PUSH PSW", "ORI",
+	"RST 6",   "RM",	  "SPHL",	 "JM",		"EI",	   "CM",	  "NOP",	 "CPI",		"RST 7"};
+
 // Core
 void cpu_init (cpu *c)
 {
@@ -53,8 +75,12 @@ void cpu_init (cpu *c)
 	c->shift	 = 0;
 	c->shift_amt = 0;
 }
-
 void cpu_set_memory (cpu *c, uint8_t *memory_ptr) { c->memory = memory_ptr; }
+void cpu_disasm (cpu *c)
+{
+	printf ("0x%04x\t%02x\t\t%02x|%02x|%02x|%02x|%02x|%02x|%02x|%04x|%04x|%d%d%d%d%d\t%s", c->pc, cpu_get_byte (c, c->pc), c->a, c->b, c->c, c->d,
+			c->e, c->h, c->l, c->sp, c->pc, c->flag_z, c->flag_s, c->flag_p, c->flag_c, c->flag_ac, INSTRUCTIONS[cpu_get_byte (c, c->pc)]);
+}
 
 // Memory
 uint8_t	 cpu_get_byte (cpu *c, uint16_t address) { return c->memory[address]; }
@@ -144,7 +170,7 @@ uint8_t flags_calc_parity (uint8_t n)
 
 uint8_t flags_calc_zero (uint8_t n) { return n == 0; }
 
-uint8_t flags_calc_sign (uint8_t n) { return n >> 7; }
+uint8_t flags_calc_sign (uint8_t n) { return (n & 0x80) == 0x80; }
 
 uint8_t flags_calc_carry (uint8_t f, uint8_t g, uint8_t modulator, uint8_t carry_bit)
 {
@@ -185,7 +211,9 @@ void cpu_set_flags_all (cpu *c, uint8_t f, uint8_t g, uint8_t modulator)
 // Emualtion
 void cpu_unimplemented (cpu *c)
 {
-	printf ("UNIMPLEMENTED INSTRUCTION %02x\n", cpu_get_byte (c, c->pc));
+	printf ("\nUNIMPLEMENTED INSTRUCTION %02x\n", cpu_get_byte (c, c->pc));
+	printf ("Instructions executed: %lu\n", c->instructions);
+	printf ("Cycles: %lu\n", c->cycles);
 	exit (1);
 }
 
@@ -235,6 +263,17 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0xec: cpe (c); break;
 		case 0xe4: cpo (c); break;
 
+		// RET
+		case 0xc9: ret (c); break;
+		case 0xd8: rc (c); break;
+		case 0xd0: rnc (c); break;
+		case 0xc8: rz (c); break;
+		case 0xc0: rnz (c); break;
+		case 0xf8: rm (c); break;
+		case 0xf0: rp (c); break;
+		case 0xe8: rpe (c); break;
+		case 0xe0: rpo (c); break;
+
 		// IMMEDIATE INSTRUCTIONS
 		case 0x01: lxi_b (c); break;
 		case 0x11: lxi_d (c); break;
@@ -262,29 +301,47 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0x75: mov_m (c, REG (l)); break;
 
 		// REGISTER PAIR INSTRUCTIONS
-		case 0xc5: push_b (c); break;	// PUSH B
-		case 0xd5: push_d (c); break;	// PUSH D
-		case 0xe5: push_h (c); break;	// PUSH H
-		case 0xf5: push_psw (c); break; // PUSH PSW
-		case 0xc1: pop_b (c); break;	// POP B
-		case 0xd1: pop_d (c); break;	// POP D
-		case 0xe1: pop_h (c); break;	// POP H
-		case 0xf1: pop_psw (c); break;	// POP PSW
-		case 0x09: dad_b (c); break;	// DAD B	Double add
-		case 0x19: dad_d (c); break;	// DAD D
-		case 0x29: dad_h (c); break;	// DAD H
-		case 0x39: dad_sp (c); break;	// DAD SP
-		case 0x03: inx_b (c); break;	// INX B	Increment register pair
-		case 0x13: inx_d (c); break;	// INX D
-		case 0x23: inx_h (c); break;	// INX H
-		case 0x33: inx_sp (c); break;	// INX SP
-		case 0x0b: dcx_b (c); break;	// DCX B	Decrement register pair
-		case 0x1b: dcx_d (c); break;	// DCX D
-		case 0x2b: dcx_h (c); break;	// DCX H
-		case 0x3b: dcx_sp (c); break;	// DCX SP
-		case 0xeb: xchg (c); break;		// XCHG		Exchange Registers
-		case 0xe3: xthl (c); break;		// XHTL		Exchange Stack
-		case 0xf9: sphl (c); break;		// SPHL		Load SP from H and L
+		case 0xc5: push_b (c); break;
+		case 0xd5: push_d (c); break;
+		case 0xe5: push_h (c); break;
+		case 0xf5: push_psw (c); break;
+		case 0xc1: pop_b (c); break;
+		case 0xd1: pop_d (c); break;
+		case 0xe1: pop_h (c); break;
+		case 0xf1: pop_psw (c); break;
+		case 0x09: dad_b (c); break;
+		case 0x19: dad_d (c); break;
+		case 0x29: dad_h (c); break;
+		case 0x39: dad_sp (c); break;
+		case 0x03: inx_b (c); break;
+		case 0x13: inx_d (c); break;
+		case 0x23: inx_h (c); break;
+		case 0x33: inx_sp (c); break;
+		case 0x0b: dcx_b (c); break;
+		case 0x1b: dcx_d (c); break;
+		case 0x2b: dcx_h (c); break;
+		case 0x3b: dcx_sp (c); break;
+		case 0xeb: xchg (c); break;
+		case 0xe3: xthl (c); break;
+		case 0xf9: sphl (c); break;
+
+		// SINGLE REGISTER INSTRUCTIONS
+		case 0x3c: inr (c, REG (a)); break; // INR A	Increment
+		case 0x04: inr (c, REG (b)); break; // INR B
+		case 0x0c: inr (c, REG (c)); break; // INR C
+		case 0x14: inr (c, REG (d)); break; // INR D
+		case 0x1c: inr (c, REG (e)); break; // INR E
+		case 0x24: inr (c, REG (h)); break; // INR H
+		case 0x2c: inr (c, REG (l)); break; // INR L
+		case 0x34: inr_m (c); break;		// INR M
+		case 0x3d: dcr (c, REG (a)); break; // DCR A	Decrement
+		case 0x05: dcr (c, REG (b)); break; // DCR B
+		case 0x0d: dcr (c, REG (c)); break; // DCR C
+		case 0x15: dcr (c, REG (d)); break; // DCR D
+		case 0x1d: dcr (c, REG (e)); break; // DCR E
+		case 0x25: dcr (c, REG (h)); break; // DCR H
+		case 0x2d: dcr (c, REG (l)); break; // DCR L
+		case 0x35: dcr_m (c); break;		// DCR M
 
 		default: cpu_unimplemented (c); break;
 	}
