@@ -385,6 +385,14 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0x7c: mov (c, REG (a), REG (h)); break;
 		case 0x7d: mov (c, REG (a), REG (l)); break;
 
+		case 0x7e: mov_m_to_dest (c, REG (a));
+		case 0x46: mov_m_to_dest (c, REG (b));
+		case 0x4e: mov_m_to_dest (c, REG (c));
+		case 0x56: mov_m_to_dest (c, REG (d));
+		case 0x5e: mov_m_to_dest (c, REG (e));
+		case 0x66: mov_m_to_dest (c, REG (h));
+		case 0x6e: mov_m_to_dest (c, REG (l));
+
 		// REGISTER PAIR INSTRUCTIONS
 		case 0xc5: push_b (c); break;
 		case 0xd5: push_d (c); break;

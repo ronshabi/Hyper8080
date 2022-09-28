@@ -269,6 +269,12 @@ void mov (cpu *c, uint8_t *dest, const uint8_t *src)
 	*dest = *src;
 	PC1;
 }
+void mov_m_to_dest (cpu *c, uint8_t *dest)
+{
+	uint8_t m = cpu_deref_hl (c);
+	*dest	  = m;
+	PC1;
+}
 void mov_m (cpu *c, const uint8_t *reg)
 {
 	cpu_set_byte (c, cpu_deref_hl (c), *reg);
@@ -495,7 +501,6 @@ void out (cpu *c)
 	else if (device_number == DEVICE_SOUND1)
 	{
 		// OUT DEVICE 3
-		// sound unimplemented yet
 		c->o3 = c->a;
 	}
 	else if (device_number == DEVICE_SHIFT_DATA)

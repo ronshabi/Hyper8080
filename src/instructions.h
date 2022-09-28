@@ -62,6 +62,7 @@ void cpi (cpu *c); // CPI - Compare immediate with accumulator
 void ldax_b (cpu *c); // LDAX B		Load accumulator
 void ldax_d (cpu *c); // LDAX D
 void mov (cpu *c, uint8_t *dest, const uint8_t *src);
+void mov_m_to_dest (cpu *c, uint8_t *dest);
 void mov_m (cpu *c, const uint8_t *reg);
 
 /* REGISTER PAIR INSTRUCTIONS */
