@@ -463,7 +463,8 @@ void dcr_m (cpu *c)
 /* I/O */
 void in (cpu *c)
 {
-	uint8_t device_number = cpu_get_byte (c, c->sp + 1);
+	uint8_t device_number = cpu_get_byte (c, c->pc + 1);
+	printf (" <DEVICE = %d>", device_number);
 
 	if (device_number == DEVICE_INP0)
 	{
@@ -490,7 +491,9 @@ void in (cpu *c)
 }
 void out (cpu *c)
 {
-	uint8_t device_number = cpu_get_byte (c, c->sp + 1);
+	uint8_t device_number = cpu_get_byte (c, c->pc + 1);
+
+	printf (" <DEVICE = %d>", device_number);
 
 	if (device_number == DEVICE_SHIFT_AMT)
 	{
