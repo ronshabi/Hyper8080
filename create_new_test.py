@@ -2,13 +2,14 @@
 # Script to easily generate new CTest Units
 
 import shutil
+import sys
 
 PREFIX = "test"
 BASE_C_FILE = "test_base"
 TESTS_FOLDER = "tests"
 CMAKELISTS = "CMakeLists.txt"
 
-test_name = input("Enter test name: ")
+test_name = ""
 
 
 def append_line(path, line):
@@ -16,10 +17,11 @@ def append_line(path, line):
         f.write("\n")
         f.write(line)
 
-
 def add_test_to_cmakelists(new_test_name):
+    append_line(CMAKELISTS, '\n')
     append_line(CMAKELISTS, f"add_executable({PREFIX}_{test_name} {TESTS_FOLDER}/{PREFIX}_{test_name}.c)")
     append_line(CMAKELISTS, f"add_test(Test-{test_name} {PREFIX}_{test_name})")
+    print(f"Added new test {PREFIX}-{test_name} to {CMAKELISTS}!")
 
 
 def create_test_file(new_test_name):
@@ -27,8 +29,17 @@ def create_test_file(new_test_name):
     target_path = f"{TESTS_FOLDER}/{PREFIX}_{new_test_name}.c"
     shutil.copyfile(original_path, target_path)
     add_test_to_cmakelists(new_test_name)
+    print(f"Test file created at {TESTS_FOLDER}/{PREFIX}_{new_test_name}.c")
 
 
-print(f"Added new test {PREFIX}-{test_name} to {CMAKELISTS}!")
+if __name__ == '__main__':
+    # Check for arguments
+    if (len(sys.argv) != 2):
+        print("Easily generate new CTests!")
+        print(f"Usage: python3 {str(sys.argv[0])} <test_name>")
+        exit(1)
 
-create_test_file(test_name)
+    # Get test name from argv[1]
+    test_name = str(sys.argv[1])
+
+    create_test_file(test_name)

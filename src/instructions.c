@@ -184,10 +184,46 @@ void adi (cpu *c)
 	cpu_set_flags_c (c, c->a, cpu_get_byte (c, c->pc + 1), 0);
 	PC2;
 }
-void aci (cpu *c);
-void sui (cpu *c);
-void sbi (cpu *c);
-void ani (cpu *c);
+void aci (cpu *c)
+{
+	uint16_t temp = (c->a) + (cpu_get_byte (c, c->pc + 1)) + c->flag_c;
+	c->a		  = temp & 0xff;
+	// Set flags
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_ac (c, c->a, cpu_get_byte (c, c->pc + 1), c->flag_c);
+	cpu_set_flags_c (c, c->a, cpu_get_byte (c, c->pc + 1), c->flag_c);
+	PC2;
+}
+void sui (cpu *c)
+{
+	uint16_t temp = c->a - cpu_get_byte (c, c->pc + 1);
+	c->a		  = temp & 0xff;
+	// Set flags
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_ac (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
+	cpu_set_flags_c (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
+	PC2;
+}
+void sbi (cpu *c)
+{
+	uint16_t temp = c->a - cpu_get_byte (c, c->pc + 1) - c->flag_c;
+	c->a		  = temp & 0xff;
+	// Set flags
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_ac (c, c->a, -cpu_get_byte (c, c->pc + 1), -c->flag_c);
+	cpu_set_flags_c (c, c->a, -cpu_get_byte (c, c->pc + 1), -c->flag_c);
+	PC2;
+}
+void ani (cpu *c)
+{
+	uint16_t temp = c->a & cpu_get_byte (c, c->pc + 1);
+	c->a		  = temp & 0xff;
+	// Set flags
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_ac (c, c->a, -cpu_get_byte (c, c->pc + 1) - c->flag_c, 0);
+	cpu_set_flags_c (c, c->a, -cpu_get_byte (c, c->pc + 1) - c->flag_c, 0);
+	PC2;
+}
 void xri (cpu *c);
 void ori (cpu *c);
 void cpi (cpu *c);

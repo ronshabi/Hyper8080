@@ -17,3 +17,19 @@ add_test(Test-Stack-Overflowing test_stack_overflowing)
 add_test(Test-CPU-Basic-Memory-Operations test_cpu_basic_memory)
 add_test(Test-Flags test_flags)
 add_test(Test-Instructions test_instructions)
+
+
+add_executable(test_adi tests/test_adi.c)
+add_test(Test-adi test_adi)
+
+
+add_executable(test_aci tests/test_aci.c)
+add_test(Test-aci test_aci)
+
+
+add_executable(test_sui tests/test_sui.c)
+add_test(Test-sui test_sui)
+
+
+add_executable(test_sbi tests/test_sbi.c)
+add_test(Test-sbi test_sbi)
