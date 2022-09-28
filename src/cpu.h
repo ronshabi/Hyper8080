@@ -10,6 +10,20 @@
 // Quickly access register location
 #define REG(reg) &(c->reg)
 
+// Device numbers
+// Output
+#define DEVICE_SHIFT_AMT  2
+#define DEVICE_SOUND1	  3
+#define DEVICE_SHIFT_DATA 4
+#define DEVICE_SOUND2	  5
+#define DEVICE_WATCHDOG	  6
+
+// Input
+#define DEVICE_INP0		0
+#define DEVICE_INP1		1
+#define DEVICE_INP2		2
+#define DEVICE_SHIFT_IN 3
+
 typedef struct cpu
 {
 	uint8_t	 a, b, c, d, e, h, l;

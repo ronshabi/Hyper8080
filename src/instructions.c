@@ -453,3 +453,72 @@ void dcr_m (cpu *c)
 	cpu_set_flags_ac (c, m, -1, 0);
 	PC1;
 }
+
+/* I/O */
+void in (cpu *c)
+{
+	uint8_t device_number = cpu_get_byte (c, c->sp + 1);
+
+	if (device_number == DEVICE_INP0)
+	{
+		// IN DEVICE 0
+		c->i0 = c->a;
+	}
+	else if (device_number == DEVICE_INP1)
+	{
+		// IN DEVICE 1
+		c->i1 = c->a;
+	}
+	else if (device_number == DEVICE_INP2)
+	{
+		// IN DEVICE 2
+		c->i2 = c->a;
+	}
+	else if (device_number == DEVICE_SHIFT_IN)
+	{
+		// IN DEVICE 3
+		c->a = c->shift >> (8 - c->shift_amt);
+	}
+
+	PC2;
+}
+void out (cpu *c)
+{
+	uint8_t device_number = cpu_get_byte (c, c->sp + 1);
+
+	if (device_number == DEVICE_SHIFT_AMT)
+	{
+		// OUT DEVICE 2
+		c->o2		 = c->a;
+		c->shift_amt = c->a & 0b00000111; // bits 0-2
+	}
+	else if (device_number == DEVICE_SOUND1)
+	{
+		// OUT DEVICE 3
+		// sound unimplemented yet
+		c->o3 = c->a;
+	}
+	else if (device_number == DEVICE_SHIFT_DATA)
+	{
+		// OUT DEVICE 4
+		c->o4 = c->a;
+		c->shift >>= 8;
+		c->shift |= c->a << 8;
+	}
+	else if (device_number == DEVICE_SOUND2)
+	{
+		// OUT DEVICE 5
+		c->o5 = c->a;
+	}
+	else if (device_number == DEVICE_WATCHDOG)
+	{
+		// OUT DEVICE 6
+		c->o6 = c->a;
+	}
+	PC2;
+}
+void hlt (cpu *c)
+{
+	printf ("\nHALTED!\n");
+	c->halt = 1;
+}

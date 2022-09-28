@@ -411,22 +411,27 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0xf9: sphl (c); break;
 
 		// SINGLE REGISTER INSTRUCTIONS
-		case 0x3c: inr (c, REG (a)); break; // INR A	Increment
-		case 0x04: inr (c, REG (b)); break; // INR B
-		case 0x0c: inr (c, REG (c)); break; // INR C
-		case 0x14: inr (c, REG (d)); break; // INR D
-		case 0x1c: inr (c, REG (e)); break; // INR E
-		case 0x24: inr (c, REG (h)); break; // INR H
-		case 0x2c: inr (c, REG (l)); break; // INR L
-		case 0x34: inr_m (c); break;		// INR M
-		case 0x3d: dcr (c, REG (a)); break; // DCR A	Decrement
-		case 0x05: dcr (c, REG (b)); break; // DCR B
-		case 0x0d: dcr (c, REG (c)); break; // DCR C
-		case 0x15: dcr (c, REG (d)); break; // DCR D
-		case 0x1d: dcr (c, REG (e)); break; // DCR E
-		case 0x25: dcr (c, REG (h)); break; // DCR H
-		case 0x2d: dcr (c, REG (l)); break; // DCR L
-		case 0x35: dcr_m (c); break;		// DCR M
+		case 0x3c: inr (c, REG (a)); break;
+		case 0x04: inr (c, REG (b)); break;
+		case 0x0c: inr (c, REG (c)); break;
+		case 0x14: inr (c, REG (d)); break;
+		case 0x1c: inr (c, REG (e)); break;
+		case 0x24: inr (c, REG (h)); break;
+		case 0x2c: inr (c, REG (l)); break;
+		case 0x34: inr_m (c); break;
+		case 0x3d: dcr (c, REG (a)); break;
+		case 0x05: dcr (c, REG (b)); break;
+		case 0x0d: dcr (c, REG (c)); break;
+		case 0x15: dcr (c, REG (d)); break;
+		case 0x1d: dcr (c, REG (e)); break;
+		case 0x25: dcr (c, REG (h)); break;
+		case 0x2d: dcr (c, REG (l)); break;
+		case 0x35: dcr_m (c); break;
+
+		// I/O
+		case 0xdb: in (c); break;
+		case 0xd3: out (c); break;
+		case 0x76: hlt (c); break;
 
 		default: cpu_unimplemented (c); break;
 	}

@@ -95,4 +95,9 @@ void inr_m (cpu *c);			 // INR M
 void dcr (cpu *c, uint8_t *reg); // DCR	Increment
 void dcr_m (cpu *c);			 // DCR M
 
+/* I/O */
+void in (cpu *c);  // IN
+void out (cpu *c); // OUT
+void hlt (cpu *c); // HALT
+
 #endif // INSTRUCTIONS_H
