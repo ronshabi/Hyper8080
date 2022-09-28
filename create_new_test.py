@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Script to easily generate new CTest Units
 
 import shutil
