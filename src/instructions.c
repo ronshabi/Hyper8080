@@ -460,6 +460,41 @@ void dcr_m (cpu *c)
 	PC1;
 }
 
+/* ROTATE ACCUMULATOR */
+void rlc (cpu *c)
+{
+	uint8_t bit7 = (c->a & 0x80) >> 7;
+	c->a <<= 1;
+	c->a |= bit7;
+	c->flag_c = bit7;
+	PC1;
+}
+void rrc (cpu *c)
+{
+	uint8_t bit0 = (c->a & 0x1);
+	c->a >>= 1;
+	c->a |= bit0 << 7;
+	c->flag_c = bit0;
+	PC1;
+}
+void ral (cpu *c)
+{
+	uint8_t bit7 = (c->a & 0x80) >> 7;
+	c->a <<= 1;
+	c->a |= c->flag_c;
+	c->flag_c = bit7;
+	PC1;
+}
+void rar (cpu *c)
+{
+	uint8_t bit0 = (c->a & 0x1);
+	uint8_t bit7 = (c->a & 0x80) >> 7;
+	c->a >>= 1;
+	c->a |= bit7 << 7;
+	c->flag_c = bit0;
+	PC1;
+}
+
 /* I/O */
 void in (cpu *c)
 {
@@ -529,4 +564,178 @@ void hlt (cpu *c)
 {
 	printf ("\nHALTED!\n");
 	c->halt = 1;
+}
+
+/* REGISTER OR MEMORY TO ACCUMULATOR INSTRUCTIONS */
+void add (cpu *c, const uint8_t *reg)
+{
+	uint16_t a_raw	 = c->a;
+	uint16_t reg_raw = *reg;
+	a_raw += reg_raw;
+	c->a = a_raw & 0xff;
+
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c (c, a_raw & 0xff, reg_raw & 0xff, 0);
+	cpu_set_flags_ac (c, a_raw & 0xff, reg_raw & 0xff, 0);
+	PC1;
+}
+void add_m (cpu *c)
+{
+	uint16_t a_raw	 = c->a;
+	uint16_t reg_raw = cpu_deref_hl (c);
+	a_raw += reg_raw;
+	c->a = a_raw & 0xff;
+
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c (c, a_raw & 0xff, reg_raw & 0xff, 0);
+	cpu_set_flags_ac (c, a_raw & 0xff, reg_raw & 0xff, 0);
+	PC1;
+}
+void adc (cpu *c, const uint8_t *reg)
+{
+	uint16_t a_raw	 = c->a;
+	uint16_t reg_raw = *reg;
+	a_raw += reg_raw;
+	a_raw += c->flag_c;
+	c->a = a_raw & 0xff;
+
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c (c, a_raw & 0xff, reg_raw & 0xff, c->flag_c);
+	cpu_set_flags_ac (c, a_raw & 0xff, reg_raw & 0xff, c->flag_c);
+	PC1;
+}
+void adc_m (cpu *c)
+{
+	uint16_t a_raw	 = c->a;
+	uint16_t reg_raw = cpu_deref_hl (c);
+	a_raw += reg_raw;
+	a_raw += c->flag_c;
+	c->a = a_raw & 0xff;
+
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c (c, a_raw & 0xff, reg_raw & 0xff, c->flag_c);
+	cpu_set_flags_ac (c, a_raw & 0xff, reg_raw & 0xff, c->flag_c);
+	PC1;
+}
+void sub (cpu *c, const uint8_t *reg)
+{
+	uint16_t a_raw	 = c->a;
+	uint16_t reg_raw = *reg;
+	a_raw -= reg_raw;
+	c->a = a_raw & 0xff;
+
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
+	cpu_set_flags_ac (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
+	PC1;
+}
+void sub_m (cpu *c)
+{
+	uint16_t a_raw	 = c->a;
+	uint16_t reg_raw = cpu_deref_hl (c);
+	a_raw -= reg_raw;
+	c->a = a_raw & 0xff;
+
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
+	cpu_set_flags_ac (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
+	PC1;
+}
+void sbb (cpu *c, const uint8_t *reg)
+{
+	uint16_t a_raw	 = c->a;
+	uint16_t reg_raw = *reg;
+	a_raw -= reg_raw;
+	a_raw -= c->flag_c;
+	c->a = a_raw & 0xff;
+
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
+	cpu_set_flags_ac (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
+	PC1;
+}
+void sbb_m (cpu *c)
+{
+	uint16_t a_raw	 = c->a;
+	uint16_t reg_raw = cpu_deref_hl (c);
+	a_raw -= reg_raw;
+	a_raw -= c->flag_c;
+	c->a = a_raw & 0xff;
+
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
+	cpu_set_flags_ac (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
+	PC1;
+}
+void ana (cpu *c, const uint8_t *reg)
+{
+	uint16_t a_raw	 = c->a;
+	uint16_t reg_raw = *reg;
+	a_raw &= reg_raw;
+	c->a = a_raw & 0xff;
+
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c_and (c, a_raw & 0xff, reg_raw & 0xff);
+	cpu_set_flags_ac_and (c, a_raw & 0xff, reg_raw & 0xff);
+	PC1;
+}
+void ana_m (cpu *c)
+{
+	uint16_t a_raw	 = c->a;
+	uint16_t reg_raw = cpu_deref_hl (c);
+	a_raw &= reg_raw;
+	c->a = a_raw & 0xff;
+
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c_and (c, a_raw & 0xff, reg_raw & 0xff);
+	cpu_set_flags_ac_and (c, a_raw & 0xff, reg_raw & 0xff);
+	PC1;
+}
+void xra (cpu *c, const uint8_t *reg)
+{
+	uint16_t a_raw	 = c->a;
+	uint16_t reg_raw = *reg;
+	a_raw ^= reg_raw;
+	c->a = a_raw & 0xff;
+
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c_xor (c, a_raw & 0xff, reg_raw & 0xff);
+	cpu_set_flags_ac_xor (c, a_raw & 0xff, reg_raw & 0xff);
+	PC1;
+}
+void xra_m (cpu *c)
+{
+	uint16_t a_raw	 = c->a;
+	uint16_t reg_raw = cpu_deref_hl (c);
+	a_raw ^= reg_raw;
+	c->a = a_raw & 0xff;
+
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c_xor (c, a_raw & 0xff, reg_raw & 0xff);
+	cpu_set_flags_ac_xor (c, a_raw & 0xff, reg_raw & 0xff);
+	PC1;
+}
+void ora (cpu *c, const uint8_t *reg)
+{
+	uint16_t a_raw	 = c->a;
+	uint16_t reg_raw = *reg;
+	a_raw |= reg_raw;
+	c->a = a_raw & 0xff;
+
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c_or (c, a_raw & 0xff, reg_raw & 0xff);
+	cpu_set_flags_ac_or (c, a_raw & 0xff, reg_raw & 0xff);
+	PC1;
+}
+void ora_m (cpu *c)
+{
+	uint16_t a_raw	 = c->a;
+	uint16_t reg_raw = cpu_deref_hl (c);
+	a_raw |= reg_raw;
+	c->a = a_raw & 0xff;
+
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c_or (c, a_raw & 0xff, reg_raw & 0xff);
+	cpu_set_flags_ac_or (c, a_raw & 0xff, reg_raw & 0xff);
+	PC1;
 }

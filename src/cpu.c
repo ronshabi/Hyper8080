@@ -436,10 +436,74 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0x2d: dcr (c, REG (l)); break;
 		case 0x35: dcr_m (c); break;
 
+		// ROTATE ACCUMULATOR
+		case 0x07: rlc (c); break;
+		case 0x0f: rrc (c); break;
+		case 0x1f: rar (c); break;
+		case 0x17: ral (c); break;
+
 		// I/O
 		case 0xdb: in (c); break;
 		case 0xd3: out (c); break;
 		case 0x76: hlt (c); break;
+
+		// REGISTER OR MEMORY TO ACCUMULATOR INSTRUCTIONS
+		case 0x87: add (c, REG (a)); break;
+		case 0x80: add (c, REG (a)); break;
+		case 0x81: add (c, REG (a)); break;
+		case 0x82: add (c, REG (a)); break;
+		case 0x83: add (c, REG (a)); break;
+		case 0x84: add (c, REG (a)); break;
+		case 0x85: add (c, REG (a)); break;
+		case 0x86: add_m (c); break;
+		case 0x8f: adc (c, REG (a)); break;
+		case 0x88: adc (c, REG (a)); break;
+		case 0x89: adc (c, REG (a)); break;
+		case 0x8a: adc (c, REG (a)); break;
+		case 0x8b: adc (c, REG (a)); break;
+		case 0x8c: adc (c, REG (a)); break;
+		case 0x8d: adc (c, REG (a)); break;
+		case 0x8e: adc_m (c); break;
+		case 0x97: sub (c, REG (a)); break;
+		case 0x90: sub (c, REG (b)); break;
+		case 0x91: sub (c, REG (c)); break;
+		case 0x92: sub (c, REG (d)); break;
+		case 0x93: sub (c, REG (e)); break;
+		case 0x94: sub (c, REG (h)); break;
+		case 0x95: sub (c, REG (l)); break;
+		case 0x96: sub_m (c); break;
+		case 0x9f: sbb (c, REG (a)); break;
+		case 0x98: sbb (c, REG (b)); break;
+		case 0x99: sbb (c, REG (c)); break;
+		case 0x9a: sbb (c, REG (d)); break;
+		case 0x9b: sbb (c, REG (e)); break;
+		case 0x9c: sbb (c, REG (h)); break;
+		case 0x9d: sbb (c, REG (l)); break;
+		case 0x9e: sbb_m (c); break;
+		case 0xa7: ana (c, REG (a)); break;
+		case 0xa0: ana (c, REG (b)); break;
+		case 0xa1: ana (c, REG (c)); break;
+		case 0xa2: ana (c, REG (d)); break;
+		case 0xa3: ana (c, REG (e)); break;
+		case 0xa4: ana (c, REG (h)); break;
+		case 0xa5: ana (c, REG (l)); break;
+		case 0xa6: ana_m (c); break;
+		case 0xaf: xra (c, REG (a)); break;
+		case 0xa8: xra (c, REG (b)); break;
+		case 0xa9: xra (c, REG (c)); break;
+		case 0xaa: xra (c, REG (d)); break;
+		case 0xab: xra (c, REG (e)); break;
+		case 0xac: xra (c, REG (h)); break;
+		case 0xad: xra (c, REG (l)); break;
+		case 0xae: xra_m (c); break;
+		case 0xb7: ora (c, REG (a)); break;
+		case 0xb0: ora (c, REG (b)); break;
+		case 0xb1: ora (c, REG (c)); break;
+		case 0xb2: ora (c, REG (d)); break;
+		case 0xb3: ora (c, REG (e)); break;
+		case 0xb4: ora (c, REG (h)); break;
+		case 0xb5: ora (c, REG (l)); break;
+		case 0xb6: ora_m (c); break;
 
 		default: cpu_unimplemented (c); break;
 	}

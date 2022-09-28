@@ -96,9 +96,31 @@ void inr_m (cpu *c);			 // INR M
 void dcr (cpu *c, uint8_t *reg); // DCR	Increment
 void dcr_m (cpu *c);			 // DCR M
 
+/* ROTATE ACCUMULATOR */
+void rlc (cpu *c); // RLC Rotate left
+void rrc (cpu *c); // RRC Rotate right
+void ral (cpu *c); // RAR Rotate left through carry
+void rar (cpu *c); // RAR Rotate right through carry
+
 /* I/O */
 void in (cpu *c);  // IN
 void out (cpu *c); // OUT
 void hlt (cpu *c); // HALT
+
+/* REGISTER OR MEMORY TO ACCUMULATOR INSTRUCTIONS */
+void add (cpu *c, const uint8_t *reg); // ADD A		Add to accumulator
+void add_m (cpu *c);				   // ADD M
+void adc (cpu *c, const uint8_t *reg); // ADC A		Add to accumulator w/ carry
+void adc_m (cpu *c);				   // ADC M
+void sub (cpu *c, const uint8_t *reg); // SUB A		Subtract from accumulator
+void sub_m (cpu *c);				   // SUB M
+void sbb (cpu *c, const uint8_t *reg); // SBB A		Subtract from accumulator w/ borrow
+void sbb_m (cpu *c);				   // SBB M
+void ana (cpu *c, const uint8_t *reg); // ANA A  		And operation w/ accumulator
+void ana_m (cpu *c);				   // ANA M
+void xra (cpu *c, const uint8_t *reg); // XRA A		Logical xor w/zero accumulator
+void xra_m (cpu *c);				   // XRA M
+void ora (cpu *c, const uint8_t *reg); // ORA A		Logical or w/ accumulator
+void ora_m (cpu *c);				   // ORA M
 
 #endif // INSTRUCTIONS_H
