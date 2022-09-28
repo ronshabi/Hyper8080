@@ -289,6 +289,15 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0x2e: mvi (c, REG (l)); break;
 		case 0x36: mvi_m (c); break;
 
+		case 0xc6: adi (c); break;
+		case 0xce: aci (c); break;
+		case 0xd6: sui (c); break;
+		case 0xde: sbi (c); break;
+		case 0xe6: ani (c); break;
+		case 0xee: xri (c); break;
+		case 0xf6: ori (c); break;
+		case 0xfe: cpi (c); break;
+
 		// DATA TRANSFER
 		case 0x0a: ldax_b (c); break;
 		case 0x1a: ldax_d (c); break;
@@ -299,6 +308,55 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0x73: mov_m (c, REG (e)); break;
 		case 0x74: mov_m (c, REG (h)); break;
 		case 0x75: mov_m (c, REG (l)); break;
+		case 0x47: mov (c, REG (b), REG (a)); break;
+		case 0x40: mov (c, REG (b), REG (b)); break;
+		case 0x41: mov (c, REG (b), REG (c)); break;
+		case 0x42: mov (c, REG (b), REG (d)); break;
+		case 0x43: mov (c, REG (b), REG (e)); break;
+		case 0x44: mov (c, REG (b), REG (h)); break;
+		case 0x45: mov (c, REG (b), REG (l)); break;
+		case 0x4f: mov (c, REG (c), REG (a)); break;
+		case 0x48: mov (c, REG (c), REG (b)); break;
+		case 0x49: mov (c, REG (c), REG (c)); break;
+		case 0x4a: mov (c, REG (c), REG (d)); break;
+		case 0x4b: mov (c, REG (c), REG (e)); break;
+		case 0x4c: mov (c, REG (c), REG (h)); break;
+		case 0x4d: mov (c, REG (c), REG (l)); break;
+		case 0x57: mov (c, REG (d), REG (a)); break;
+		case 0x50: mov (c, REG (d), REG (b)); break;
+		case 0x51: mov (c, REG (d), REG (c)); break;
+		case 0x52: mov (c, REG (d), REG (d)); break;
+		case 0x53: mov (c, REG (d), REG (e)); break;
+		case 0x54: mov (c, REG (d), REG (h)); break;
+		case 0x55: mov (c, REG (d), REG (l)); break;
+		case 0x5f: mov (c, REG (e), REG (a)); break;
+		case 0x58: mov (c, REG (e), REG (b)); break;
+		case 0x59: mov (c, REG (e), REG (c)); break;
+		case 0x5a: mov (c, REG (e), REG (d)); break;
+		case 0x5b: mov (c, REG (e), REG (e)); break;
+		case 0x5c: mov (c, REG (e), REG (h)); break;
+		case 0x5d: mov (c, REG (e), REG (l)); break;
+		case 0x67: mov (c, REG (h), REG (a)); break;
+		case 0x60: mov (c, REG (h), REG (b)); break;
+		case 0x61: mov (c, REG (h), REG (c)); break;
+		case 0x62: mov (c, REG (h), REG (d)); break;
+		case 0x63: mov (c, REG (h), REG (e)); break;
+		case 0x64: mov (c, REG (h), REG (h)); break;
+		case 0x65: mov (c, REG (h), REG (l)); break;
+		case 0x6f: mov (c, REG (l), REG (a)); break;
+		case 0x68: mov (c, REG (l), REG (b)); break;
+		case 0x69: mov (c, REG (l), REG (c)); break;
+		case 0x6a: mov (c, REG (l), REG (d)); break;
+		case 0x6b: mov (c, REG (l), REG (e)); break;
+		case 0x6c: mov (c, REG (l), REG (h)); break;
+		case 0x6d: mov (c, REG (l), REG (l)); break;
+		case 0x7f: mov (c, REG (a), REG (a)); break;
+		case 0x78: mov (c, REG (a), REG (b)); break;
+		case 0x79: mov (c, REG (a), REG (c)); break;
+		case 0x7a: mov (c, REG (a), REG (d)); break;
+		case 0x7b: mov (c, REG (a), REG (e)); break;
+		case 0x7c: mov (c, REG (a), REG (h)); break;
+		case 0x7d: mov (c, REG (a), REG (l)); break;
 
 		// REGISTER PAIR INSTRUCTIONS
 		case 0xc5: push_b (c); break;

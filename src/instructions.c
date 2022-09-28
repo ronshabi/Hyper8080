@@ -51,8 +51,8 @@ void jpo (cpu *c)
 /* CALL */
 void call (cpu *c)
 {
-	// <!> PROBABLY INCORRECT TO PC+1 INSTEAD OF PC
-	stack_push (c, c->pc + 1);
+	// +3
+	stack_push (c, c->pc + 3);
 	jmp (c);
 }
 void cc (cpu *c)
@@ -164,7 +164,6 @@ void lxi_sp (cpu *c)
 	c->sp = cpu_get_word (c, c->pc + 1);
 	PC3;
 }
-
 void mvi (cpu *c, uint8_t *reg)
 {
 	*reg = cpu_get_byte (c, c->pc + 1);
@@ -175,6 +174,23 @@ void mvi_m (cpu *c)
 	cpu_set_byte (c, cpu_deref_hl (c), cpu_get_byte (c, c->pc + 1));
 	PC2;
 }
+void adi (cpu *c)
+{
+	uint16_t temp = c->a + cpu_get_byte (c, c->pc + 1);
+	c->a		  = temp & 0xff;
+	// Set flags
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_ac (c, c->a, cpu_get_byte (c, c->pc + 1), 0);
+	cpu_set_flags_c (c, c->a, cpu_get_byte (c, c->pc + 1), 0);
+	PC2;
+}
+void aci (cpu *c);
+void sui (cpu *c);
+void sbi (cpu *c);
+void ani (cpu *c);
+void xri (cpu *c);
+void ori (cpu *c);
+void cpi (cpu *c);
 
 /* DATA TRANSFER */
 void ldax_b (cpu *c)
@@ -185,6 +201,11 @@ void ldax_b (cpu *c)
 void ldax_d (cpu *c)
 {
 	c->a = cpu_deref_de (c);
+	PC1;
+}
+void mov (cpu *c, uint8_t *dest, const uint8_t *src)
+{
+	*dest = *src;
 	PC1;
 }
 void mov_m (cpu *c, const uint8_t *reg)

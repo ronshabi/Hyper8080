@@ -49,9 +49,19 @@ void lxi_sp (cpu *c);			 // LXI SP
 void mvi (cpu *c, uint8_t *reg); // MVI 	Move immediate data
 void mvi_m (cpu *c);			 // MVI M
 
+void adi (cpu *c); // ADI - Add immediate to accumulator
+void aci (cpu *c); // ACI - Move Immediate data
+void sui (cpu *c); // SUI - Subtract immediate from accumulator
+void sbi (cpu *c); // SBI - Subtract immediate from accumulator w/ borrow
+void ani (cpu *c); // ANI - And immediate with accumulator
+void xri (cpu *c); // XRI - Xor immediate with accumulator
+void ori (cpu *c); // ORI - Or immediate with accumulator
+void cpi (cpu *c); // CPI - Compare immediate with accumulator
+
 /* DATA TRANSFER */
 void ldax_b (cpu *c); // LDAX B		Load accumulator
 void ldax_d (cpu *c); // LDAX D
+void mov (cpu *c, uint8_t *dest, const uint8_t *src);
 void mov_m (cpu *c, const uint8_t *reg);
 
 /* REGISTER PAIR INSTRUCTIONS */
