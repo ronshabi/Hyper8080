@@ -34,3 +34,19 @@ add_test(Test-sbi test_sbi)
 add_executable(test_ani tests/test_ani.c)
 add_test(Test-ani test_ani)
 
+
+add_executable(test_sta tests/test_sta.c)
+add_test(Test-sta test_sta)
+
+
+add_executable(test_lda tests/test_lda.c)
+add_test(Test-lda test_lda)
+
+
+add_executable(test_shld tests/test_shld.c)
+add_test(Test-shld test_shld)
+
+
+add_executable(test_lhld tests/test_lhld.c)
+add_test(Test-lhld test_lhld)
+

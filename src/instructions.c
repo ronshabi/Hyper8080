@@ -280,7 +280,16 @@ void mov_m (cpu *c, const uint8_t *reg)
 	cpu_set_byte (c, cpu_deref_hl (c), *reg);
 	PC1;
 }
-
+void stax_b (cpu *c)
+{
+	cpu_set_byte (c, cpu_get_bc (c), c->a);
+	PC1;
+}
+void stax_d (cpu *c)
+{
+	cpu_set_byte (c, cpu_get_de (c), c->a);
+	PC1;
+}
 /* REGISTER PAIR INSTRUCTIONS */
 void push_b (cpu *c)
 {
@@ -738,4 +747,33 @@ void ora_m (cpu *c)
 	cpu_set_flags_c_or (c, a_raw & 0xff, reg_raw & 0xff);
 	cpu_set_flags_ac_or (c, a_raw & 0xff, reg_raw & 0xff);
 	PC1;
+}
+
+/* DIRECT ADDRESSING INSTRUCTIONS */
+void sta (cpu *c)
+{
+	uint16_t adr = cpu_get_word (c, c->pc + 1);
+	cpu_set_byte (c, adr, c->a);
+	PC3;
+}
+void lda (cpu *c)
+{
+	uint16_t adr = cpu_get_word (c, c->pc + 1);
+	c->a		 = cpu_get_byte (c, adr);
+	PC3;
+}
+
+void shld (cpu *c)
+{
+	uint16_t adr = cpu_get_word (c, c->pc + 1);
+	cpu_set_word (c, adr, cpu_get_hl (c));
+	PC3;
+}
+
+void lhld (cpu *c)
+{
+	uint16_t adr  = cpu_get_word (c, c->pc + 1);
+	uint16_t word = cpu_get_word (c, adr);
+	cpu_set_hl (c, word);
+	PC3;
 }

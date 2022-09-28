@@ -15,10 +15,10 @@ const uint8_t CYCLES[] = {
 
 const char *INSTRUCTIONS[] = {
 	"NOP",	   "LXI B",	  "STAX B",	 "INX B",	"INR B",   "DCR B",	  "MVI B",	 "RLC",		"NOP",	   "DAD B",	  "LDAX B",	 "DCX B",	 "INR C",
-	"DCR C",   "MVI C",	  "RRCC",	 "NOP",		"LXI D",   "STAX D",  "INX D",	 "INR D",	"DCR D",   "MVI D",	  "RALC",	 "NOP",		 "DAD D",
+	"DCR C",   "MVI C",	  "RRC",	 "NOP",		"LXI D",   "STAX D",  "INX D",	 "INR D",	"DCR D",   "MVI D",	  "RALC",	 "NOP",		 "DAD D",
 	"LDAX D",  "DCX D",	  "INR E",	 "DCR E",	"MVI E",   "RAR",	  "NOP",	 "LXI H",	"SHLD",	   "INX H",	  "INR H",	 "DCR H",	 "MVI H",
 	"DAA",	   "NOP",	  "DAD H",	 "LHLD",	"DCX H",   "INR L",	  "DCR L",	 "MVI L",	"CMA",	   "NOP",	  "LXI SP",	 "STA",		 "INX SP",
-	"INR M",   "DCR M",	  "MVI M",	 "STCC",	"NOP",	   "DAD SP",  "LDA",	 "DCX SP",	"INR A",   "DCR A",	  "MVI A",	 "CMCC",	 "MOV B,B",
+	"INR M",   "DCR M",	  "MVI M",	 "STC",		"NOP",	   "DAD SP",  "LDA",	 "DCX SP",	"INR A",   "DCR A",	  "MVI A",	 "CMC",		 "MOV B,B",
 	"MOV B,C", "MOV B,D", "MOV B,E", "MOV B,H", "MOV B,L", "MOV B,M", "MOV B,A", "MOV C,B", "MOV C,C", "MOV C,D", "MOV C,E", "MOV C,H",	 "MOV C,L",
 	"MOV C,M", "MOV C,A", "MOV D,B", "MOV D,C", "MOV D,D", "MOV D,E", "MOV D,H", "MOV D,L", "MOV D,M", "MOV D,A", "MOV E,B", "MOV E,C",	 "MOV E,D",
 	"MOV E,E", "MOV E,H", "MOV E,L", "MOV E,M", "MOV E,A", "MOV H,B", "MOV H,C", "MOV H,D", "MOV H,E", "MOV H,H", "MOV H,L", "MOV H,M",	 "MOV H,A",
@@ -393,6 +393,9 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0x66: mov_m_to_dest (c, REG (h));
 		case 0x6e: mov_m_to_dest (c, REG (l));
 
+		case 0x02: stax_b (c); break;
+		case 0x12: stax_d (c); break;
+
 		// REGISTER PAIR INSTRUCTIONS
 		case 0xc5: push_b (c); break;
 		case 0xd5: push_d (c); break;
@@ -504,6 +507,12 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0xb4: ora (c, REG (h)); break;
 		case 0xb5: ora (c, REG (l)); break;
 		case 0xb6: ora_m (c); break;
+
+		// DIRECT ADDRESSING INSTRUCTIONS
+		case 0x32: sta (c); break;
+		case 0x3a: lda (c); break;
+		case 0x22: shld (c); break;
+		case 0x2a: lhld (c); break;
 
 		default: cpu_unimplemented (c); break;
 	}

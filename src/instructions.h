@@ -64,6 +64,8 @@ void ldax_d (cpu *c); // LDAX D
 void mov (cpu *c, uint8_t *dest, const uint8_t *src);
 void mov_m_to_dest (cpu *c, uint8_t *dest);
 void mov_m (cpu *c, const uint8_t *reg);
+void stax_b (cpu *c);
+void stax_d (cpu *c);
 
 /* REGISTER PAIR INSTRUCTIONS */
 void push_b (cpu *c);	// PUSH B
@@ -122,5 +124,11 @@ void xra (cpu *c, const uint8_t *reg); // XRA A		Logical xor w/zero accumulator
 void xra_m (cpu *c);				   // XRA M
 void ora (cpu *c, const uint8_t *reg); // ORA A		Logical or w/ accumulator
 void ora_m (cpu *c);				   // ORA M
+
+/* DIRECT ADDRESSING INSTRUCTIONS */
+void sta (cpu *c);	// STA		Store accumulator direct
+void lda (cpu *c);	// LDA		Load accumulator direct
+void shld (cpu *c); // SHLD		Store H and L direct
+void lhld (cpu *c); // LHLD		Load H and L direct
 
 #endif // INSTRUCTIONS_H
