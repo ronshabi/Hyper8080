@@ -220,13 +220,38 @@ void ani (cpu *c)
 	c->a		  = temp & 0xff;
 	// Set flags
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_ac (c, c->a, -cpu_get_byte (c, c->pc + 1) - c->flag_c, 0);
-	cpu_set_flags_c (c, c->a, -cpu_get_byte (c, c->pc + 1) - c->flag_c, 0);
+	cpu_set_flags_c_and (c, c->a, cpu_get_byte (c, c->pc + 1));
+	cpu_set_flags_ac_and (c, c->a, cpu_get_byte (c, c->pc + 1));
 	PC2;
 }
-void xri (cpu *c);
-void ori (cpu *c);
-void cpi (cpu *c);
+void xri (cpu *c)
+{
+	uint16_t temp = c->a ^ cpu_get_byte (c, c->pc + 1);
+	c->a		  = temp & 0xff;
+	// Set flags
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c_xor (c, c->a, cpu_get_byte (c, c->pc + 1));
+	cpu_set_flags_ac_xor (c, c->a, cpu_get_byte (c, c->pc + 1));
+	PC2;
+}
+void ori (cpu *c)
+{
+	uint16_t temp = c->a | cpu_get_byte (c, c->pc + 1);
+	c->a		  = temp & 0xff;
+	// Set flags
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_c_or (c, c->a, cpu_get_byte (c, c->pc + 1));
+	cpu_set_flags_ac_or (c, c->a, cpu_get_byte (c, c->pc + 1));
+	PC2;
+}
+void cpi (cpu *c)
+{
+	// A is not changed by this operation
+	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_ac (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
+	cpu_set_flags_c (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
+	PC2;
+}
 
 /* DATA TRANSFER */
 void ldax_b (cpu *c)

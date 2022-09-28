@@ -179,6 +179,27 @@ uint8_t flags_calc_carry (uint8_t f, uint8_t g, uint8_t modulator, uint8_t carry
 	return (xord & (1 << carry_bit)) != 0;
 }
 
+uint8_t flags_calc_carry_and (uint8_t f, uint8_t g, uint8_t carry_bit)
+{
+	uint16_t raw  = f & g;
+	uint16_t xord = raw ^ f ^ g;
+	return (xord & (1 << carry_bit)) != 0;
+}
+
+uint8_t flags_calc_carry_or (uint8_t f, uint8_t g, uint8_t carry_bit)
+{
+	uint16_t raw  = f | g;
+	uint16_t xord = raw ^ f ^ g;
+	return (xord & (1 << carry_bit)) != 0;
+}
+
+uint8_t flags_calc_carry_xor (uint8_t f, uint8_t g, uint8_t carry_bit)
+{
+	uint16_t raw  = f ^ g;
+	uint16_t xord = raw ^ f ^ g;
+	return (xord & (1 << carry_bit)) != 0;
+}
+
 // Flags
 uint8_t cpu_get_flags (cpu *c)
 {
@@ -200,7 +221,13 @@ void cpu_set_flags_zsp (cpu *c, uint8_t val)
 	c->flag_p = flags_calc_parity (val);
 }
 void cpu_set_flags_c (cpu *c, uint8_t f, uint8_t g, uint8_t modulator) { c->flag_c = flags_calc_carry (f, g, modulator, 8); }
+void cpu_set_flags_c_and (cpu *c, uint8_t f, uint8_t g) { c->flag_c = flags_calc_carry_and (f, g, 8); }
+void cpu_set_flags_c_or (cpu *c, uint8_t f, uint8_t g) { c->flag_c = flags_calc_carry_or (f, g, 8); }
+void cpu_set_flags_c_xor (cpu *c, uint8_t f, uint8_t g) { c->flag_c = flags_calc_carry_xor (f, g, 8); }
 void cpu_set_flags_ac (cpu *c, uint8_t f, uint8_t g, uint8_t modulator) { c->flag_c = flags_calc_carry (f, g, modulator, 4); }
+void cpu_set_flags_ac_and (cpu *c, uint8_t f, uint8_t g) { c->flag_c = flags_calc_carry_and (f, g, 4); }
+void cpu_set_flags_ac_or (cpu *c, uint8_t f, uint8_t g) { c->flag_c = flags_calc_carry_or (f, g, 4); }
+void cpu_set_flags_ac_xor (cpu *c, uint8_t f, uint8_t g) { c->flag_c = flags_calc_carry_xor (f, g, 4); }
 void cpu_set_flags_all (cpu *c, uint8_t f, uint8_t g, uint8_t modulator)
 {
 	cpu_set_flags_zsp (c, f);

@@ -59,7 +59,13 @@ uint16_t cpu_deref_sp (cpu *c, uint16_t offset);
 uint8_t cpu_get_flags (cpu *c);
 void	cpu_set_flags_zsp (cpu *c, uint8_t val);
 void	cpu_set_flags_c (cpu *c, uint8_t f, uint8_t g, uint8_t modulator);
+void	cpu_set_flags_c_and (cpu *c, uint8_t f, uint8_t g);
+void	cpu_set_flags_c_or (cpu *c, uint8_t f, uint8_t g);
+void	cpu_set_flags_c_xor (cpu *c, uint8_t f, uint8_t g);
 void	cpu_set_flags_ac (cpu *c, uint8_t f, uint8_t g, uint8_t modulator);
+void	cpu_set_flags_ac_and (cpu *c, uint8_t f, uint8_t g);
+void	cpu_set_flags_ac_or (cpu *c, uint8_t f, uint8_t g);
+void	cpu_set_flags_ac_xor (cpu *c, uint8_t f, uint8_t g);
 void	cpu_set_flags_all (cpu *c, uint8_t f, uint8_t g, uint8_t modulator);
 
 // Stack
