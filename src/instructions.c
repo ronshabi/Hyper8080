@@ -1,5 +1,6 @@
 #include "instructions.h"
 #include <stdio.h>
+#include <stdlib.h>
 /* JUMP */
 void pchl (cpu *c) { cpu_unimplemented (c); }
 void jmp (cpu *c)
@@ -99,7 +100,6 @@ void cpo (cpu *c)
 /* RET */
 void ret (cpu *c)
 {
-	printf (" $%04x", cpu_get_word (c, c->pc + 1));
 	c->pc = stack_pop (c);
 }
 void rc (cpu *c)
@@ -753,27 +753,38 @@ void ora_m (cpu *c)
 void sta (cpu *c)
 {
 	uint16_t adr = cpu_get_word (c, c->pc + 1);
-	cpu_set_byte (c, adr, c->a);
+	printf (" $%04x", adr);
+	printf (" [$%04x] = $%04x", adr, cpu_get_word (c, adr));
+	cpu_set_byte (c, cpu_get_word (c, adr), c->a);
+	printf (" [$%04x] = $%04x", adr, cpu_get_word (c, adr));
 	PC3;
+	exit (69);
 }
 void lda (cpu *c)
 {
 	uint16_t adr = cpu_get_word (c, c->pc + 1);
-	c->a		 = cpu_get_byte (c, adr);
+	printf (" $%04x", adr);
+	c->a = cpu_get_byte (c, adr);
+
 	PC3;
 }
-
 void shld (cpu *c)
 {
 	uint16_t adr = cpu_get_word (c, c->pc + 1);
 	cpu_set_word (c, adr, cpu_get_hl (c));
 	PC3;
 }
-
 void lhld (cpu *c)
 {
 	uint16_t adr  = cpu_get_word (c, c->pc + 1);
 	uint16_t word = cpu_get_word (c, adr);
 	cpu_set_hl (c, word);
 	PC3;
+}
+
+/* INTERRUPT INSTRUCTIONS */
+void set_interrupt (cpu *c, uint8_t state)
+{
+	c->interrupts_enabled = state;
+	PC1;
 }

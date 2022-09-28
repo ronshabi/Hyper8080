@@ -131,4 +131,7 @@ void lda (cpu *c);	// LDA		Load accumulator direct
 void shld (cpu *c); // SHLD		Store H and L direct
 void lhld (cpu *c); // LHLD		Load H and L direct
 
+/* INTERRUPT INSTRUCTIONS */
+void set_interrupt (cpu *c, uint8_t state);
+
 #endif // INSTRUCTIONS_H

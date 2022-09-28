@@ -514,6 +514,10 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0x22: shld (c); break;
 		case 0x2a: lhld (c); break;
 
+		// INTERRUPT TOGGLE INSTRUCTIONS
+		case 0xfb: set_interrupt (c, 1); break;
+		case 0xf3: set_interrupt (c, 0); break;
+
 		default: cpu_unimplemented (c); break;
 	}
 }
