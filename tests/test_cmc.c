@@ -12,5 +12,26 @@ int main (void)
 	uint8_t *memory = calloc (10000, 1);
 	cpu_set_memory (&c, memory);
 
-	return 0;
+	int passed = 0;
+	
+	c.flag_c = 1;
+
+	cmc (&c);
+	
+	if (c.flag_c == 0) {
+		passed++;
+	}
+
+	cmc (&c);
+	
+	if (c.flag_c == 1) {
+		passed++;
+	}
+	
+	if (passed == 2) {
+		return 0;
+	}
+	
+	free(memory);
+	return 1;
 }

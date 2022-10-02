@@ -266,7 +266,11 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0xdd:
 		case 0xed:
 		case 0xfd: PC1; break;
-
+		
+		// CARRY
+		case 0x37: stc(c); break;
+		case 0x3f: cmc(c); break;
+		
 		// JUMP
 		case 0xe9: pchl (c); break;
 		case 0xc3: jmp (c); break;

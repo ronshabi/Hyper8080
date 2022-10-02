@@ -1,6 +1,18 @@
 #include "instructions.h"
 #include <stdio.h>
 #include <stdlib.h>
+
+/* CARRY */
+void stc(cpu *c) {
+	c->flag_c = 1;
+	PC1;
+}
+
+void cmc(cpu *c) {
+	c->flag_c = !c->flag_c;
+	PC1;
+}
+
 /* JUMP */
 void pchl (cpu *c) { cpu_unimplemented (c); }
 void jmp (cpu *c)
