@@ -12,5 +12,14 @@ int main (void)
 	uint8_t *memory = calloc (10000, 1);
 	cpu_set_memory (&c, memory);
 
-	return 0;
+	c.pc = 0;
+	cpu_set_word (&c, 0x1, 0xcafe);
+	cpu_set_byte (&c, 0xcafe, 0x12);
+	c.a = 0xfe;
+
+	sta (&c);
+
+	if (cpu_get_byte (&c, 0xcafe) == 0xfe) { return 0; }
+
+	return 1;
 }

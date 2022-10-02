@@ -685,7 +685,6 @@ void ana (cpu *c, const uint8_t *reg)
 
 	cpu_set_flags_zsp (c, c->a);
 	cpu_set_flags_c_and (c, a_raw & 0xff, reg_raw & 0xff);
-	cpu_set_flags_ac_and (c, a_raw & 0xff, reg_raw & 0xff);
 	PC1;
 }
 void ana_m (cpu *c)
@@ -753,12 +752,8 @@ void ora_m (cpu *c)
 void sta (cpu *c)
 {
 	uint16_t adr = cpu_get_word (c, c->pc + 1);
-	printf (" $%04x", adr);
-	printf (" [$%04x] = $%04x", adr, cpu_get_word (c, adr));
-	cpu_set_byte (c, cpu_get_word (c, adr), c->a);
-	printf (" [$%04x] = $%04x", adr, cpu_get_word (c, adr));
+	cpu_set_byte (c, adr, c->a);
 	PC3;
-	exit (69);
 }
 void lda (cpu *c)
 {
