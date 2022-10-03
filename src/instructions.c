@@ -3,12 +3,14 @@
 #include <stdlib.h>
 
 /* CARRY */
-void stc(cpu *c) {
+void stc (cpu *c)
+{
 	c->flag_c = 1;
 	PC1;
 }
 
-void cmc(cpu *c) {
+void cmc (cpu *c)
+{
 	c->flag_c = !c->flag_c;
 	PC1;
 }
@@ -110,10 +112,7 @@ void cpo (cpu *c)
 }
 
 /* RET */
-void ret (cpu *c)
-{
-	c->pc = stack_pop (c);
-}
+void ret (cpu *c) { c->pc = stack_pop (c); }
 void rc (cpu *c)
 {
 	if (c->flag_c) { ret (c); }
@@ -188,22 +187,18 @@ void mvi_m (cpu *c)
 }
 void adi (cpu *c)
 {
-	uint16_t temp = c->a + cpu_get_byte (c, c->pc + 1);
-	c->a		  = temp & 0xff;
-	// Set flags
+	uint16_t result = c->a + GET_IMMEDIATE_BYTE;
+	c->a			= result & 0xff;
+	cpu_set_flags_carry_from_16bit (c, result);
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_ac (c, c->a, cpu_get_byte (c, c->pc + 1), 0);
-	cpu_set_flags_c (c, c->a, cpu_get_byte (c, c->pc + 1), 0);
 	PC2;
 }
 void aci (cpu *c)
 {
-	uint16_t temp = (c->a) + (cpu_get_byte (c, c->pc + 1)) + c->flag_c;
-	c->a		  = temp & 0xff;
-	// Set flags
+	uint16_t result = c->a + GET_IMMEDIATE_BYTE + c->flag_c;
+	c->a			= result & 0xff;
+	cpu_set_flags_carry_from_16bit (c, result);
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_ac (c, c->a, cpu_get_byte (c, c->pc + 1), c->flag_c);
-	cpu_set_flags_c (c, c->a, cpu_get_byte (c, c->pc + 1), c->flag_c);
 	PC2;
 }
 void sui (cpu *c)
@@ -212,8 +207,8 @@ void sui (cpu *c)
 	c->a		  = temp & 0xff;
 	// Set flags
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_ac (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
-	cpu_set_flags_c (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
+	cpu_set_flags_ac_add (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
+	cpu_set_flags_c_add (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
 	PC2;
 }
 void sbi (cpu *c)
@@ -222,8 +217,8 @@ void sbi (cpu *c)
 	c->a		  = temp & 0xff;
 	// Set flags
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_ac (c, c->a, -cpu_get_byte (c, c->pc + 1), -c->flag_c);
-	cpu_set_flags_c (c, c->a, -cpu_get_byte (c, c->pc + 1), -c->flag_c);
+	cpu_set_flags_ac_add (c, c->a, -cpu_get_byte (c, c->pc + 1), -c->flag_c);
+	cpu_set_flags_c_add (c, c->a, -cpu_get_byte (c, c->pc + 1), -c->flag_c);
 	PC2;
 }
 void ani (cpu *c)
@@ -260,8 +255,8 @@ void cpi (cpu *c)
 {
 	// A is not changed by this operation
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_ac (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
-	cpu_set_flags_c (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
+	cpu_set_flags_ac_add (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
+	cpu_set_flags_c_add (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
 	PC2;
 }
 
@@ -449,15 +444,16 @@ void inr (cpu *c, uint8_t *reg)
 {
 	*reg += 1;
 	cpu_set_flags_zsp (c, *reg);
-	cpu_set_flags_ac (c, *reg, 1, 0);
+	cpu_set_flags_ac_add (c, *reg, 1, 0);
 	PC1;
 }
 void inr_m (cpu *c)
 {
 	uint8_t m = cpu_deref_hl (c);
 	cpu_set_byte (c, cpu_get_hl (c), m + 1);
-	cpu_set_flags_zsp (c, m + 1);
-	cpu_set_flags_ac (c, m, 1, 0);
+	uint8_t mplusone = m + 1;
+	cpu_set_flags_zsp (c, mplusone);
+	cpu_set_flags_ac_add (c, m, 1, 0);
 	PC1;
 }
 void dcr (cpu *c, uint8_t *reg)
@@ -466,7 +462,7 @@ void dcr (cpu *c, uint8_t *reg)
 	precision--;
 	*reg = precision & 0xff;
 	cpu_set_flags_zsp (c, *reg);
-	// cpu_set_flags_ac (c, *reg, -1, 0);
+	// cpu_set_flags_ac_add (c, *reg, -1, 0);
 
 	if (*reg == 0) { printf ("\nREG HIT ZERO\n"); }
 
@@ -477,7 +473,7 @@ void dcr_m (cpu *c)
 	uint8_t m = cpu_deref_hl (c);
 	cpu_set_byte (c, cpu_get_hl (c), m - 1);
 	cpu_set_flags_zsp (c, m - 1);
-	cpu_set_flags_ac (c, m, -1, 0);
+	cpu_set_flags_ac_add (c, m, -1, 0);
 	PC1;
 }
 
@@ -596,8 +592,8 @@ void add (cpu *c, const uint8_t *reg)
 	c->a = a_raw & 0xff;
 
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c (c, a_raw & 0xff, reg_raw & 0xff, 0);
-	cpu_set_flags_ac (c, a_raw & 0xff, reg_raw & 0xff, 0);
+	cpu_set_flags_c_add (c, a_raw & 0xff, reg_raw & 0xff, 0);
+	cpu_set_flags_ac_add (c, a_raw & 0xff, reg_raw & 0xff, 0);
 	PC1;
 }
 void add_m (cpu *c)
@@ -608,21 +604,16 @@ void add_m (cpu *c)
 	c->a = a_raw & 0xff;
 
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c (c, a_raw & 0xff, reg_raw & 0xff, 0);
-	cpu_set_flags_ac (c, a_raw & 0xff, reg_raw & 0xff, 0);
+	cpu_set_flags_c_add (c, a_raw & 0xff, reg_raw & 0xff, 0);
+	cpu_set_flags_ac_add (c, a_raw & 0xff, reg_raw & 0xff, 0);
 	PC1;
 }
 void adc (cpu *c, const uint8_t *reg)
 {
-	uint16_t a_raw	 = c->a;
-	uint16_t reg_raw = *reg;
-	a_raw += reg_raw;
-	a_raw += c->flag_c;
-	c->a = a_raw & 0xff;
-
-	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c (c, a_raw & 0xff, reg_raw & 0xff, c->flag_c);
-	cpu_set_flags_ac (c, a_raw & 0xff, reg_raw & 0xff, c->flag_c);
+	uint16_t result = c->a + c->flag_c + *reg;
+	cpu_set_flags_c_add (c, c->a, *reg, c->flag_c);
+	c->a = result & 0xff;
+	cpu_set_flags_zsp (c, result);
 	PC1;
 }
 void adc_m (cpu *c)
@@ -634,8 +625,8 @@ void adc_m (cpu *c)
 	c->a = a_raw & 0xff;
 
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c (c, a_raw & 0xff, reg_raw & 0xff, c->flag_c);
-	cpu_set_flags_ac (c, a_raw & 0xff, reg_raw & 0xff, c->flag_c);
+	cpu_set_flags_c_add (c, a_raw & 0xff, reg_raw & 0xff, c->flag_c);
+	cpu_set_flags_ac_add (c, a_raw & 0xff, reg_raw & 0xff, c->flag_c);
 	PC1;
 }
 void sub (cpu *c, const uint8_t *reg)
@@ -646,8 +637,8 @@ void sub (cpu *c, const uint8_t *reg)
 	c->a = a_raw & 0xff;
 
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
-	cpu_set_flags_ac (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
+	cpu_set_flags_c_add (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
+	cpu_set_flags_ac_add (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
 	PC1;
 }
 void sub_m (cpu *c)
@@ -658,8 +649,8 @@ void sub_m (cpu *c)
 	c->a = a_raw & 0xff;
 
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
-	cpu_set_flags_ac (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
+	cpu_set_flags_c_add (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
+	cpu_set_flags_ac_add (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
 	PC1;
 }
 void sbb (cpu *c, const uint8_t *reg)
@@ -671,8 +662,8 @@ void sbb (cpu *c, const uint8_t *reg)
 	c->a = a_raw & 0xff;
 
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
-	cpu_set_flags_ac (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
+	cpu_set_flags_c_add (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
+	cpu_set_flags_ac_add (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
 	PC1;
 }
 void sbb_m (cpu *c)
@@ -684,8 +675,8 @@ void sbb_m (cpu *c)
 	c->a = a_raw & 0xff;
 
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
-	cpu_set_flags_ac (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
+	cpu_set_flags_c_add (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
+	cpu_set_flags_ac_add (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
 	PC1;
 }
 void ana (cpu *c, const uint8_t *reg)

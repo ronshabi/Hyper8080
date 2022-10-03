@@ -10,6 +10,9 @@
 // Quickly access register location
 #define REG(reg) &(c->reg)
 
+// Quickly get immediate
+#define GET_IMMEDIATE_BYTE cpu_get_byte (c, c->pc + 1)
+
 // Device numbers
 // Output
 #define DEVICE_SHIFT_AMT  2
@@ -72,15 +75,8 @@ uint16_t cpu_deref_sp (cpu *c, uint16_t offset);
 // Flags
 uint8_t cpu_get_flags (cpu *c);
 void	cpu_set_flags_zsp (cpu *c, uint8_t val);
-void	cpu_set_flags_c (cpu *c, uint8_t f, uint8_t g, uint8_t modulator);
-void	cpu_set_flags_c_and (cpu *c, uint8_t f, uint8_t g);
-void	cpu_set_flags_c_or (cpu *c, uint8_t f, uint8_t g);
-void	cpu_set_flags_c_xor (cpu *c, uint8_t f, uint8_t g);
-void	cpu_set_flags_ac (cpu *c, uint8_t f, uint8_t g, uint8_t modulator);
-void	cpu_set_flags_ac_and (cpu *c, uint8_t f, uint8_t g);
-void	cpu_set_flags_ac_or (cpu *c, uint8_t f, uint8_t g);
-void	cpu_set_flags_ac_xor (cpu *c, uint8_t f, uint8_t g);
-void	cpu_set_flags_all (cpu *c, uint8_t f, uint8_t g, uint8_t modulator);
+void	cpu_set_flags_carry_add (cpu *c, uint8_t a, uint8_t b, uint8_t carry);
+void	cpu_set_flags_carry_from_16bit (cpu *c, uint16_t num);
 
 // Stack
 void	 stack_push (cpu *c, uint16_t val);
