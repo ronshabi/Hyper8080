@@ -158,12 +158,12 @@ uint8_t flags_calc_parity (uint8_t n)
 	}
 	return 1 - parity;
 }
-uint8_t flags_calc_zero (uint8_t n) { return n == 0; }
-uint8_t flags_calc_sign (uint8_t n) { return (n & 0x80) == 0x80; }
+uint8_t flags_calc_zero (uint8_t n) { return (n == 0); }
+uint8_t flags_calc_sign (uint8_t n) { return ((n & 0x80) == 0x80); }
 uint8_t flags_calc_carry (uint8_t a, uint8_t b, uint8_t carry)
 {
-	uint16_t result = a + b + carry;
-	return (result > 0xff);
+	uint16_t sum = a + b + carry;
+	return (sum > 0xff);
 }
 uint8_t cpu_get_flags (cpu *c)
 {
@@ -184,7 +184,7 @@ void cpu_set_flags_zsp (cpu *c, uint8_t val)
 	c->flag_p = flags_calc_parity (val);
 }
 void cpu_set_flags_carry_add (cpu *c, uint8_t a, uint8_t b, uint8_t carry) { c->flag_c = flags_calc_carry (a, b, carry); }
-void cpu_set_flags_carry_from_16bit (cpu *c, uint16_t num) { c->a = (num > 0xff); }
+void cpu_set_flags_carry_from_16bit (cpu *c, uint16_t num) { c->flag_c = (num > 0xff); }
 // Emualtion
 void cpu_unimplemented (cpu *c)
 {

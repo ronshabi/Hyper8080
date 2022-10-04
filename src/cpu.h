@@ -13,6 +13,8 @@
 // Quickly get immediate
 #define GET_IMMEDIATE_BYTE cpu_get_byte (c, c->pc + 1)
 
+#define FLIP(n) (~n + 1)
+
 // Device numbers
 // Output
 #define DEVICE_SHIFT_AMT  2

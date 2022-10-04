@@ -11,7 +11,8 @@ void stc (cpu *c)
 
 void cmc (cpu *c)
 {
-	c->flag_c = !c->flag_c;
+	if (c->flag_c == 1) { c->flag_c = 0; }
+	else { c->flag_c = 1; }
 	PC1;
 }
 
@@ -190,7 +191,7 @@ void adi (cpu *c)
 	uint16_t result = c->a + GET_IMMEDIATE_BYTE;
 	c->a			= result & 0xff;
 	cpu_set_flags_carry_from_16bit (c, result);
-	cpu_set_flags_zsp (c, c->a);
+	cpu_set_flags_zsp (c, result);
 	PC2;
 }
 void aci (cpu *c)
@@ -203,60 +204,50 @@ void aci (cpu *c)
 }
 void sui (cpu *c)
 {
-	uint16_t temp = c->a - cpu_get_byte (c, c->pc + 1);
-	c->a		  = temp & 0xff;
-	// Set flags
+	uint16_t result = c->a + (~GET_IMMEDIATE_BYTE + 1);
+	c->a			= result & 0xff;
+	cpu_set_flags_carry_from_16bit (c, result);
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_ac_add (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
-	cpu_set_flags_c_add (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
 	PC2;
 }
 void sbi (cpu *c)
 {
-	uint16_t temp = c->a - cpu_get_byte (c, c->pc + 1) - c->flag_c;
-	c->a		  = temp & 0xff;
-	// Set flags
+	uint16_t result = c->a + (~GET_IMMEDIATE_BYTE + 1) + (~c->flag_c + 1);
+	c->a			= result & 0xff;
+	cpu_set_flags_carry_from_16bit (c, result);
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_ac_add (c, c->a, -cpu_get_byte (c, c->pc + 1), -c->flag_c);
-	cpu_set_flags_c_add (c, c->a, -cpu_get_byte (c, c->pc + 1), -c->flag_c);
 	PC2;
 }
 void ani (cpu *c)
 {
-	uint16_t temp = c->a & cpu_get_byte (c, c->pc + 1);
-	c->a		  = temp & 0xff;
-	// Set flags
+	uint16_t result = c->a & GET_IMMEDIATE_BYTE;
+	c->a			= result & 0xff;
+	cpu_set_flags_carry_from_16bit (c, result);
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_and (c, c->a, cpu_get_byte (c, c->pc + 1));
-	cpu_set_flags_ac_and (c, c->a, cpu_get_byte (c, c->pc + 1));
 	PC2;
 }
 void xri (cpu *c)
 {
-	uint16_t temp = c->a ^ cpu_get_byte (c, c->pc + 1);
-	c->a		  = temp & 0xff;
-	// Set flags
+	uint16_t result = c->a ^ GET_IMMEDIATE_BYTE;
+	c->a			= result & 0xff;
+	cpu_set_flags_carry_from_16bit (c, result);
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_xor (c, c->a, cpu_get_byte (c, c->pc + 1));
-	cpu_set_flags_ac_xor (c, c->a, cpu_get_byte (c, c->pc + 1));
 	PC2;
 }
 void ori (cpu *c)
 {
-	uint16_t temp = c->a | cpu_get_byte (c, c->pc + 1);
-	c->a		  = temp & 0xff;
-	// Set flags
+	uint16_t result = c->a | GET_IMMEDIATE_BYTE;
+	c->a			= result & 0xff;
+	cpu_set_flags_carry_from_16bit (c, result);
 	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_or (c, c->a, cpu_get_byte (c, c->pc + 1));
-	cpu_set_flags_ac_or (c, c->a, cpu_get_byte (c, c->pc + 1));
 	PC2;
 }
 void cpi (cpu *c)
 {
-	// A is not changed by this operation
-	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_ac_add (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
-	cpu_set_flags_c_add (c, c->a, -cpu_get_byte (c, c->pc + 1), 0);
+	// A is not changed by this operation, only the FLAGS
+	uint16_t result = c->a + (~GET_IMMEDIATE_BYTE + 1);
+	cpu_set_flags_carry_from_16bit (c, result);
+	cpu_set_flags_zsp (c, result & 0xff);
 	PC2;
 }
 
@@ -442,38 +433,38 @@ void sphl (cpu *c)
 /* SINGLE REGISTER INSTRUCTIONS */
 void inr (cpu *c, uint8_t *reg)
 {
-	*reg += 1;
+	uint16_t result = ++*reg;
 	cpu_set_flags_zsp (c, *reg);
-	cpu_set_flags_ac_add (c, *reg, 1, 0);
+	cpu_set_flags_carry_from_16bit (c, result);
+	c->a = result & 0xff;
 	PC1;
 }
 void inr_m (cpu *c)
 {
-	uint8_t m = cpu_deref_hl (c);
-	cpu_set_byte (c, cpu_get_hl (c), m + 1);
-	uint8_t mplusone = m + 1;
-	cpu_set_flags_zsp (c, mplusone);
-	cpu_set_flags_ac_add (c, m, 1, 0);
+	uint16_t result = cpu_deref_hl (c) + 1;
+	cpu_set_byte (c, cpu_deref_hl (c), result & 0xff);
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result);
 	PC1;
 }
 void dcr (cpu *c, uint8_t *reg)
 {
-	uint16_t precision = *reg;
-	precision--;
-	*reg = precision & 0xff;
-	cpu_set_flags_zsp (c, *reg);
-	// cpu_set_flags_ac_add (c, *reg, -1, 0);
+	uint16_t result = *reg + FLIP (1);
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result & 0xff);
+	*reg = result & 0xff;
 
 	if (*reg == 0) { printf ("\nREG HIT ZERO\n"); }
-
 	PC1;
 }
 void dcr_m (cpu *c)
 {
-	uint8_t m = cpu_deref_hl (c);
-	cpu_set_byte (c, cpu_get_hl (c), m - 1);
-	cpu_set_flags_zsp (c, m - 1);
-	cpu_set_flags_ac_add (c, m, -1, 0);
+	uint16_t result = cpu_deref_hl (c) + FLIP (1);
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result & 0xff);
+	cpu_set_byte (c, cpu_get_hl (c), result & 0xff);
+
+	if (cpu_deref_hl (c) == 0) { printf ("\nM HIT ZERO\n"); }
 	PC1;
 }
 
@@ -586,168 +577,114 @@ void hlt (cpu *c)
 /* REGISTER OR MEMORY TO ACCUMULATOR INSTRUCTIONS */
 void add (cpu *c, const uint8_t *reg)
 {
-	uint16_t a_raw	 = c->a;
-	uint16_t reg_raw = *reg;
-	a_raw += reg_raw;
-	c->a = a_raw & 0xff;
-
-	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_add (c, a_raw & 0xff, reg_raw & 0xff, 0);
-	cpu_set_flags_ac_add (c, a_raw & 0xff, reg_raw & 0xff, 0);
+	uint16_t result = c->a + *reg;
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result);
+	c->a = result & 0xff;
 	PC1;
 }
 void add_m (cpu *c)
 {
-	uint16_t a_raw	 = c->a;
-	uint16_t reg_raw = cpu_deref_hl (c);
-	a_raw += reg_raw;
-	c->a = a_raw & 0xff;
-
-	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_add (c, a_raw & 0xff, reg_raw & 0xff, 0);
-	cpu_set_flags_ac_add (c, a_raw & 0xff, reg_raw & 0xff, 0);
+	uint16_t result = c->a + cpu_deref_hl (c);
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result);
+	c->a = result & 0xff;
 	PC1;
 }
 void adc (cpu *c, const uint8_t *reg)
 {
-	uint16_t result = c->a + c->flag_c + *reg;
-	cpu_set_flags_c_add (c, c->a, *reg, c->flag_c);
+	uint16_t result = c->a + *reg + c->flag_c;
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result);
 	c->a = result & 0xff;
-	cpu_set_flags_zsp (c, result);
 	PC1;
 }
 void adc_m (cpu *c)
 {
-	uint16_t a_raw	 = c->a;
-	uint16_t reg_raw = cpu_deref_hl (c);
-	a_raw += reg_raw;
-	a_raw += c->flag_c;
-	c->a = a_raw & 0xff;
-
-	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_add (c, a_raw & 0xff, reg_raw & 0xff, c->flag_c);
-	cpu_set_flags_ac_add (c, a_raw & 0xff, reg_raw & 0xff, c->flag_c);
+	uint16_t result = c->a + cpu_deref_hl (c) + c->flag_c;
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result);
+	c->a = result & 0xff;
 	PC1;
 }
 void sub (cpu *c, const uint8_t *reg)
 {
-	uint16_t a_raw	 = c->a;
-	uint16_t reg_raw = *reg;
-	a_raw -= reg_raw;
-	c->a = a_raw & 0xff;
-
-	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_add (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
-	cpu_set_flags_ac_add (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
+	uint16_t result = c->a + FLIP (*reg);
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result);
+	c->a = result & 0xff;
 	PC1;
 }
 void sub_m (cpu *c)
 {
-	uint16_t a_raw	 = c->a;
-	uint16_t reg_raw = cpu_deref_hl (c);
-	a_raw -= reg_raw;
-	c->a = a_raw & 0xff;
-
-	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_add (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
-	cpu_set_flags_ac_add (c, a_raw & 0xff, -(reg_raw & 0xff), 0);
+	uint16_t result = c->a + FLIP (cpu_deref_hl (c));
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result);
+	c->a = result & 0xff;
 	PC1;
 }
 void sbb (cpu *c, const uint8_t *reg)
 {
-	uint16_t a_raw	 = c->a;
-	uint16_t reg_raw = *reg;
-	a_raw -= reg_raw;
-	a_raw -= c->flag_c;
-	c->a = a_raw & 0xff;
-
-	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_add (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
-	cpu_set_flags_ac_add (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
+	uint16_t result = c->a + FLIP (*reg) + FLIP (c->flag_c);
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result);
+	c->a = result & 0xff;
 	PC1;
 }
 void sbb_m (cpu *c)
 {
-	uint16_t a_raw	 = c->a;
-	uint16_t reg_raw = cpu_deref_hl (c);
-	a_raw -= reg_raw;
-	a_raw -= c->flag_c;
-	c->a = a_raw & 0xff;
-
-	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_add (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
-	cpu_set_flags_ac_add (c, a_raw & 0xff, -(reg_raw & 0xff), -c->flag_c);
+	uint16_t result = c->a + FLIP (cpu_deref_hl (c)) + FLIP (c->flag_c);
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result);
+	c->a = result & 0xff;
 	PC1;
 }
 void ana (cpu *c, const uint8_t *reg)
 {
-	uint16_t a_raw	 = c->a;
-	uint16_t reg_raw = *reg;
-	a_raw &= reg_raw;
-	c->a = a_raw & 0xff;
-
-	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_and (c, a_raw & 0xff, reg_raw & 0xff);
+	uint16_t result = c->a & *reg;
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result);
+	c->a = result & 0xff;
 	PC1;
 }
 void ana_m (cpu *c)
 {
-	uint16_t a_raw	 = c->a;
-	uint16_t reg_raw = cpu_deref_hl (c);
-	a_raw &= reg_raw;
-	c->a = a_raw & 0xff;
-
-	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_and (c, a_raw & 0xff, reg_raw & 0xff);
-	cpu_set_flags_ac_and (c, a_raw & 0xff, reg_raw & 0xff);
+	uint16_t result = c->a & (cpu_deref_hl (c));
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result);
+	c->a = result & 0xff;
 	PC1;
 }
 void xra (cpu *c, const uint8_t *reg)
 {
-	uint16_t a_raw	 = c->a;
-	uint16_t reg_raw = *reg;
-	a_raw ^= reg_raw;
-	c->a = a_raw & 0xff;
-
-	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_xor (c, a_raw & 0xff, reg_raw & 0xff);
-	cpu_set_flags_ac_xor (c, a_raw & 0xff, reg_raw & 0xff);
+	uint16_t result = c->a ^ *reg;
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result);
+	c->a = result & 0xff;
 	PC1;
 }
 void xra_m (cpu *c)
 {
-	uint16_t a_raw	 = c->a;
-	uint16_t reg_raw = cpu_deref_hl (c);
-	a_raw ^= reg_raw;
-	c->a = a_raw & 0xff;
-
-	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_xor (c, a_raw & 0xff, reg_raw & 0xff);
-	cpu_set_flags_ac_xor (c, a_raw & 0xff, reg_raw & 0xff);
+	uint16_t result = c->a ^ (cpu_deref_hl (c));
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result);
+	c->a = result & 0xff;
 	PC1;
 }
 void ora (cpu *c, const uint8_t *reg)
 {
-	uint16_t a_raw	 = c->a;
-	uint16_t reg_raw = *reg;
-	a_raw |= reg_raw;
-	c->a = a_raw & 0xff;
-
-	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_or (c, a_raw & 0xff, reg_raw & 0xff);
-	cpu_set_flags_ac_or (c, a_raw & 0xff, reg_raw & 0xff);
+	uint16_t result = c->a | *reg;
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result);
+	c->a = result & 0xff;
 	PC1;
 }
 void ora_m (cpu *c)
 {
-	uint16_t a_raw	 = c->a;
-	uint16_t reg_raw = cpu_deref_hl (c);
-	a_raw |= reg_raw;
-	c->a = a_raw & 0xff;
-
-	cpu_set_flags_zsp (c, c->a);
-	cpu_set_flags_c_or (c, a_raw & 0xff, reg_raw & 0xff);
-	cpu_set_flags_ac_or (c, a_raw & 0xff, reg_raw & 0xff);
+	uint16_t result = c->a | (cpu_deref_hl (c));
+	cpu_set_flags_zsp (c, result & 0xff);
+	cpu_set_flags_carry_from_16bit (c, result);
+	c->a = result & 0xff;
 	PC1;
 }
 
