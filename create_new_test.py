@@ -32,13 +32,10 @@ def create_test_file(new_test_name):
 
 
 if __name__ == '__main__':
-    # Check for arguments
     if len(sys.argv) != 2:
         print("Easily generate new CTests!")
         print(f"Usage: python3 {str(sys.argv[0])} <test_name>")
         exit(1)
 
-    # Get test name from argv[1]
     test_name = str(sys.argv[1])
-
     create_test_file(test_name)
