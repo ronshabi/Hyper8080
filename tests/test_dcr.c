@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include "../src/instructions.h"
 #include "../src/instructions.c"
-#include "../src/cpu.h"
 #include "../src/cpu.c"
 
 int main (void)
@@ -12,5 +11,15 @@ int main (void)
 	uint8_t *memory = calloc (10000, 1);
 	cpu_set_memory (&c, memory);
 
-	return 0;
+	c.h = 0x3a;
+	c.l = 0x7c;
+
+	cpu_set_byte (&c, 0x3a7c, 0x40);
+
+	dcr_m (&c);
+
+	if (cpu_get_byte (&c, 0x3a7c) == 0x3f) { return 0; }
+
+	free (memory);
+	return 1;
 }
