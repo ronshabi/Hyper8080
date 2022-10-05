@@ -436,13 +436,13 @@ void inr (cpu *c, uint8_t *reg)
 	uint16_t result = ++*reg;
 	cpu_set_flags_zsp (c, *reg);
 	cpu_set_flags_carry_from_16bit (c, result);
-	c->a = result & 0xff;
+	*reg = result & 0xff;
 	PC1;
 }
 void inr_m (cpu *c)
 {
 	uint16_t result = cpu_deref_hl (c) + 1;
-	cpu_set_byte (c, cpu_deref_hl (c), result & 0xff);
+	cpu_set_byte (c, cpu_get_hl (c), result & 0xff);
 	cpu_set_flags_zsp (c, result & 0xff);
 	cpu_set_flags_carry_from_16bit (c, result);
 	PC1;
@@ -495,11 +495,10 @@ void ral (cpu *c)
 }
 void rar (cpu *c)
 {
-	uint8_t bit0 = (c->a & 0x1);
-	uint8_t bit7 = (c->a & 0x80) >> 7;
-	c->a >>= 1;
-	c->a |= bit7 << 7;
-	c->flag_c = bit0;
+	uint8_t bit0 = c->a & 0x1;
+	c->a		 = c->a >> 1;
+	c->a		 = c->a | (c->flag_c << 7);
+	c->flag_c	 = bit0;
 	PC1;
 }
 

@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include "../src/instructions.h"
 #include "../src/instructions.c"
-#include "../src/cpu.h"
 #include "../src/cpu.c"
 
 int main (void)

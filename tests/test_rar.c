@@ -1,7 +1,5 @@
-#include <stdlib.h>
 #include "../src/instructions.h"
 #include "../src/instructions.c"
-#include "../src/cpu.h"
 #include "../src/cpu.c"
 
 int main (void)
@@ -9,8 +7,14 @@ int main (void)
 	cpu c;
 	cpu_init (&c);
 
-	uint8_t *memory = calloc (10000, 1);
-	cpu_set_memory (&c, memory);
+	c.a		 = 0x6a;
+	c.flag_c = 1;
 
-	return 0;
+	rar (&c);
+
+	printf ("%02x\n", c.a);
+
+	if (c.a == 0x0b5 && !c.flag_c) { return 0; }
+
+	return 1;
 }
