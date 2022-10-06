@@ -2,7 +2,7 @@
 #include "instructions.h"
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <time.h>
 const uint8_t CYCLES[] = {
 	4, 10, 7, 5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5, 7,	 4,	 4,	 10, 16, 5,	 5,
 	5, 7,  4, 4,  10, 16, 5,  5,  5,  7,  4,  4,  10, 13, 5,  10, 10, 10, 4,  4,  10, 13, 5,  5,  5,  7,  4,  5,  5,  5, 5,	 5,	 5,	 7,	 5,	 5,	 5,
@@ -83,8 +83,20 @@ void cpu_disasm (cpu *c)
 }
 
 // Memory
-uint8_t	 cpu_get_byte (cpu *c, uint16_t address) { return c->memory[address]; }
-void	 cpu_set_byte (cpu *c, uint16_t address, uint8_t val) { c->memory[address] = val; }
+uint8_t cpu_get_byte (cpu *c, uint16_t address) { return c->memory[address]; }
+void	cpu_set_byte (cpu *c, uint16_t address, uint8_t val)
+{
+	// Prevent writing to ROM
+	if (address >= 0x2000 && address <= 0x4000) { c->memory[address] = val; }
+	else
+	{
+		fprintf (stderr, "\nWARNING: Write to ROM @ $%04x.\n");
+		// left here for debug purposes
+		// struct timespec ts = { .tv_sec = 1, .tv_nsec = 0};
+		// nanosleep (&ts, NULL);
+		exit (2);
+	}
+}
 uint16_t cpu_get_word (cpu *c, uint16_t address) { return c->memory[address + 1] << 8 | c->memory[address]; }
 void	 cpu_set_word (cpu *c, uint16_t address, uint16_t val)
 {
@@ -338,13 +350,13 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0x7c: mov (c, REG (a), REG (h)); break;
 		case 0x7d: mov (c, REG (a), REG (l)); break;
 
-		case 0x7e: mov_m_to_dest (c, REG (a));
-		case 0x46: mov_m_to_dest (c, REG (b));
-		case 0x4e: mov_m_to_dest (c, REG (c));
-		case 0x56: mov_m_to_dest (c, REG (d));
-		case 0x5e: mov_m_to_dest (c, REG (e));
-		case 0x66: mov_m_to_dest (c, REG (h));
-		case 0x6e: mov_m_to_dest (c, REG (l));
+		case 0x7e: mov_m_to_dest (c, REG (a)); break;
+		case 0x46: mov_m_to_dest (c, REG (b)); break;
+		case 0x4e: mov_m_to_dest (c, REG (c)); break;
+		case 0x56: mov_m_to_dest (c, REG (d)); break;
+		case 0x5e: mov_m_to_dest (c, REG (e)); break;
+		case 0x66: mov_m_to_dest (c, REG (h)); break;
+		case 0x6e: mov_m_to_dest (c, REG (l)); break;
 
 		case 0x02: stax_b (c); break;
 		case 0x12: stax_d (c); break;

@@ -183,7 +183,7 @@ void mvi (cpu *c, uint8_t *reg)
 }
 void mvi_m (cpu *c)
 {
-	cpu_set_byte (c, cpu_deref_hl (c), cpu_get_byte (c, c->pc + 1));
+	cpu_set_byte (c, cpu_get_hl (c), cpu_get_byte (c, c->pc + 1));
 	PC2;
 }
 void adi (cpu *c)
@@ -275,7 +275,7 @@ void mov_m_to_dest (cpu *c, uint8_t *dest)
 }
 void mov_m (cpu *c, const uint8_t *reg)
 {
-	cpu_set_byte (c, cpu_deref_hl (c), *reg);
+	cpu_set_byte (c, cpu_get_hl (c), *reg);
 	PC1;
 }
 void stax_b (cpu *c)
