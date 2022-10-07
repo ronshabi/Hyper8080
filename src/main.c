@@ -9,9 +9,11 @@
 #define WINDOW_WIDTH	 224
 #define WINDOW_HEIGHT	 256
 #define WINDOW_TITLE	 "8080 Emulator (unstable)"
+#define WINDOW_SCALE	 4
 
 #include "cpu.h"
 #include "debug.h"
+#include "render.h"
 
 int main (int argc, char *argv[])
 {
@@ -50,55 +52,78 @@ int main (int argc, char *argv[])
 	uint8_t current_opcode;
 
 	/*
-	==============================
+	==========================================================================================
 	SDL
-	==============================
+	==========================================================================================
 	 */
 
-	bool	  quit = false;
-	SDL_Event e;
+	SDL_Event	  e;
+	bool		  quit	   = false;
+	SDL_Window	 *Window   = NULL;
+	SDL_Renderer *Renderer = NULL;
 
-	// Init & create window
+	// Init
 	SDL_Init (SDL_INIT_VIDEO);
-	SDL_Window *WinMain =
-		SDL_CreateWindow (WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
 
+	Window =
+		SDL_CreateWindow (WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH * WINDOW_SCALE, WINDOW_HEIGHT * WINDOW_SCALE,
+						  SDL_WINDOW_SHOWN);							  // Create window
+	SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "1");					  // Set texture filtering to linear
+	Renderer = SDL_CreateRenderer (Window, -1, SDL_RENDERER_ACCELERATED); // Create renderer for window
+	SDL_RenderSetScale (Renderer, WINDOW_SCALE, WINDOW_SCALE);			  // Set renderer scale
+	SDL_RenderSetLogicalSize (Renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
+	R_ClearScreen (Renderer);
+	R_Update (Renderer);
 	// ==================== Event loop ====================
 
 	while (!quit)
 	{
-		// poll events
+		// ---------- POLL EVENTS ---------------
 		while (SDL_PollEvent (&e) != 0)
 		{
-
 			// quit
-			if (e.type == SDL_QUIT)
-			{
-				exit (3); // FIXME: Remove after finishing SDL implementation
-				quit = true;
-			}
+			if (e.type == SDL_QUIT) { quit = true; }
 
 			// keypress
 			else if (e.type == SDL_KEYDOWN)
 			{
 				switch (e.key.keysym.sym)
 				{
-					case SDLK_UP: printf ("u\n"); break;
-					case SDLK_DOWN: printf ("d\n"); break;
-					case SDLK_LEFT: printf ("l\n"); break;
-					case SDLK_RIGHT: printf ("r\n"); break;
+					case SDLK_1: {
+						c.i1 |= 0b00000100; // INPUT 1 BIT 2 - P1 START BUTTON
+						break;
+					}
+					case SDLK_SPACE: {
+						c.i1 |= 0b00010000; // INPUT 1 BIT 4 - P1 SHOOT
+						break;
+					}
+					case SDLK_LEFT: {
+						c.i1 |= 0b00100000; // INPUT 1 BIT 5 - P1 LEFT
+						break;
+					}
+					case SDLK_RIGHT: {
+						c.i1 |= 0b01000000; // INPUT 1 BIT 6 - P1 RIGHT
+						break;
+					}
 					default: break;
 				}
 			}
-		}
+		} // ------------------------------------ (/poll_events)
+
+		// Clear screen
+		// SDL_RenderClear (Renderer);
 	}
 
 	// ====================================================
 
-	// Close
-	SDL_DestroyWindow (WinMain);
-	WinMain = NULL;
+	// ********** Close **********
+	SDL_DestroyWindow (Window);
+	SDL_DestroyRenderer (Renderer);
+	Renderer = NULL;
+	Window	 = NULL;
 	SDL_Quit ();
+	exit (3); // FIXME: Remove after finishing SDL implementation
+			  // ***************************
 
 #ifdef DEBUG_MODE_REGULAR
 	printf ("PC\t\tOpcode\tA |B |C |D |E |H |L |SP  |CP  |ZSPCA\tInstruction\targs\n");

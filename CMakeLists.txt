@@ -6,7 +6,7 @@ set(CMAKE_C_STANDARD 99)
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
-add_executable(8080_Emu src/main.c src/cpu.c src/cpu.h src/instructions.c src/instructions.h src/debug.c src/debug.h)
+add_executable(8080_Emu src/main.c src/cpu.c src/cpu.h src/instructions.c src/instructions.h src/debug.c src/debug.h src/render.c src/render.h)
 target_link_libraries(8080_Emu ${SDL2_LIBRARIES})
 
 # Testing
