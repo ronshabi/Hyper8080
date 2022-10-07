@@ -716,6 +716,12 @@ void lhld (cpu *c)
 	PC3;
 }
 
+void daa (cpu *c)
+{
+	// TODO: Implement full function
+	PC1;
+}
+
 /* INTERRUPT INSTRUCTIONS */
 void set_interrupt (cpu *c, uint8_t state)
 {

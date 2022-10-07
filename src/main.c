@@ -74,7 +74,9 @@ int main (int argc, char *argv[])
 	==========================================================================================
 	 */
 
-	double		  lastinterrupt = 0;
+	double		  lastTimer		 = 0;
+	double		  nextInterrupt	 = 0;
+	int			  whichInterrupt = 0;
 	SDL_Event	  e;
 	bool		  quit	   = false;
 	SDL_Window	 *Window   = NULL;
@@ -175,14 +177,14 @@ int main (int argc, char *argv[])
 			//
 			// Time loop
 			//
-			if (Sys_Time () - lastinterrupt > (1.0 / 60.0))
+			if (Sys_Time () - nextInterrupt > (1.0 / 60.0))
 			{
 
 				// interrupt only if EI
 				if (c.interrupts_enabled)
 				{
 					C_GenerateInterrupt (&c, 2);
-					lastinterrupt = Sys_Time ();
+					nextInterrupt = Sys_Time ();
 					// printf ("%f\n", Sys_Time ());
 				}
 

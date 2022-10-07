@@ -85,7 +85,7 @@ void C_DisAsm (cpu *c)
 void C_GenerateInterrupt (cpu *c, int intnum)
 {
 #ifdef DEBUG_MODE_REGULAR
-	printf ("\n~~~~~~~~~~ INT %d ~~~~~~~~~~\n", intnum);
+	printf ("\n~~~~~~~~~~ INT %d -~~~~~~~~~~\n", intnum);
 #endif
 
 	stack_push (c, c->pc);
@@ -99,14 +99,14 @@ uint8_t C_GetByte (cpu *c, uint16_t address) { return c->memory[address]; }
 void	C_SetByte (cpu *c, uint16_t address, uint8_t val)
 {
 	// Prevent writing to ROM
-	if (address >= 0x2000 && address <= 0x4000) { c->memory[address] = val; }
+	if (address >= 0x1fff && address <= 0x4000) { c->memory[address] = val; }
 	else
 	{
-		fprintf (stderr, "\nWARNING: Write to ROM @ $%04x.\n");
-		// left here for debug purposes
-		// struct timespec ts = { .tv_sec = 1, .tv_nsec = 0};
-		// nanosleep (&ts, NULL);
-		exit (2);
+		// fprintf (stderr, "\nWARNING: Write to ROM @ $%04x.\n", address);
+		//  left here for debug purposes
+		//  struct timespec ts = { .tv_sec = 1, .tv_nsec = 0};
+		//  nanosleep (&ts, NULL);
+		// exit (2);
 	}
 }
 uint16_t cpu_get_word (cpu *c, uint16_t address) { return c->memory[address + 1] << 8 | c->memory[address]; }
