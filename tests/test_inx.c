@@ -9,16 +9,16 @@ int main (void)
 	cpu_init (&c);
 	int passed = 0;
 
-	cpu_set_bc (&c, 0x00ff);
-	cpu_set_de (&c, 0x0200);
-	cpu_set_hl (&c, 0x0300);
+	C_SetBC (&c, 0x00ff);
+	C_SetDE (&c, 0x0200);
+	C_SetHL (&c, 0x0300);
 	c.sp = 0x0001;
 	inx_b (&c);
 	inx_d (&c);
 	inx_h (&c);
 	inx_sp (&c);
 
-	if (cpu_get_bc (&c) == 0x100 && cpu_get_de (&c) == 0x201 && cpu_get_hl (&c) == 0x301 && c.sp == 2) { return 0; }
+	if (C_GetBC (&c) == 0x100 && C_GetDE (&c) == 0x201 && C_GetHL (&c) == 0x301 && c.sp == 2) { return 0; }
 
 	return 1;
 }

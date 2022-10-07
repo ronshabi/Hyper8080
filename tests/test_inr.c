@@ -9,13 +9,13 @@ int main (void)
 	cpu_init (&c);
 
 	uint8_t *memory = calloc (10000, 1);
-	cpu_set_memory (&c, memory);
+	C_SetMemory (&c, memory);
 
 	inr (&c, &(c.b));
 	inr (&c, &(c.b));
 	inr (&c, &(c.b));
-	cpu_set_hl (&c, 0x1234);
-	cpu_set_byte (&c, 0x1234, 0xfa);
+	C_SetHL (&c, 0x1234);
+	C_SetByte (&c, 0x1234, 0xfa);
 	inr_m (&c);
 
 	if (c.b == 3 && cpu_get_byte (&c, 0x1234) == 0xfb && !c.flag_z && c.flag_s && !c.flag_p) { return 0; }

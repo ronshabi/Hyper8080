@@ -10,11 +10,11 @@ int main (void)
 	cpu_init (&c);
 
 	uint8_t *memory = calloc (10000, 1);
-	cpu_set_memory (&c, memory);
+	C_SetMemory (&c, memory);
 
 	c.a	 = 0x56;
 	c.pc = 0;
-	cpu_set_byte (&c, 0x1, 0xbe);
+	C_SetByte (&c, 0x1, 0xbe);
 	adi (&c);
 
 	if (c.a == 0x14 && c.flag_c && c.flag_p && !c.flag_z && !c.flag_s) { return 0; }

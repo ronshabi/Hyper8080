@@ -10,7 +10,7 @@ int main (void)
 	cpu_init (&c);
 
 	uint8_t *memory = calloc (10000, 1);
-	cpu_set_memory (&c, memory);
+	C_SetMemory (&c, memory);
 
 	int passed = 0;
 
@@ -25,14 +25,14 @@ int main (void)
 
 	lxi_d (&c);
 
-	if (cpu_get_de (&c) == 0xefac) { passed++; }
+	if (C_GetDE (&c) == 0xefac) { passed++; }
 
 	cpu_set_word (&c, 1, 0xeb12);
 	c.pc = 0;
 
 	lxi_h (&c);
 
-	if (cpu_get_hl (&c) == 0xeb12) { passed++; }
+	if (C_GetHL (&c) == 0xeb12) { passed++; }
 
 	cpu_set_word (&c, 1, 0x1f8e);
 	c.pc = 0;

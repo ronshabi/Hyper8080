@@ -17,7 +17,7 @@ void cmc (cpu *c)
 }
 
 /* JUMP */
-void pchl (cpu *c) { cpu_unimplemented (c); }
+void pchl (cpu *c) { C_Unimplemented (c); }
 void jmp (cpu *c)
 {
 	printf (" $%04x", cpu_get_word (c, c->pc + 1));
@@ -158,17 +158,17 @@ void rpo (cpu *c)
 /* IMMEDIATE INSTRUCTIONS */
 void lxi_b (cpu *c)
 {
-	cpu_set_bc (c, cpu_get_word (c, c->pc + 1));
+	C_SetBC (c, cpu_get_word (c, c->pc + 1));
 	PC3;
 }
 void lxi_d (cpu *c)
 {
-	cpu_set_de (c, cpu_get_word (c, c->pc + 1));
+	C_SetDE (c, cpu_get_word (c, c->pc + 1));
 	PC3;
 }
 void lxi_h (cpu *c)
 {
-	cpu_set_hl (c, cpu_get_word (c, c->pc + 1));
+	C_SetHL (c, cpu_get_word (c, c->pc + 1));
 	PC3;
 }
 void lxi_sp (cpu *c)
@@ -178,12 +178,12 @@ void lxi_sp (cpu *c)
 }
 void mvi (cpu *c, uint8_t *reg)
 {
-	*reg = cpu_get_byte (c, c->pc + 1);
+	*reg = C_GetByte (c, c->pc + 1);
 	PC2;
 }
 void mvi_m (cpu *c)
 {
-	cpu_set_byte (c, cpu_get_hl (c), cpu_get_byte (c, c->pc + 1));
+	C_SetByte (c, C_GetHL (c), C_GetByte (c, c->pc + 1));
 	PC2;
 }
 void adi (cpu *c)
@@ -254,12 +254,12 @@ void cpi (cpu *c)
 /* DATA TRANSFER */
 void ldax_b (cpu *c)
 {
-	c->a = cpu_deref_bc (c);
+	c->a = C_DerefBC (c);
 	PC1;
 }
 void ldax_d (cpu *c)
 {
-	c->a = cpu_deref_de (c);
+	c->a = C_DerefDE (c);
 	PC1;
 }
 void mov (cpu *c, uint8_t *dest, const uint8_t *src)
@@ -269,39 +269,39 @@ void mov (cpu *c, uint8_t *dest, const uint8_t *src)
 }
 void mov_m_to_dest (cpu *c, uint8_t *dest)
 {
-	uint8_t m = cpu_deref_hl (c);
+	uint8_t m = C_DerefHL (c);
 	*dest	  = m;
 	PC1;
 }
 void mov_m (cpu *c, const uint8_t *reg)
 {
-	cpu_set_byte (c, cpu_get_hl (c), *reg);
+	C_SetByte (c, C_GetHL (c), *reg);
 	PC1;
 }
 void stax_b (cpu *c)
 {
-	cpu_set_byte (c, cpu_get_bc (c), c->a);
+	C_SetByte (c, C_GetBC (c), c->a);
 	PC1;
 }
 void stax_d (cpu *c)
 {
-	cpu_set_byte (c, cpu_get_de (c), c->a);
+	C_SetByte (c, C_GetDE (c), c->a);
 	PC1;
 }
 /* REGISTER PAIR INSTRUCTIONS */
 void push_b (cpu *c)
 {
-	stack_push (c, cpu_get_bc (c));
+	stack_push (c, C_GetBC (c));
 	PC1;
 }
 void push_d (cpu *c)
 {
-	stack_push (c, cpu_get_de (c));
+	stack_push (c, C_GetDE (c));
 	PC1;
 }
 void push_h (cpu *c)
 {
-	stack_push (c, cpu_get_hl (c));
+	stack_push (c, C_GetHL (c));
 	PC1;
 }
 void push_psw (cpu *c)
@@ -311,18 +311,18 @@ void push_psw (cpu *c)
 }
 void pop_b (cpu *c)
 {
-	cpu_set_bc (c, stack_pop (c));
+	C_SetBC (c, stack_pop (c));
 	PC1;
 }
 
 void pop_d (cpu *c)
 {
-	cpu_set_de (c, stack_pop (c));
+	C_SetDE (c, stack_pop (c));
 	PC1;
 }
 void pop_h (cpu *c)
 {
-	cpu_set_hl (c, stack_pop (c));
+	C_SetHL (c, stack_pop (c));
 	PC1;
 }
 void pop_psw (cpu *c)
@@ -332,49 +332,49 @@ void pop_psw (cpu *c)
 }
 void dad_b (cpu *c)
 {
-	uint32_t result = cpu_get_bc (c) + cpu_get_hl (c);
+	uint32_t result = C_GetBC (c) + C_GetHL (c);
 	if (result > 0xffff) { c->flag_c = 1; }
 	else { c->flag_c = 0; }
-	cpu_set_hl (c, result & 0xffff);
+	C_SetHL (c, result & 0xffff);
 	PC1;
 }
 void dad_d (cpu *c)
 {
-	uint32_t result = cpu_get_de (c) + cpu_get_hl (c);
+	uint32_t result = C_GetDE (c) + C_GetHL (c);
 	if (result > 0xffff) { c->flag_c = 1; }
 	else { c->flag_c = 0; }
-	cpu_set_hl (c, result & 0xffff);
+	C_SetHL (c, result & 0xffff);
 	PC1;
 }
 void dad_h (cpu *c)
 {
-	uint32_t result = cpu_get_hl (c) + cpu_get_hl (c);
+	uint32_t result = C_GetHL (c) + C_GetHL (c);
 	if (result > 0xffff) { c->flag_c = 1; }
 	else { c->flag_c = 0; }
-	cpu_set_hl (c, result & 0xffff);
+	C_SetHL (c, result & 0xffff);
 	PC1;
 }
 void dad_sp (cpu *c)
 {
-	uint32_t result = c->sp + cpu_get_hl (c);
+	uint32_t result = c->sp + C_GetHL (c);
 	if (result > 0xffff) { c->flag_c = 1; }
 	else { c->flag_c = 0; }
-	cpu_set_hl (c, result & 0xffff);
+	C_SetHL (c, result & 0xffff);
 	PC1;
 }
 void inx_b (cpu *c)
 {
-	cpu_set_bc (c, cpu_get_bc (c) + 1);
+	C_SetBC (c, C_GetBC (c) + 1);
 	PC1;
 }
 void inx_d (cpu *c)
 {
-	cpu_set_de (c, cpu_get_de (c) + 1);
+	C_SetDE (c, C_GetDE (c) + 1);
 	PC1;
 }
 void inx_h (cpu *c)
 {
-	cpu_set_hl (c, cpu_get_hl (c) + 1);
+	C_SetHL (c, C_GetHL (c) + 1);
 	PC1;
 }
 void inx_sp (cpu *c)
@@ -384,17 +384,17 @@ void inx_sp (cpu *c)
 }
 void dcx_b (cpu *c)
 {
-	cpu_set_bc (c, cpu_get_bc (c) - 1);
+	C_SetBC (c, C_GetBC (c) - 1);
 	PC1;
 }
 void dcx_d (cpu *c)
 {
-	cpu_set_de (c, cpu_get_de (c) - 1);
+	C_SetDE (c, C_GetDE (c) - 1);
 	PC1;
 }
 void dcx_h (cpu *c)
 {
-	cpu_set_hl (c, cpu_get_hl (c) - 1);
+	C_SetHL (c, C_GetHL (c) - 1);
 	PC1;
 }
 void dcx_sp (cpu *c) { c->sp--; }
@@ -416,17 +416,17 @@ void xthl (cpu *c)
 	uint8_t l = c->l;
 	uint8_t h = c->h;
 
-	c->l = cpu_deref_sp (c, 0);
-	c->h = cpu_deref_sp (c, 1);
+	c->l = C_DerefSP (c, 0);
+	c->h = C_DerefSP (c, 1);
 
-	cpu_set_byte (c, c->sp, l);
-	cpu_set_byte (c, c->sp + 1, h);
+	C_SetByte (c, c->sp, l);
+	C_SetByte (c, c->sp + 1, h);
 
 	PC1;
 }
 void sphl (cpu *c)
 {
-	c->sp = cpu_get_hl (c);
+	c->sp = C_GetHL (c);
 	PC1;
 }
 
@@ -441,8 +441,8 @@ void inr (cpu *c, uint8_t *reg)
 }
 void inr_m (cpu *c)
 {
-	uint16_t result = cpu_deref_hl (c) + 1;
-	cpu_set_byte (c, cpu_get_hl (c), result & 0xff);
+	uint16_t result = C_DerefHL (c) + 1;
+	C_SetByte (c, C_GetHL (c), result & 0xff);
 	cpu_set_flags_zsp (c, result & 0xff);
 	cpu_set_flags_carry_from_16bit (c, result);
 	PC1;
@@ -459,12 +459,12 @@ void dcr (cpu *c, uint8_t *reg)
 }
 void dcr_m (cpu *c)
 {
-	uint16_t result = cpu_deref_hl (c) + FLIP (1);
+	uint16_t result = C_DerefHL (c) + FLIP (1);
 	cpu_set_flags_zsp (c, result & 0xff);
 	cpu_set_flags_carry_from_16bit (c, result & 0xff);
-	cpu_set_byte (c, cpu_get_hl (c), result & 0xff);
+	C_SetByte (c, C_GetHL (c), result & 0xff);
 
-	if (cpu_deref_hl (c) == 0) { printf ("\nM HIT ZERO\n"); }
+	if (C_DerefHL (c) == 0) { printf ("\nM HIT ZERO\n"); }
 	PC1;
 }
 
@@ -505,7 +505,7 @@ void rar (cpu *c)
 /* I/O */
 void in (cpu *c)
 {
-	uint8_t device_number = cpu_get_byte (c, c->pc + 1);
+	uint8_t device_number = C_GetByte (c, c->pc + 1);
 	printf (" <DEVICE = %d>", device_number);
 
 	if (device_number == DEVICE_INP0)
@@ -533,7 +533,7 @@ void in (cpu *c)
 }
 void out (cpu *c)
 {
-	uint8_t device_number = cpu_get_byte (c, c->pc + 1);
+	uint8_t device_number = C_GetByte (c, c->pc + 1);
 
 	printf (" <DEVICE = %d>", device_number);
 
@@ -584,7 +584,7 @@ void add (cpu *c, const uint8_t *reg)
 }
 void add_m (cpu *c)
 {
-	uint16_t result = c->a + cpu_deref_hl (c);
+	uint16_t result = c->a + C_DerefHL (c);
 	cpu_set_flags_zsp (c, result & 0xff);
 	cpu_set_flags_carry_from_16bit (c, result);
 	c->a = result & 0xff;
@@ -600,7 +600,7 @@ void adc (cpu *c, const uint8_t *reg)
 }
 void adc_m (cpu *c)
 {
-	uint16_t result = c->a + cpu_deref_hl (c) + c->flag_c;
+	uint16_t result = c->a + C_DerefHL (c) + c->flag_c;
 	cpu_set_flags_zsp (c, result & 0xff);
 	cpu_set_flags_carry_from_16bit (c, result);
 	c->a = result & 0xff;
@@ -616,7 +616,7 @@ void sub (cpu *c, const uint8_t *reg)
 }
 void sub_m (cpu *c)
 {
-	uint16_t result = c->a + FLIP (cpu_deref_hl (c));
+	uint16_t result = c->a + FLIP (C_DerefHL (c));
 	cpu_set_flags_zsp (c, result & 0xff);
 	cpu_set_flags_carry_from_16bit (c, result);
 	c->a = result & 0xff;
@@ -632,7 +632,7 @@ void sbb (cpu *c, const uint8_t *reg)
 }
 void sbb_m (cpu *c)
 {
-	uint16_t result = c->a + FLIP (cpu_deref_hl (c)) + FLIP (c->flag_c);
+	uint16_t result = c->a + FLIP (C_DerefHL (c)) + FLIP (c->flag_c);
 	cpu_set_flags_zsp (c, result & 0xff);
 	cpu_set_flags_carry_from_16bit (c, result);
 	c->a = result & 0xff;
@@ -648,7 +648,7 @@ void ana (cpu *c, const uint8_t *reg)
 }
 void ana_m (cpu *c)
 {
-	uint16_t result = c->a & (cpu_deref_hl (c));
+	uint16_t result = c->a & (C_DerefHL (c));
 	cpu_set_flags_zsp (c, result & 0xff);
 	cpu_set_flags_carry_from_16bit (c, result);
 	c->a = result & 0xff;
@@ -664,7 +664,7 @@ void xra (cpu *c, const uint8_t *reg)
 }
 void xra_m (cpu *c)
 {
-	uint16_t result = c->a ^ (cpu_deref_hl (c));
+	uint16_t result = c->a ^ (C_DerefHL (c));
 	cpu_set_flags_zsp (c, result & 0xff);
 	cpu_set_flags_carry_from_16bit (c, result);
 	c->a = result & 0xff;
@@ -680,7 +680,7 @@ void ora (cpu *c, const uint8_t *reg)
 }
 void ora_m (cpu *c)
 {
-	uint16_t result = c->a | (cpu_deref_hl (c));
+	uint16_t result = c->a | (C_DerefHL (c));
 	cpu_set_flags_zsp (c, result & 0xff);
 	cpu_set_flags_carry_from_16bit (c, result);
 	c->a = result & 0xff;
@@ -691,28 +691,28 @@ void ora_m (cpu *c)
 void sta (cpu *c)
 {
 	uint16_t adr = cpu_get_word (c, c->pc + 1);
-	cpu_set_byte (c, adr, c->a);
+	C_SetByte (c, adr, c->a);
 	PC3;
 }
 void lda (cpu *c)
 {
 	uint16_t adr = cpu_get_word (c, c->pc + 1);
 	printf (" $%04x", adr);
-	c->a = cpu_get_byte (c, adr);
+	c->a = C_GetByte (c, adr);
 
 	PC3;
 }
 void shld (cpu *c)
 {
 	uint16_t adr = cpu_get_word (c, c->pc + 1);
-	cpu_set_word (c, adr, cpu_get_hl (c));
+	cpu_set_word (c, adr, C_GetHL (c));
 	PC3;
 }
 void lhld (cpu *c)
 {
 	uint16_t adr  = cpu_get_word (c, c->pc + 1);
 	uint16_t word = cpu_get_word (c, adr);
-	cpu_set_hl (c, word);
+	C_SetHL (c, word);
 	PC3;
 }
 
@@ -721,12 +721,4 @@ void set_interrupt (cpu *c, uint8_t state)
 {
 	c->interrupts_enabled = state;
 	PC1;
-}
-
-void C_GenerateInterrupt (cpu *c, int intnum)
-{
-	stack_push (c, c->pc);
-
-	// rst intnum
-	c->pc = intnum * 8;
 }

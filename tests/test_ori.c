@@ -10,7 +10,7 @@ int main (void)
 	cpu_init (&c);
 
 	uint8_t *memory = calloc (10000, 1);
-	cpu_set_memory (&c, memory);
+	C_SetMemory (&c, memory);
 
 	return 0;
 }

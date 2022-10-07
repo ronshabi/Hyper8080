@@ -2,7 +2,8 @@
 #include "instructions.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
+#include "debug.h"
+
 const uint8_t CYCLES[] = {
 	4, 10, 7, 5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5, 7,	 4,	 4,	 10, 16, 5,	 5,
 	5, 7,  4, 4,  10, 16, 5,  5,  5,  7,  4,  4,  10, 13, 5,  10, 10, 10, 4,  4,  10, 13, 5,  5,  5,  7,  4,  5,  5,  5, 5,	 5,	 5,	 7,	 5,	 5,	 5,
@@ -75,16 +76,27 @@ void cpu_init (cpu *c)
 	c->shift	 = 0;
 	c->shift_amt = 0;
 }
-void cpu_set_memory (cpu *c, uint8_t *memory_ptr) { c->memory = memory_ptr; }
-void cpu_disasm (cpu *c)
+void C_DisAsm (cpu *c)
 {
-	printf ("0x%04x\t%02x\t\t%02x|%02x|%02x|%02x|%02x|%02x|%02x|%04x|%04x|%d%d%d%d%d\t%s", c->pc, cpu_get_byte (c, c->pc), c->a, c->b, c->c, c->d,
-			c->e, c->h, c->l, c->sp, c->pc, c->flag_z, c->flag_s, c->flag_p, c->flag_c, c->flag_ac, INSTRUCTIONS[cpu_get_byte (c, c->pc)]);
+	printf ("0x%04x\t%02x\t\t%02x|%02x|%02x|%02x|%02x|%02x|%02x|%04x|%04x|%d%d%d%d%d\t%s", c->pc, C_GetByte (c, c->pc), c->a, c->b, c->c, c->d, c->e,
+			c->h, c->l, c->sp, c->pc, c->flag_z, c->flag_s, c->flag_p, c->flag_c, c->flag_ac, INSTRUCTIONS[C_GetByte (c, c->pc)]);
+}
+
+void C_GenerateInterrupt (cpu *c, int intnum)
+{
+#ifdef DEBUG_MODE_REGULAR
+	printf ("\n~~~~~~~~~~ INT %d ~~~~~~~~~~\n", intnum);
+#endif
+
+	stack_push (c, c->pc);
+	// rst intnum
+	c->pc = intnum * 8;
 }
 
 // Memory
-uint8_t cpu_get_byte (cpu *c, uint16_t address) { return c->memory[address]; }
-void	cpu_set_byte (cpu *c, uint16_t address, uint8_t val)
+void	C_SetMemory (cpu *c, uint8_t *memory_ptr) { c->memory = memory_ptr; }
+uint8_t C_GetByte (cpu *c, uint16_t address) { return c->memory[address]; }
+void	C_SetByte (cpu *c, uint16_t address, uint8_t val)
 {
 	// Prevent writing to ROM
 	if (address >= 0x2000 && address <= 0x4000) { c->memory[address] = val; }
@@ -100,14 +112,14 @@ void	cpu_set_byte (cpu *c, uint16_t address, uint8_t val)
 uint16_t cpu_get_word (cpu *c, uint16_t address) { return c->memory[address + 1] << 8 | c->memory[address]; }
 void	 cpu_set_word (cpu *c, uint16_t address, uint16_t val)
 {
-	cpu_set_byte (c, address, val & 0xff);
-	cpu_set_byte (c, address + 1, val >> 8);
+	C_SetByte (c, address, val & 0xff);
+	C_SetByte (c, address + 1, val >> 8);
 }
 
 // Register pairs
-uint16_t cpu_get_bc (cpu *c) { return c->b << 8 | c->c; }
-uint16_t cpu_get_de (cpu *c) { return c->d << 8 | c->e; }
-uint16_t cpu_get_hl (cpu *c) { return c->h << 8 | c->l; }
+uint16_t C_GetBC (cpu *c) { return c->b << 8 | c->c; }
+uint16_t C_GetDE (cpu *c) { return c->d << 8 | c->e; }
+uint16_t C_GetHL (cpu *c) { return c->h << 8 | c->l; }
 uint16_t cpu_get_psw (cpu *c)
 {
 	uint16_t ret = 0;
@@ -115,25 +127,25 @@ uint16_t cpu_get_psw (cpu *c)
 	ret |= cpu_get_flags (c) & 0xff;
 	return ret;
 }
-void cpu_set_bc (cpu *c, uint16_t val)
+void C_SetBC (cpu *c, uint16_t val)
 {
 	c->b = val >> 8;
 	c->c = val & 0xff;
 }
-void cpu_set_de (cpu *c, uint16_t val)
+void C_SetDE (cpu *c, uint16_t val)
 {
 	c->d = val >> 8;
 	c->e = val & 0xff;
 }
-void cpu_set_hl (cpu *c, uint16_t val)
+void C_SetHL (cpu *c, uint16_t val)
 {
 	c->h = val >> 8;
 	c->l = val & 0xff;
 }
-uint16_t cpu_deref_bc (cpu *c) { return cpu_get_byte (c, cpu_get_bc (c)); }
-uint16_t cpu_deref_de (cpu *c) { return cpu_get_byte (c, cpu_get_de (c)); }
-uint16_t cpu_deref_hl (cpu *c) { return cpu_get_byte (c, cpu_get_hl (c)); }
-uint16_t cpu_deref_sp (cpu *c, uint16_t offset) { return cpu_get_byte (c, c->sp + offset); }
+uint16_t C_DerefBC (cpu *c) { return C_GetByte (c, C_GetBC (c)); }
+uint16_t C_DerefDE (cpu *c) { return C_GetByte (c, C_GetDE (c)); }
+uint16_t C_DerefHL (cpu *c) { return C_GetByte (c, C_GetHL (c)); }
+uint16_t C_DerefSP (cpu *c, uint16_t offset) { return C_GetByte (c, c->sp + offset); }
 
 // Stack
 void stack_push (cpu *c, uint16_t val)
@@ -198,14 +210,14 @@ void cpu_set_flags_zsp (cpu *c, uint8_t val)
 void cpu_set_flags_carry_add (cpu *c, uint8_t a, uint8_t b, uint8_t carry) { c->flag_c = flags_calc_carry (a, b, carry); }
 void cpu_set_flags_carry_from_16bit (cpu *c, uint16_t num) { c->flag_c = (num > 0xff); }
 // Emualtion
-void cpu_unimplemented (cpu *c)
+void C_Unimplemented (cpu *c)
 {
-	printf ("\nUNIMPLEMENTED INSTRUCTION %02x\n", cpu_get_byte (c, c->pc));
+	printf ("\nUNIMPLEMENTED INSTRUCTION %02x\n", C_GetByte (c, c->pc));
 	printf ("Instructions executed: %lu\n", c->instructions);
 	printf ("Cycles: %lu\n", c->cycles);
 	exit (1);
 }
-void cpu_emulate (cpu *c, uint8_t opcode)
+void C_Emulate (cpu *c, uint8_t opcode)
 {
 	/* READ HEADER FILES FOR INSTRUCTION DOCUMENTATION */
 	c->instructions++;
@@ -483,6 +495,6 @@ void cpu_emulate (cpu *c, uint8_t opcode)
 		case 0xfb: set_interrupt (c, 1); break;
 		case 0xf3: set_interrupt (c, 0); break;
 
-		default: cpu_unimplemented (c); break;
+		default: C_Unimplemented (c); break;
 	}
 }

@@ -10,7 +10,7 @@ int main (void)
 	cpu_init (&c);
 
 	uint8_t *memory = calloc (10000, 1);
-	cpu_set_memory (&c, memory);
+	C_SetMemory (&c, memory);
 
 	int tests_passed = 0;
 
@@ -21,7 +21,7 @@ int main (void)
 	c.h = 0xa1;
 	c.l = 0x7b;
 	dad_b (&c);
-	if (cpu_get_hl (&c) == 0xD51A && c.flag_c == 0)
+	if (C_GetHL (&c) == 0xD51A && c.flag_c == 0)
 	{
 		printf ("DAD Passed!\n");
 		tests_passed++;
@@ -33,7 +33,7 @@ int main (void)
 
 	inx_d (&c);
 
-	if (cpu_get_de (&c) == 0x3900)
+	if (C_GetDE (&c) == 0x3900)
 	{
 		printf ("INX Passed!\n");
 		tests_passed++;
@@ -45,7 +45,7 @@ int main (void)
 
 	dcx_h (&c);
 
-	if (cpu_get_hl (&c) == 0x97ff)
+	if (C_GetHL (&c) == 0x97ff)
 	{
 		printf ("DCX Passed!\n");
 		tests_passed++;
@@ -79,12 +79,12 @@ int main (void)
 	c.sp = 0x10ad;
 	c.h	 = 0x0b;
 	c.l	 = 0x3c;
-	cpu_set_byte (&c, 0x10ad, 0xf0);
-	cpu_set_byte (&c, 0x10ae, 0x0d);
+	C_SetByte (&c, 0x10ad, 0xf0);
+	C_SetByte (&c, 0x10ae, 0x0d);
 
 	xthl (&c);
 
-	if (c.h == 0x0d && c.l == 0xf0 && cpu_deref_sp (&c, 0) == 0x3c && cpu_deref_sp (&c, 1) == 0x0b)
+	if (c.h == 0x0d && c.l == 0xf0 && C_DerefSP (&c, 0) == 0x3c && C_DerefSP (&c, 1) == 0x0b)
 	{
 		printf ("XTHL Passed!\n");
 		tests_passed++;

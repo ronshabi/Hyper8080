@@ -10,13 +10,13 @@ int main (void)
 	cpu_init (&c);
 
 	uint8_t *memory = calloc (10000, 1);
-	cpu_set_memory (&c, memory);
+	C_SetMemory (&c, memory);
 
 	// C2
 	c.pc	 = 0000;
 	c.flag_c = 0;
-	cpu_set_byte (&c, 0x1, 0x56);
-	cpu_set_byte (&c, 0x3, 0xbe);
+	C_SetByte (&c, 0x1, 0x56);
+	C_SetByte (&c, 0x3, 0xbe);
 	mvi (&c, &(c.a));
 	aci (&c);
 

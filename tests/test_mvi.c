@@ -9,9 +9,9 @@ int main (void)
 	cpu_init (&c);
 
 	uint8_t *memory = calloc (10000, 1);
-	cpu_set_memory (&c, memory);
+	C_SetMemory (&c, memory);
 
-	cpu_set_byte (&c, 1, 0xca);
+	C_SetByte (&c, 1, 0xca);
 	c.pc = 0;
 	mvi (&c, &(c.b));
 
@@ -19,6 +19,6 @@ int main (void)
 	mvi_m (&c);
 
 	free (memory);
-	if (c.b == 0xca && cpu_deref_hl (&c) == 0xca) { return 0; }
+	if (c.b == 0xca && C_DerefHL (&c) == 0xca) { return 0; }
 	return 1;
 }

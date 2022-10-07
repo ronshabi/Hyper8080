@@ -10,7 +10,7 @@ int main (void)
 	cpu_init (&c);
 
 	uint8_t *memory = malloc (10000);
-	cpu_set_memory (&c, memory);
+	C_SetMemory (&c, memory);
 	stack_push (&c, 0xcafe);
 
 	if (stack_pop (&c) == 0xcafe) { return 0; }

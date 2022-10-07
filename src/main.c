@@ -3,6 +3,7 @@
 #include <string.h>
 #include <SDL2/SDL.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define ANSI_COLOR_RED	 "\x1b[31m"
 #define ANSI_COLOR_RESET "\x1b[0m"
@@ -14,6 +15,22 @@
 #include "cpu.h"
 #include "debug.h"
 #include "render.h"
+
+double Sys_Time (void)
+{
+	struct timespec ts;
+	static int		secbase;
+
+	clock_gettime (CLOCK_REALTIME, &ts);
+
+	if (!secbase)
+	{
+		secbase = ts.tv_sec;
+		return ts.tv_nsec / 1000000.0;
+	}
+
+	return (ts.tv_sec - secbase) + ts.tv_nsec / 1000000.0;
+}
 
 int main (int argc, char *argv[])
 {
@@ -57,6 +74,7 @@ int main (int argc, char *argv[])
 	==========================================================================================
 	 */
 
+	double		  lastinterrupt = 0;
 	SDL_Event	  e;
 	bool		  quit	   = false;
 	SDL_Window	 *Window   = NULL;
@@ -143,6 +161,33 @@ int main (int argc, char *argv[])
 				}
 			}
 		}
+
+		//
+		// If CPU not halted
+		//
+		while (!c.halt)
+		{
+			current_opcode = C_GetByte (&c, c.pc);
+			C_DisAsm (&c);
+			C_Emulate (&c, current_opcode);
+			printf ("\n"); // FIXME: Should be enabled only when DEBUG_MODE_REGULAR is defined
+
+			//
+			// Time loop
+			//
+			if (Sys_Time () - lastinterrupt > (1.0 / 60.0))
+			{
+
+				// interrupt only if EI
+				if (c.interrupts_enabled)
+				{
+					C_GenerateInterrupt (&c, 2);
+					lastinterrupt = Sys_Time ();
+					// printf ("%f\n", Sys_Time ());
+				}
+
+			} // 1/60sec has elapsed
+		}
 	}
 
 	// ====================================================
@@ -167,9 +212,9 @@ int main (int argc, char *argv[])
 	// Emulation loop
 	while (!c.halt)
 	{
-		current_opcode = cpu_get_byte (&c, c.pc);
-		cpu_disasm (&c);
-		cpu_emulate (&c, current_opcode);
+		current_opcode = C_GetByte (&c, c.pc);
+		C_DisAsm (&c);
+		C_Emulate (&c, current_opcode);
 #ifdef DEBUG_MODE_REGULAR
 		printf ("\n");
 #endif

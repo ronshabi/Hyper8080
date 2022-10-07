@@ -11,7 +11,7 @@
 #define REG(reg) &(c->reg)
 
 // Quickly get immediate
-#define GET_IMMEDIATE_BYTE cpu_get_byte (c, c->pc + 1)
+#define GET_IMMEDIATE_BYTE C_GetByte (c, c->pc + 1)
 
 #define FLIP(n) (~n + 1)
 
@@ -53,26 +53,26 @@ typedef struct cpu
 
 // Core
 void cpu_init (cpu *c);
-void cpu_set_memory (cpu *c, uint8_t *memory_ptr);
-void cpu_disasm (cpu *c);
+void C_SetMemory (cpu *c, uint8_t *memory_ptr);
+void C_DisAsm (cpu *c);
 
 // Memory
-uint8_t	 cpu_get_byte (cpu *c, uint16_t address);
+uint8_t	 C_GetByte (cpu *c, uint16_t address);
 uint16_t cpu_get_word (cpu *c, uint16_t address);
-void	 cpu_set_byte (cpu *c, uint16_t address, uint8_t val);
+void	 C_SetByte (cpu *c, uint16_t address, uint8_t val);
 void	 cpu_set_word (cpu *c, uint16_t address, uint16_t val);
 
 // Register pairs
-uint16_t cpu_get_bc (cpu *c);
-uint16_t cpu_get_de (cpu *c);
-uint16_t cpu_get_hl (cpu *c);
-void	 cpu_set_bc (cpu *c, uint16_t val);
-void	 cpu_set_de (cpu *c, uint16_t val);
-void	 cpu_set_hl (cpu *c, uint16_t val);
-uint16_t cpu_deref_bc (cpu *c);
-uint16_t cpu_deref_de (cpu *c);
-uint16_t cpu_deref_hl (cpu *c);
-uint16_t cpu_deref_sp (cpu *c, uint16_t offset);
+uint16_t C_GetBC (cpu *c);
+uint16_t C_GetDE (cpu *c);
+uint16_t C_GetHL (cpu *c);
+void	 C_SetBC (cpu *c, uint16_t val);
+void	 C_SetDE (cpu *c, uint16_t val);
+void	 C_SetHL (cpu *c, uint16_t val);
+uint16_t C_DerefBC (cpu *c);
+uint16_t C_DerefDE (cpu *c);
+uint16_t C_DerefHL (cpu *c);
+uint16_t C_DerefSP (cpu *c, uint16_t offset);
 
 // Flags
 uint8_t cpu_get_flags (cpu *c);
@@ -87,7 +87,8 @@ void	 stack_push_psw (cpu *c);
 void	 stack_pop_psw (cpu *c);
 
 // Emulation
-void cpu_emulate (cpu *c, uint8_t opcode);
-void cpu_unimplemented (cpu *c);
+void C_Emulate (cpu *c, uint8_t opcode);
+void C_Unimplemented (cpu *c);
+void C_GenerateInterrupt (cpu *c, int intnum);
 
 #endif // CPU_H

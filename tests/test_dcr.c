@@ -9,12 +9,12 @@ int main (void)
 	cpu_init (&c);
 
 	uint8_t *memory = calloc (10000, 1);
-	cpu_set_memory (&c, memory);
+	C_SetMemory (&c, memory);
 
 	c.h = 0x3a;
 	c.l = 0x7c;
 
-	cpu_set_byte (&c, 0x3a7c, 0x40);
+	C_SetByte (&c, 0x3a7c, 0x40);
 
 	dcr_m (&c);
 
