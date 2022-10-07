@@ -5,7 +5,7 @@
 int main (void)
 {
 	cpu c;
-	cpu_init (&c);
+	C_Init (&c);
 
 	c.a = 0xf2;
 

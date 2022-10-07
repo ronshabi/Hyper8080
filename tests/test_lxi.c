@@ -7,34 +7,34 @@
 int main (void)
 {
 	cpu c;
-	cpu_init (&c);
+	C_Init (&c);
 
 	uint8_t *memory = calloc (10000, 1);
 	C_SetMemory (&c, memory);
 
 	int passed = 0;
 
-	cpu_set_word (&c, 1, 0xcafe);
+	C_SetWord (&c, 1, 0xcafe);
 	c.pc = 0;
 	lxi_b (&c);
 
 	if (c.b == 0xca && c.c == 0xfe) { passed++; }
 
-	cpu_set_word (&c, 1, 0xefac);
+	C_SetWord (&c, 1, 0xefac);
 	c.pc = 0;
 
 	lxi_d (&c);
 
 	if (C_GetDE (&c) == 0xefac) { passed++; }
 
-	cpu_set_word (&c, 1, 0xeb12);
+	C_SetWord (&c, 1, 0xeb12);
 	c.pc = 0;
 
 	lxi_h (&c);
 
 	if (C_GetHL (&c) == 0xeb12) { passed++; }
 
-	cpu_set_word (&c, 1, 0x1f8e);
+	C_SetWord (&c, 1, 0x1f8e);
 	c.pc = 0;
 
 	lxi_sp (&c);

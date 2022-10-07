@@ -7,13 +7,13 @@
 int main (void)
 {
 	cpu c;
-	cpu_init (&c);
+	C_Init (&c);
 
 	uint8_t *memory = calloc (10000, 1);
 	C_SetMemory (&c, memory);
 
 	c.pc = 0;
-	cpu_set_word (&c, 0x1, 0xcafe);
+	C_SetWord (&c, 0x1, 0xcafe);
 	C_SetByte (&c, 0xcafe, 0x12);
 	c.a = 0xfe;
 

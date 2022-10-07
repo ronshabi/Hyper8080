@@ -52,15 +52,15 @@ typedef struct cpu
 } cpu;
 
 // Core
-void cpu_init (cpu *c);
+void C_Init (cpu *c);
 void C_SetMemory (cpu *c, uint8_t *memory_ptr);
 void C_DisAsm (cpu *c);
 
 // Memory
 uint8_t	 C_GetByte (cpu *c, uint16_t address);
-uint16_t cpu_get_word (cpu *c, uint16_t address);
+uint16_t C_GetWord (cpu *c, uint16_t address);
 void	 C_SetByte (cpu *c, uint16_t address, uint8_t val);
-void	 cpu_set_word (cpu *c, uint16_t address, uint16_t val);
+void	 C_SetWord (cpu *c, uint16_t address, uint16_t val);
 
 // Register pairs
 uint16_t C_GetBC (cpu *c);
@@ -75,16 +75,16 @@ uint16_t C_DerefHL (cpu *c);
 uint16_t C_DerefSP (cpu *c, uint16_t offset);
 
 // Flags
-uint8_t cpu_get_flags (cpu *c);
-void	cpu_set_flags_zsp (cpu *c, uint8_t val);
-void	cpu_set_flags_carry_add (cpu *c, uint8_t a, uint8_t b, uint8_t carry);
-void	cpu_set_flags_carry_from_16bit (cpu *c, uint16_t num);
+uint8_t C_Flags_Get (cpu *c);
+void	C_Flags_SetZSP (cpu *c, uint8_t val);
+void	C_Flags_SetCarryAdd (cpu *c, uint8_t a, uint8_t b, uint8_t carry);
+void	C_Flags_SetCarryFromWord (cpu *c, uint16_t num);
 
 // Stack
-void	 stack_push (cpu *c, uint16_t val);
-uint16_t stack_pop (cpu *c);
-void	 stack_push_psw (cpu *c);
-void	 stack_pop_psw (cpu *c);
+void	 S_Push (cpu *c, uint16_t val);
+uint16_t S_Pop (cpu *c);
+void	 S_PushPSW (cpu *c);
+void	 S_PopPSW (cpu *c);
 
 // Emulation
 void C_Emulate (cpu *c, uint8_t opcode);

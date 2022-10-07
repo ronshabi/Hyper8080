@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "debug.h"
 
-const uint8_t CYCLES[] = {
+const uint8_t C_CYCLES[] = {
 	4, 10, 7, 5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5, 7,	 4,	 4,	 10, 16, 5,	 5,
 	5, 7,  4, 4,  10, 16, 5,  5,  5,  7,  4,  4,  10, 13, 5,  10, 10, 10, 4,  4,  10, 13, 5,  5,  5,  7,  4,  5,  5,  5, 5,	 5,	 5,	 7,	 5,	 5,	 5,
 	5, 5,  5, 5,  7,  5,  5,  5,  5,  5,  5,  5,  7,  5,  5,  5,  5,  5,  5,  5,  7,  5,  5,  5,  5,  5,  5,  5,  7,  5, 5,	 5,	 5,	 5,	 5,	 5,	 7,
@@ -14,7 +14,7 @@ const uint8_t CYCLES[] = {
 	7, 11, 5, 10, 10, 18, 11, 11, 7,  11, 5,  5,  10, 5,  11, 11, 7,  11, 5,  10, 10, 4,  11, 11, 7,  11, 5,  5,  10, 4, 11, 11, 7,	 11,
 };
 
-const char *INSTRUCTIONS[] = {
+const char *C_INSTRUCTIONS[] = {
 	"NOP",	   "LXI B",	  "STAX B",	 "INX B",	"INR B",   "DCR B",	  "MVI B",	 "RLC",		"NOP",	   "DAD B",	  "LDAX B",	 "DCX B",	 "INR C",
 	"DCR C",   "MVI C",	  "RRC",	 "NOP",		"LXI D",   "STAX D",  "INX D",	 "INR D",	"DCR D",   "MVI D",	  "RALC",	 "NOP",		 "DAD D",
 	"LDAX D",  "DCX D",	  "INR E",	 "DCR E",	"MVI E",   "RAR",	  "NOP",	 "LXI H",	"SHLD",	   "INX H",	  "INR H",	 "DCR H",	 "MVI H",
@@ -37,7 +37,7 @@ const char *INSTRUCTIONS[] = {
 	"RST 6",   "RM",	  "SPHL",	 "JM",		"EI",	   "CM",	  "NOP",	 "CPI",		"RST 7"};
 
 // Core
-void cpu_init (cpu *c)
+void C_Init (cpu *c)
 {
 	c->a = 0;
 	c->b = 0;
@@ -79,7 +79,7 @@ void cpu_init (cpu *c)
 void C_DisAsm (cpu *c)
 {
 	printf ("0x%04x\t%02x\t\t%02x|%02x|%02x|%02x|%02x|%02x|%02x|%04x|%04x|%d%d%d%d%d\t%s", c->pc, C_GetByte (c, c->pc), c->a, c->b, c->c, c->d, c->e,
-			c->h, c->l, c->sp, c->pc, c->flag_z, c->flag_s, c->flag_p, c->flag_c, c->flag_ac, INSTRUCTIONS[C_GetByte (c, c->pc)]);
+			c->h, c->l, c->sp, c->pc, c->flag_z, c->flag_s, c->flag_p, c->flag_c, c->flag_ac, C_INSTRUCTIONS[C_GetByte (c, c->pc)]);
 }
 
 void C_GenerateInterrupt (cpu *c, int intnum)
@@ -88,7 +88,7 @@ void C_GenerateInterrupt (cpu *c, int intnum)
 	printf ("\n~~~~~~~~~~ INT %d -~~~~~~~~~~\n", intnum);
 #endif
 
-	stack_push (c, c->pc);
+	S_Push (c, c->pc);
 	// rst intnum
 	c->pc = intnum * 8;
 }
@@ -109,8 +109,8 @@ void	C_SetByte (cpu *c, uint16_t address, uint8_t val)
 		// exit (2);
 	}
 }
-uint16_t cpu_get_word (cpu *c, uint16_t address) { return c->memory[address + 1] << 8 | c->memory[address]; }
-void	 cpu_set_word (cpu *c, uint16_t address, uint16_t val)
+uint16_t C_GetWord (cpu *c, uint16_t address) { return c->memory[address + 1] << 8 | c->memory[address]; }
+void	 C_SetWord (cpu *c, uint16_t address, uint16_t val)
 {
 	C_SetByte (c, address, val & 0xff);
 	C_SetByte (c, address + 1, val >> 8);
@@ -120,11 +120,11 @@ void	 cpu_set_word (cpu *c, uint16_t address, uint16_t val)
 uint16_t C_GetBC (cpu *c) { return c->b << 8 | c->c; }
 uint16_t C_GetDE (cpu *c) { return c->d << 8 | c->e; }
 uint16_t C_GetHL (cpu *c) { return c->h << 8 | c->l; }
-uint16_t cpu_get_psw (cpu *c)
+uint16_t C_GetPSW (cpu *c)
 {
 	uint16_t ret = 0;
 	ret |= c->a << 8;
-	ret |= cpu_get_flags (c) & 0xff;
+	ret |= C_Flags_Get (c) & 0xff;
 	return ret;
 }
 void C_SetBC (cpu *c, uint16_t val)
@@ -148,21 +148,21 @@ uint16_t C_DerefHL (cpu *c) { return C_GetByte (c, C_GetHL (c)); }
 uint16_t C_DerefSP (cpu *c, uint16_t offset) { return C_GetByte (c, c->sp + offset); }
 
 // Stack
-void stack_push (cpu *c, uint16_t val)
+void S_Push (cpu *c, uint16_t val)
 {
 	c->sp -= 2;
-	cpu_set_word (c, c->sp, val);
+	C_SetWord (c, c->sp, val);
 }
-uint16_t stack_pop (cpu *c)
+uint16_t S_Pop (cpu *c)
 {
-	uint16_t ret = cpu_get_word (c, c->sp);
+	uint16_t ret = C_GetWord (c, c->sp);
 	c->sp += 2;
 	return ret;
 }
-void stack_push_psw (cpu *c) { stack_push (c, cpu_get_psw (c)); }
-void stack_pop_psw (cpu *c)
+void S_PushPSW (cpu *c) { S_Push (c, C_GetPSW (c)); }
+void S_PopPSW (cpu *c)
 {
-	uint16_t psw = stack_pop (c);
+	uint16_t psw = S_Pop (c);
 	c->a		 = psw >> 8;
 	c->flag_s	 = psw >> 7 & 0x1;
 	c->flag_z	 = psw >> 6 & 0x1;
@@ -172,7 +172,7 @@ void stack_pop_psw (cpu *c)
 }
 
 // Flags
-uint8_t flags_calc_parity (uint8_t n)
+uint8_t F_Parity (uint8_t n)
 {
 	uint8_t parity = 0;
 	while (n)
@@ -182,14 +182,14 @@ uint8_t flags_calc_parity (uint8_t n)
 	}
 	return 1 - parity;
 }
-uint8_t flags_calc_zero (uint8_t n) { return (n == 0); }
-uint8_t flags_calc_sign (uint8_t n) { return ((n & 0x80) == 0x80); }
-uint8_t flags_calc_carry (uint8_t a, uint8_t b, uint8_t carry)
+uint8_t F_Zero (uint8_t n) { return (n == 0); }
+uint8_t F_Sign (uint8_t n) { return ((n & 0x80) == 0x80); }
+uint8_t F_Carry (uint8_t a, uint8_t b, uint8_t carry)
 {
 	uint16_t sum = a + b + carry;
 	return (sum > 0xff);
 }
-uint8_t cpu_get_flags (cpu *c)
+uint8_t C_Flags_Get (cpu *c)
 {
 	uint8_t ret = c->flag_s << 7;
 	ret |= c->flag_z << 6;
@@ -201,14 +201,14 @@ uint8_t cpu_get_flags (cpu *c)
 	ret |= c->flag_c;
 	return ret;
 }
-void cpu_set_flags_zsp (cpu *c, uint8_t val)
+void C_Flags_SetZSP (cpu *c, uint8_t val)
 {
-	c->flag_z = flags_calc_zero (val);
-	c->flag_s = flags_calc_sign (val);
-	c->flag_p = flags_calc_parity (val);
+	c->flag_z = F_Zero (val);
+	c->flag_s = F_Sign (val);
+	c->flag_p = F_Parity (val);
 }
-void cpu_set_flags_carry_add (cpu *c, uint8_t a, uint8_t b, uint8_t carry) { c->flag_c = flags_calc_carry (a, b, carry); }
-void cpu_set_flags_carry_from_16bit (cpu *c, uint16_t num) { c->flag_c = (num > 0xff); }
+void C_Flags_SetCarryAdd (cpu *c, uint8_t a, uint8_t b, uint8_t carry) { c->flag_c = F_Carry (a, b, carry); }
+void C_Flags_SetCarryFromWord (cpu *c, uint16_t num) { c->flag_c = (num > 0xff); }
 // Emualtion
 void C_Unimplemented (cpu *c)
 {
@@ -221,7 +221,7 @@ void C_Emulate (cpu *c, uint8_t opcode)
 {
 	/* READ HEADER FILES FOR INSTRUCTION DOCUMENTATION */
 	c->instructions++;
-	c->cycles += CYCLES[opcode];
+	c->cycles += C_CYCLES[opcode];
 
 	switch (opcode)
 	{
@@ -278,7 +278,7 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xe8: rpe (c); break;
 		case 0xe0: rpo (c); break;
 
-		// IMMEDIATE INSTRUCTIONS
+		// IMMEDIATE C_INSTRUCTIONS
 		case 0x01: lxi_b (c); break;
 		case 0x11: lxi_d (c); break;
 		case 0x21: lxi_h (c); break;
@@ -373,7 +373,7 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x02: stax_b (c); break;
 		case 0x12: stax_d (c); break;
 
-		// REGISTER PAIR INSTRUCTIONS
+		// REGISTER PAIR C_INSTRUCTIONS
 		case 0xc5: push_b (c); break;
 		case 0xd5: push_d (c); break;
 		case 0xe5: push_h (c); break;
@@ -398,7 +398,7 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xe3: xthl (c); break;
 		case 0xf9: sphl (c); break;
 
-		// SINGLE REGISTER INSTRUCTIONS
+		// SINGLE REGISTER C_INSTRUCTIONS
 		case 0x3c: inr (c, REG (a)); break;
 		case 0x04: inr (c, REG (b)); break;
 		case 0x0c: inr (c, REG (c)); break;
@@ -427,7 +427,7 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xd3: out (c); break;
 		case 0x76: hlt (c); break;
 
-		// REGISTER OR MEMORY TO ACCUMULATOR INSTRUCTIONS
+		// REGISTER OR MEMORY TO ACCUMULATOR C_INSTRUCTIONS
 		case 0x87: add (c, REG (a)); break;
 		case 0x80: add (c, REG (a)); break;
 		case 0x81: add (c, REG (a)); break;
@@ -485,13 +485,13 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xb5: ora (c, REG (l)); break;
 		case 0xb6: ora_m (c); break;
 
-		// DIRECT ADDRESSING INSTRUCTIONS
+		// DIRECT ADDRESSING C_INSTRUCTIONS
 		case 0x32: sta (c); break;
 		case 0x3a: lda (c); break;
 		case 0x22: shld (c); break;
 		case 0x2a: lhld (c); break;
 
-		// INTERRUPT TOGGLE INSTRUCTIONS
+		// INTERRUPT TOGGLE C_INSTRUCTIONS
 		case 0xfb: set_interrupt (c, 1); break;
 		case 0xf3: set_interrupt (c, 0); break;
 

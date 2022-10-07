@@ -7,7 +7,7 @@ int main (void)
 {
 	int passed = 0;
 	cpu c;
-	cpu_init (&c);
+	C_Init (&c);
 
 	C_SetBC (&c, 0x339f);
 	C_SetHL (&c, 0xa17b);

@@ -6,7 +6,7 @@
 int main (void)
 {
 	cpu c;
-	cpu_init (&c);
+	C_Init (&c);
 
 	uint8_t *memory = calloc (10000, 1);
 	C_SetMemory (&c, memory);
@@ -21,7 +21,7 @@ int main (void)
 	C_SetByte (&c, 0xface, 0xdf);
 	C_SetByte (&c, 0x0b0c, 0x33);
 
-	cpu_set_word (&c, 0xfeed, 0xabcd);
+	C_SetWord (&c, 0xfeed, 0xabcd);
 
 	if (C_DerefBC (&c) != 0x33) return 1;
 

@@ -6,7 +6,7 @@
 int main (void)
 {
 	cpu c;
-	cpu_init (&c);
+	C_Init (&c);
 	int passed = 0;
 
 	C_SetBC (&c, 0x00ff);

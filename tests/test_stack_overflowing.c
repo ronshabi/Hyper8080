@@ -10,7 +10,7 @@
 int main (void)
 {
 	cpu c;
-	cpu_init (&c);
+	C_Init (&c);
 
 	uint8_t *memory = malloc (2000);
 	C_SetMemory (&c, memory);
@@ -19,7 +19,7 @@ int main (void)
 
 	while (i < ITER)
 	{
-		stack_push (&c, (uint16_t)VALUE + i);
+		S_Push (&c, (uint16_t)VALUE + i);
 		i++;
 	}
 
@@ -27,7 +27,7 @@ int main (void)
 
 	while (i != 0)
 	{
-		if (stack_pop (&c) != (uint16_t)VALUE + i) { return 1; }
+		if (S_Pop (&c) != (uint16_t)VALUE + i) { return 1; }
 
 		i--;
 	}

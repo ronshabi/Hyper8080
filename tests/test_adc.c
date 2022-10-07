@@ -5,7 +5,7 @@
 int main (void)
 {
 	cpu c;
-	cpu_init (&c);
+	C_Init (&c);
 	c.a		 = 0x3d;
 	c.c		 = 0x42;
 	c.flag_c = 0;
@@ -16,7 +16,7 @@ int main (void)
 
 	if (c.a == 0x7f && !c.flag_c && !c.flag_s && !c.flag_z && !c.flag_p && !c.flag_ac) { passed++; }
 
-	cpu_init (&c);
+	C_Init (&c);
 	c.a		 = 0x3d;
 	c.c		 = 0x42;
 	c.flag_c = 1;

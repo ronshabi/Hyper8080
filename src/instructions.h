@@ -45,7 +45,7 @@ void rp (cpu *c);  // RP       RET positive
 void rpe (cpu *c); // RPE      RET parity even
 void rpo (cpu *c); // RPO      RET parity odd
 
-/* IMMEDIATE INSTRUCTIONS */
+/* IMMEDIATE C_INSTRUCTIONS */
 void lxi_b (cpu *c);			 // LXI B	Load register pair immediate
 void lxi_d (cpu *c);			 // LXI D
 void lxi_h (cpu *c);			 // LXI H
@@ -71,7 +71,7 @@ void mov_m (cpu *c, const uint8_t *reg);
 void stax_b (cpu *c);
 void stax_d (cpu *c);
 
-/* REGISTER PAIR INSTRUCTIONS */
+/* REGISTER PAIR C_INSTRUCTIONS */
 void push_b (cpu *c);	// PUSH B
 void push_d (cpu *c);	// PUSH D
 void push_h (cpu *c);	// PUSH H
@@ -96,7 +96,7 @@ void xchg (cpu *c);		// XCHG		Exchange Registers
 void xthl (cpu *c);		// XTHL		Exchange Stack
 void sphl (cpu *c);		// SPHL		Load SP from H and L
 
-/* SINGLE REGISTER INSTRUCTIONS */
+/* SINGLE REGISTER C_INSTRUCTIONS */
 void inr (cpu *c, uint8_t *reg); // INR	Increment
 void inr_m (cpu *c);			 // INR M
 void dcr (cpu *c, uint8_t *reg); // DCR	Increment
@@ -113,7 +113,7 @@ void in (cpu *c);  // IN
 void out (cpu *c); // OUT
 void hlt (cpu *c); // HALT
 
-/* REGISTER OR MEMORY TO ACCUMULATOR INSTRUCTIONS */
+/* REGISTER OR MEMORY TO ACCUMULATOR C_INSTRUCTIONS */
 void add (cpu *c, const uint8_t *reg); // ADD A		Add to accumulator
 void add_m (cpu *c);				   // ADD M
 void adc (cpu *c, const uint8_t *reg); // ADC A		Add to accumulator w/ carry
@@ -129,7 +129,7 @@ void xra_m (cpu *c);				   // XRA M
 void ora (cpu *c, const uint8_t *reg); // ORA A		Logical or w/ accumulator
 void ora_m (cpu *c);				   // ORA M
 
-/* DIRECT ADDRESSING INSTRUCTIONS */
+/* DIRECT ADDRESSING C_INSTRUCTIONS */
 void sta (cpu *c);	// STA		Store accumulator direct
 void lda (cpu *c);	// LDA		Load accumulator direct
 void shld (cpu *c); // SHLD		Store H and L direct
@@ -138,7 +138,7 @@ void lhld (cpu *c); // LHLD		Load H and L direct
 // FIXME: Move me to my group!
 void daa (cpu *c);
 
-/* INTERRUPT INSTRUCTIONS */
+/* INTERRUPT C_INSTRUCTIONS */
 void set_interrupt (cpu *c, uint8_t state);
 
 #endif // INSTRUCTIONS_H

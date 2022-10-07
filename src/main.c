@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <SDL2/SDL.h>
 #include <stdbool.h>
 #include <time.h>
 
@@ -10,7 +9,7 @@
 #define WINDOW_WIDTH	 224
 #define WINDOW_HEIGHT	 256
 #define WINDOW_TITLE	 "8080 Emulator (unstable)"
-#define WINDOW_SCALE	 1
+#define WINDOW_SCALE	 1.0F
 
 #include "cpu.h"
 #include "debug.h"
@@ -63,7 +62,7 @@ int main (int argc, char *argv[])
 	fclose (f);
 
 	cpu c;
-	cpu_init (&c);
+	C_Init (&c);
 	c.memory = buffer;
 
 	uint8_t current_opcode;
@@ -82,16 +81,9 @@ int main (int argc, char *argv[])
 	SDL_Window	 *Window   = NULL;
 	SDL_Renderer *Renderer = NULL;
 
-	// Init
-	SDL_Init (SDL_INIT_VIDEO);
-
-	Window =
-		SDL_CreateWindow (WINDOW_TITLE, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH * WINDOW_SCALE, WINDOW_HEIGHT * WINDOW_SCALE,
-						  SDL_WINDOW_SHOWN);							  // Create window
-	SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "1");					  // Set texture filtering to linear
-	Renderer = SDL_CreateRenderer (Window, -1, SDL_RENDERER_ACCELERATED); // Create renderer for window
-	SDL_RenderSetScale (Renderer, WINDOW_SCALE, WINDOW_SCALE);			  // Set renderer scale
-	SDL_RenderSetLogicalSize (Renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
+	// Create window
+	R_Init ();
+	R_CreateWindow (Window, Renderer, WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_SCALE);
 	R_ClearScreen (Renderer);
 	R_Update (Renderer);
 
@@ -172,7 +164,20 @@ int main (int argc, char *argv[])
 			current_opcode = C_GetByte (&c, c.pc);
 			C_DisAsm (&c);
 			C_Emulate (&c, current_opcode);
-			printf ("\n"); // FIXME: Should be enabled only when DEBUG_MODE_REGULAR is defined
+
+#ifdef DEBUG_MODE_REGULAR
+			printf ("\n");
+#endif
+
+#ifdef DEBUG_MODE_STOP
+			if (c.instructions == DEBUG_MODE_STOP_AFTER_INSTRUCTION)
+			{
+				printf ("STOPPED AT %d\n", DEBUG_MODE_STOP_AFTER_INSTRUCTION);
+				printf ("Instructions executed: %lu\n", c.instructions);
+				printf ("Cycles: %lu\n", c.cycles);
+				break;
+			}
+#endif
 
 			//
 			// Time loop
@@ -194,41 +199,8 @@ int main (int argc, char *argv[])
 
 	// ====================================================
 
-	// ********** Close **********
-	SDL_DestroyWindow (Window);
-	SDL_DestroyRenderer (Renderer);
-	Renderer = NULL;
-	Window	 = NULL;
-	SDL_Quit ();
-
+	R_Exit (Window, Renderer);
 	free (buffer);
 
-	exit (3); // FIXME: Remove after finishing SDL implementation
-			  // ***************************
-
-#ifdef DEBUG_MODE_REGULAR
-	printf ("PC\t\tOpcode\tA |B |C |D |E |H |L |SP  |CP  |ZSPCA\tInstruction\targs\n");
-	printf ("--\t\t------\t--|--|--|--|--|--|--|----|----|-----\t-----------\t----\n");
-#endif
-
-	// Emulation loop
-	while (!c.halt)
-	{
-		current_opcode = C_GetByte (&c, c.pc);
-		C_DisAsm (&c);
-		C_Emulate (&c, current_opcode);
-#ifdef DEBUG_MODE_REGULAR
-		printf ("\n");
-#endif
-#ifdef DEBUG_MODE_STOP
-		if (c.instructions == DEBUG_MODE_STOP_AFTER_INSTRUCTION)
-		{
-			printf ("STOPPED AT %d\n", DEBUG_MODE_STOP_AFTER_INSTRUCTION);
-			printf ("Instructions executed: %lu\n", c.instructions);
-			printf ("Cycles: %lu\n", c.cycles);
-			break;
-		}
-#endif
-	}
 	return 0;
 }
