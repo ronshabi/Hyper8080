@@ -101,6 +101,7 @@ void inr (cpu *c, uint8_t *reg); // INR	Increment
 void inr_m (cpu *c);			 // INR M
 void dcr (cpu *c, uint8_t *reg); // DCR	Increment
 void dcr_m (cpu *c);			 // DCR M
+void daa (cpu *c);
 
 /* ROTATE ACCUMULATOR */
 void rlc (cpu *c); // RLC Rotate left
@@ -135,8 +136,6 @@ void lda (cpu *c);	// LDA		Load accumulator direct
 void shld (cpu *c); // SHLD		Store H and L direct
 void lhld (cpu *c); // LHLD		Load H and L direct
 
-// FIXME: Move me to my group!
-void daa (cpu *c);
 
 /* INTERRUPT C_INSTRUCTIONS */
 void set_interrupt (cpu *c, uint8_t state);

@@ -8,7 +8,7 @@ include_directories(${SDL2_INCLUDE_DIRS})
 
 add_executable(8080_Emu src/main.c src/cpu.c src/cpu.h src/instructions.c src/instructions.h src/debug.c src/debug.h src/render.c src/render.h)
 target_link_libraries(8080_Emu ${SDL2_LIBRARIES})
-
+target_link_libraries(8080_Emu m)
 # Testing
 enable_testing()
 add_executable(test_stack tests/test_stack.c)

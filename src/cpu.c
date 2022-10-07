@@ -415,6 +415,7 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x25: dcr (c, REG (h)); break;
 		case 0x2d: dcr (c, REG (l)); break;
 		case 0x35: dcr_m (c); break;
+		case 0x27: daa (c); break;
 
 		// ROTATE ACCUMULATOR
 		case 0x07: rlc (c); break;
@@ -494,6 +495,16 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		// INTERRUPT TOGGLE C_INSTRUCTIONS
 		case 0xfb: set_interrupt (c, 1); break;
 		case 0xf3: set_interrupt (c, 0); break;
+
+		// RST
+		case 0xc7: C_GenerateInterrupt (c, 0);
+		case 0xcf: C_GenerateInterrupt (c, 1);
+		case 0xd7: C_GenerateInterrupt (c, 2);
+		case 0xdf: C_GenerateInterrupt (c, 3);
+		case 0xe7: C_GenerateInterrupt (c, 4);
+		case 0xef: C_GenerateInterrupt (c, 5);
+		case 0xf7: C_GenerateInterrupt (c, 6);
+		case 0xff: C_GenerateInterrupt (c, 7);
 
 		default: C_Unimplemented (c); break;
 	}

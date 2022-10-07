@@ -9,7 +9,7 @@
 #define WINDOW_WIDTH	 224
 #define WINDOW_HEIGHT	 256
 #define WINDOW_TITLE	 "8080 Emulator (unstable)"
-#define WINDOW_SCALE	 1.0F
+#define WINDOW_SCALE	 1
 
 #include "cpu.h"
 #include "debug.h"
@@ -31,39 +31,55 @@ double Sys_Time (void)
 	return (ts.tv_sec - secbase) + ts.tv_nsec / 1000000.0;
 }
 
+void Sys_LoadRomIntoMemory (FILE *fptr, char *filename, unsigned char *memptr)
+{
+	// (try to) open file
+	fptr = fopen (filename, "rb");
+
+	// Check if file exists, if not -> exit and print error (with nice colors)
+	if (fptr == NULL)
+	{
+		fprintf (stderr, ANSI_COLOR_RED);
+		fprintf (stderr, "fatal error: ");
+		fprintf (stderr, ANSI_COLOR_RESET);
+		fprintf (stderr, "Couldn't open file %s: file doesn't exist.\n", filename);
+		exit (1);
+	}
+
+	// get size of file
+	fseek (fptr, 0L, SEEK_END);
+	long fsize = ftell (fptr);
+	fseek (fptr, 0L, SEEK_SET);
+
+	// Read to memory buffer
+	fread (memptr, fsize, 1, fptr);
+
+	// File handle not needed anymore
+	fclose (fptr);
+}
+
+void Sys_Alloc (unsigned char **ptr, int howmuch) { *ptr = calloc (0xffff, 1); }
+
 int main (int argc, char *argv[])
 {
+	//
+	// Check arguments
+	//
 	if (argc != 2)
 	{
 		fprintf (stderr, "Usage: %s <file...>\n", argv[0]);
 		exit (1);
 	}
 
-	FILE *f = fopen (argv[1], "rb");
+	FILE		  *romfile;
+	cpu			   c;
+	unsigned char *memory;
 
-	// Check if file exists
-	if (f == NULL)
-	{
-		fprintf (stderr, "%s: ", argv[0]);
-		fprintf (stderr, ANSI_COLOR_RED);
-		fprintf (stderr, "fatal error: ");
-		fprintf (stderr, ANSI_COLOR_RESET);
-		fprintf (stderr, "Couldn't open file %s: file doesn't exist.\n", argv[1]);
-		exit (1);
-	}
+	Sys_Alloc (&memory, 0xffff);
+	Sys_LoadRomIntoMemory (romfile, argv[1], memory);
 
-	// Get file size and read it into mem buffer
-	fseek (f, 0L, SEEK_END);
-	long fsize = ftell (f);
-	fseek (f, 0L, SEEK_SET);
-
-	unsigned char *buffer = calloc (0xffff, 1); // TODO: Change to match the CPU parameter
-	fread (buffer, fsize, 1, f);
-	fclose (f);
-
-	cpu c;
 	C_Init (&c);
-	c.memory = buffer;
+	c.memory = memory;
 
 	uint8_t current_opcode;
 
@@ -72,7 +88,6 @@ int main (int argc, char *argv[])
 	SDL
 	==========================================================================================
 	 */
-
 	double		  lastTimer		 = 0;
 	double		  nextInterrupt	 = 0;
 	int			  whichInterrupt = 0;
@@ -83,13 +98,28 @@ int main (int argc, char *argv[])
 
 	// Create window
 	R_Init ();
-	R_CreateWindow (Window, Renderer, WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_SCALE);
-	R_ClearScreen (Renderer);
-	R_Update (Renderer);
+	R_CreateWindow (&Window, &Renderer, WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_SCALE);
+	R_ClearScreen (&Renderer);
+	R_Update (&Renderer);
 
 	// ==================== Event loop ====================
 	while (!quit)
 	{
+		//
+		// Draw
+		//
+		for (int y = 0; y < WINDOW_HEIGHT; y++)
+		{
+			for (int x = 0; x < WINDOW_WIDTH; x++)
+			{
+				//				if (g > 255) {g = 0;}
+				//				if (b > 255) {b = 0;}
+				R_RenderPixel (&Renderer, x + (int)Sys_Time () & 0xff, y, ~(x + y), x, y);
+			}
+		}
+
+		R_Update (&Renderer);
+
 		//
 		// Poll Events
 		//
@@ -103,6 +133,10 @@ int main (int argc, char *argv[])
 			{
 				switch (e.key.keysym.sym)
 				{
+					case SDLK_q: {
+						quit = true;
+						break;
+					}
 					case SDLK_RETURN: {
 						printf ("Coin inserted\n");
 						c.i1 &= ~(0b00000001); // Coin
@@ -159,7 +193,7 @@ int main (int argc, char *argv[])
 		//
 		// If CPU not halted
 		//
-		while (!c.halt)
+		while (0)
 		{
 			current_opcode = C_GetByte (&c, c.pc);
 			C_DisAsm (&c);
@@ -199,8 +233,8 @@ int main (int argc, char *argv[])
 
 	// ====================================================
 
-	R_Exit (Window, Renderer);
-	free (buffer);
+	R_Exit (&Window, &Renderer);
+	free (memory);
 
 	return 0;
 }

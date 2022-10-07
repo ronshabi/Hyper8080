@@ -17,7 +17,11 @@ void cmc (cpu *c)
 }
 
 /* JUMP */
-void pchl (cpu *c) { C_Unimplemented (c); }
+void pchl (cpu *c)
+{
+	c->pc = C_GetHL (c);
+	PC1;
+}
 void jmp (cpu *c)
 {
 	printf (" $%04x", C_GetWord (c, c->pc + 1));
@@ -467,6 +471,11 @@ void dcr_m (cpu *c)
 	if (C_DerefHL (c) == 0) { printf ("\nM HIT ZERO\n"); }
 	PC1;
 }
+void daa (cpu *c)
+{
+	// TODO: Implement full function
+	PC1;
+}
 
 /* ROTATE ACCUMULATOR */
 void rlc (cpu *c)
@@ -716,11 +725,6 @@ void lhld (cpu *c)
 	PC3;
 }
 
-void daa (cpu *c)
-{
-	// TODO: Implement full function
-	PC1;
-}
 
 /* INTERRUPT C_INSTRUCTIONS */
 void set_interrupt (cpu *c, uint8_t state)
