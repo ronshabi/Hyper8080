@@ -722,3 +722,11 @@ void set_interrupt (cpu *c, uint8_t state)
 	c->interrupts_enabled = state;
 	PC1;
 }
+
+void C_GenerateInterrupt (cpu *c, int intnum)
+{
+	stack_push (c, c->pc);
+
+	// rst intnum
+	c->pc = intnum * 8;
+}

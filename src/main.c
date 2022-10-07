@@ -74,11 +74,13 @@ int main (int argc, char *argv[])
 	SDL_RenderSetLogicalSize (Renderer, WINDOW_WIDTH, WINDOW_HEIGHT);
 	R_ClearScreen (Renderer);
 	R_Update (Renderer);
-	// ==================== Event loop ====================
 
+	// ==================== Event loop ====================
 	while (!quit)
 	{
-		// ---------- POLL EVENTS ---------------
+		//
+		// Poll Events
+		//
 		while (SDL_PollEvent (&e) != 0)
 		{
 			// quit
@@ -140,10 +142,7 @@ int main (int argc, char *argv[])
 					default: break;
 				}
 			}
-		} // ------------------------------------ (/poll_events)
-
-		// Clear screen
-		// SDL_RenderClear (Renderer);
+		}
 	}
 
 	// ====================================================
