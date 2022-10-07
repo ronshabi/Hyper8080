@@ -526,7 +526,7 @@ void in (cpu *c)
 	else if (device_number == DEVICE_SHIFT_IN)
 	{
 		// IN DEVICE 3
-		c->a = c->shift >> (8 - c->shift_amt);
+		c->a = (c->shift >> (8 - c->shift_amt)) & 0xff;
 	}
 
 	PC2;
