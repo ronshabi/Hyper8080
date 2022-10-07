@@ -84,7 +84,8 @@ int main (int argc, char *argv[])
 			// quit
 			if (e.type == SDL_QUIT) { quit = true; }
 
-			// keypress
+			// ========================
+			// Key down
 			else if (e.type == SDL_KEYDOWN)
 			{
 				switch (e.key.keysym.sym)
@@ -103,6 +104,33 @@ int main (int argc, char *argv[])
 					}
 					case SDLK_RIGHT: {
 						c.i1 |= 0b01000000; // INPUT 1 BIT 6 - P1 RIGHT
+						break;
+					}
+					default: break;
+				}
+			}
+
+			// ========================
+			// Key up
+			else if (e.type == SDL_KEYUP)
+			{
+				switch (e.key.keysym.sym)
+				{
+					case SDLK_1: {
+						c.i1 &= ~(0b00000100); // INPUT 1 BIT 2 - P1 START BUTTON
+						break;
+					}
+					case SDLK_SPACE: {
+						printf ("1 key up\n");
+						c.i1 |= ~(0b00010000); // INPUT 1 BIT 4 - P1 SHOOT
+						break;
+					}
+					case SDLK_LEFT: {
+						c.i1 |= ~(0b00100000); // INPUT 1 BIT 5 - P1 LEFT
+						break;
+					}
+					case SDLK_RIGHT: {
+						c.i1 |= ~(0b01000000); // INPUT 1 BIT 6 - P1 RIGHT
 						break;
 					}
 					default: break;
