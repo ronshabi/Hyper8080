@@ -9,7 +9,7 @@
 #define WINDOW_WIDTH	 224
 #define WINDOW_HEIGHT	 256
 #define WINDOW_TITLE	 "8080 Emulator (unstable)"
-#define WINDOW_SCALE	 4
+#define WINDOW_SCALE	 1
 
 #include "cpu.h"
 #include "debug.h"
@@ -41,7 +41,7 @@ int main (int argc, char *argv[])
 	long fsize = ftell (f);
 	fseek (f, 0L, SEEK_SET);
 
-	unsigned char *buffer = calloc (10000, 1); // TODO: Change to match the CPU parameter
+	unsigned char *buffer = calloc (0xffff, 1); // TODO: Change to match the CPU parameter
 	fread (buffer, fsize, 1, f);
 	fclose (f);
 
@@ -84,53 +84,57 @@ int main (int argc, char *argv[])
 			// quit
 			if (e.type == SDL_QUIT) { quit = true; }
 
-			// ========================
 			// Key down
 			else if (e.type == SDL_KEYDOWN)
 			{
 				switch (e.key.keysym.sym)
 				{
+					case SDLK_RETURN: {
+						printf ("Coin inserted\n");
+						c.i1 &= ~(0b00000001); // Coin
+						break;
+					}
 					case SDLK_1: {
-						c.i1 |= 0b00000100; // INPUT 1 BIT 2 - P1 START BUTTON
+						c.i1 |= 0b00000100; // P1 Start
 						break;
 					}
 					case SDLK_SPACE: {
-						c.i1 |= 0b00010000; // INPUT 1 BIT 4 - P1 SHOOT
+						c.i1 |= 0b00010000; // P1 Shoot
 						break;
 					}
 					case SDLK_LEFT: {
-						c.i1 |= 0b00100000; // INPUT 1 BIT 5 - P1 LEFT
+						c.i1 |= 0b00100000; // P1 Left
 						break;
 					}
 					case SDLK_RIGHT: {
-						c.i1 |= 0b01000000; // INPUT 1 BIT 6 - P1 RIGHT
+						c.i1 |= 0b01000000; // P1 Right
 						break;
 					}
 					default: break;
 				}
 			}
-
-			// ========================
 			// Key up
 			else if (e.type == SDL_KEYUP)
 			{
 				switch (e.key.keysym.sym)
 				{
+						//					case SDLK_RETURN: {
+						//						c.i1 &= (0b00000001); // Coin
+						//						break;
+						//					}
 					case SDLK_1: {
-						c.i1 &= ~(0b00000100); // INPUT 1 BIT 2 - P1 START BUTTON
+						c.i1 &= ~(0b00000100); // P1 Start
 						break;
 					}
 					case SDLK_SPACE: {
-						printf ("1 key up\n");
-						c.i1 |= ~(0b00010000); // INPUT 1 BIT 4 - P1 SHOOT
 						break;
 					}
 					case SDLK_LEFT: {
-						c.i1 |= ~(0b00100000); // INPUT 1 BIT 5 - P1 LEFT
+						c.i1 |= ~(0b00100000); // P1 Left
 						break;
 					}
 					case SDLK_RIGHT: {
-						c.i1 |= ~(0b01000000); // INPUT 1 BIT 6 - P1 RIGHT
+						c.i1 |= ~(0b01000000); // P1 Right
 						break;
 					}
 					default: break;
@@ -150,6 +154,9 @@ int main (int argc, char *argv[])
 	Renderer = NULL;
 	Window	 = NULL;
 	SDL_Quit ();
+
+	free (buffer);
+
 	exit (3); // FIXME: Remove after finishing SDL implementation
 			  // ***************************
 
