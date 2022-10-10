@@ -82,6 +82,7 @@ void C_GenerateInterrupt (cpu *c, int intnum)
 {
 	if (c->interrupts_enabled)
 	{
+
 		S_Push (c, c->pc);
 		c->pc				  = intnum * 8;
 		c->interrupts_enabled = 0;
@@ -494,7 +495,12 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xe7: C_GenerateInterrupt (c, 4); break;
 		case 0xef: C_GenerateInterrupt (c, 5); break;
 		case 0xf7: C_GenerateInterrupt (c, 6); break;
-		case 0xff: C_GenerateInterrupt (c, 7); break;
+		case 0xff: {
+
+			exit (7);
+			C_GenerateInterrupt (c, 7);
+			break;
+		};
 
 		default: C_Unimplemented (c); break;
 	}

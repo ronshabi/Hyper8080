@@ -72,7 +72,7 @@ int main (int argc, char *argv[])
 
 		// Send interrupts @ 60hz
 		delta_interruptTime = now - lastInterrupt;
-		if (delta_interruptTime > (long)(1E9 / 60))
+		if (delta_interruptTime > (long)(1E9 / 120))
 		{
 			if (c.interrupts_enabled)
 			{
