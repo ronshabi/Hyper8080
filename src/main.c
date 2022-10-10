@@ -58,7 +58,7 @@ int main (int argc, char *argv[])
 	while (!quit && !c.halt)
 	{
 
-		now			 = Sys_UnixTime ();
+		now			 = SDL_GetTicks ();
 		c_CycleCount = c.cycles;
 		c_CycleDelta = c_CycleCount - c_CycleLast;
 		c_Delta		 = now - c_LastExecution;
@@ -67,18 +67,18 @@ int main (int argc, char *argv[])
 		//
 		// Emulate
 		// 2mhz -> 2 million cycles per second
-		if (c_Delta > 1000000000 / 1000 * 2)
+		if (c_Delta > 2000)
 		{
-			printf ("Cycles: %lu\n", c_CycleDelta);
+			printf ("Cycles: %lu\n", SDL_GetTicks ());
 
 			// sleep based on cycle delta
-			if (c_CycleDelta > 10000)
+			if (c_CycleDelta > 2000)
 			{
-				long			howmuchsleep = c_CycleDelta - 10000;
-				struct timespec sleepts;
-				sleepts.tv_sec	= 0;
-				sleepts.tv_nsec = howmuchsleep * 1000;
-				nanosleep (&sleepts, NULL);
+				//				long			howmuchsleep = c_CycleDelta - 10000;
+				//				struct timespec sleepts;
+				//				sleepts.tv_sec	= 0;
+				//				sleepts.tv_nsec = howmuchsleep * 1000;
+				//				nanosleep (&sleepts, NULL);
 				c_CycleLast = c_CycleCount;
 			}
 			c_LastExecution = now;
@@ -86,7 +86,7 @@ int main (int argc, char *argv[])
 
 		// Send interrupts @ 60hz
 		delta_interruptTime = now - lastInterrupt;
-		if (delta_interruptTime > HZ (120))
+		if (delta_interruptTime > 1000 / 120)
 		{
 			if (c.interrupts_enabled)
 			{
@@ -99,6 +99,9 @@ int main (int argc, char *argv[])
 
 		// C_DisAsm (&c);
 		c_currentOpcode = C_GetByte (&c, c.pc);
+		c.i0			= 0b00001110;
+		c.i1			= 0b10001101;
+		c.i2			= 0b10001000;
 		C_Emulate (&c, c_currentOpcode);
 		// printf ("\n");
 	}
