@@ -1,9 +1,5 @@
-#ifndef DEBUG_H
-#define DEBUG_H
-
+#pragma once
 // useful debugging macros
 
 #define DEBUG_MODE_REGULAR
-// #define DEBUG_MODE_STOP
-#define DEBUG_MODE_STOP_AFTER_INSTRUCTION 362000
-#endif // DEBUG_H
+#define PrintTime(time) printf ("Time: %lu\n", time)

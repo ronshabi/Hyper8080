@@ -1,6 +1,4 @@
-#include "instructions.h"
-#include <stdio.h>
-#include <stdlib.h>
+#include "defs.h"
 
 /* CARRY */
 void stc (cpu *c)
@@ -24,7 +22,9 @@ void pchl (cpu *c)
 }
 void jmp (cpu *c)
 {
+#ifdef DEBUG_MODE_REGULAR
 	printf (" $%04x", C_GetWord (c, c->pc + 1));
+#endif
 	c->pc = C_GetWord (c, c->pc + 1);
 }
 void jc (cpu *c)
@@ -458,7 +458,9 @@ void dcr (cpu *c, uint8_t *reg)
 	C_Flags_SetCarryFromWord (c, result & 0xff);
 	*reg = result & 0xff;
 
+#ifdef DEBUG_MODE_REGULAR
 	if (*reg == 0) { printf ("\nREG HIT ZERO\n"); }
+#endif
 	PC1;
 }
 void dcr_m (cpu *c)
@@ -468,12 +470,22 @@ void dcr_m (cpu *c)
 	C_Flags_SetCarryFromWord (c, result & 0xff);
 	C_SetByte (c, C_GetHL (c), result & 0xff);
 
+#ifdef DEBUG_MODE_REGULAR
 	if (C_DerefHL (c) == 0) { printf ("\nM HIT ZERO\n"); }
+#endif
 	PC1;
 }
 void daa (cpu *c)
 {
-	// TODO: Implement full function
+	if ((c->a & 0x0f) > 9) { c->a += 6; }
+
+	if ((c->a & 0xf0) > 0x90)
+	{
+		uint16_t result = c->a + 0x60;
+		c->a			= result & 0xff;
+		C_Flags_SetZSP (c, result & 0xff);
+		C_Flags_SetCarryFromWord (c, result);
+	}
 	PC1;
 }
 
@@ -515,22 +527,23 @@ void rar (cpu *c)
 void in (cpu *c)
 {
 	uint8_t device_number = C_GetByte (c, c->pc + 1);
+#ifdef DEBUG_MODE_REGULAR
 	printf (" <DEVICE = %d>", device_number);
-
+#endif
 	if (device_number == DEVICE_INP0)
 	{
 		// IN DEVICE 0
-		c->i0 = c->a;
+		c->a = c->i0;
 	}
 	else if (device_number == DEVICE_INP1)
 	{
 		// IN DEVICE 1
-		c->i1 = c->a;
+		c->a = c->i1;
 	}
 	else if (device_number == DEVICE_INP2)
 	{
 		// IN DEVICE 2
-		c->i2 = c->a;
+		c->a = c->i2;
 	}
 	else if (device_number == DEVICE_SHIFT_IN)
 	{
@@ -543,9 +556,9 @@ void in (cpu *c)
 void out (cpu *c)
 {
 	uint8_t device_number = C_GetByte (c, c->pc + 1);
-
+#ifdef DEBUG_MODE_REGULAR
 	printf (" <DEVICE = %d>", device_number);
-
+#endif
 	if (device_number == DEVICE_SHIFT_AMT)
 	{
 		// OUT DEVICE 2
@@ -578,7 +591,9 @@ void out (cpu *c)
 }
 void hlt (cpu *c)
 {
+#ifdef DEBUG_MODE_REGULAR
 	printf ("\nHALTED!\n");
+#endif
 	c->halt = 1;
 }
 
@@ -695,6 +710,19 @@ void ora_m (cpu *c)
 	c->a = result & 0xff;
 	PC1;
 }
+void cmp (cpu *c, uint8_t *r)
+{
+	uint16_t result = c->a - *r;
+	C_Flags_SetZSP (c, result & 0xff);
+	C_Flags_SetCarryFromWord (c, result);
+}
+
+void cmp_m (cpu *c)
+{
+	uint16_t result = c->a - C_DerefHL (c);
+	C_Flags_SetZSP (c, result & 0xff);
+	C_Flags_SetCarryFromWord (c, result);
+}
 
 /* DIRECT ADDRESSING C_INSTRUCTIONS */
 void sta (cpu *c)
@@ -706,7 +734,9 @@ void sta (cpu *c)
 void lda (cpu *c)
 {
 	uint16_t adr = C_GetWord (c, c->pc + 1);
+#ifdef DEBUG_MODE_REGULAR
 	printf (" $%04x", adr);
+#endif
 	c->a = C_GetByte (c, adr);
 
 	PC3;
@@ -724,7 +754,6 @@ void lhld (cpu *c)
 	C_SetHL (c, word);
 	PC3;
 }
-
 
 /* INTERRUPT C_INSTRUCTIONS */
 void set_interrupt (cpu *c, uint8_t state)

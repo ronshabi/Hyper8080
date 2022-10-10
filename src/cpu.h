@@ -1,8 +1,4 @@
-#ifndef CPU_H
-#define CPU_H
-
-#include <stdint.h>
-
+#pragma once
 #define PC1 c->pc += 1
 #define PC2 c->pc += 2
 #define PC3 c->pc += 3
@@ -90,5 +86,3 @@ void	 S_PopPSW (cpu *c);
 void C_Emulate (cpu *c, uint8_t opcode);
 void C_Unimplemented (cpu *c);
 void C_GenerateInterrupt (cpu *c, int intnum);
-
-#endif // CPU_H

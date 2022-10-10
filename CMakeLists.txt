@@ -1,14 +1,15 @@
 cmake_minimum_required(VERSION 3.1)
 project(8080_Emu C)
 
-set(CMAKE_C_STANDARD 99)
-
+set(CMAKE_C_STANDARD 11)
+#set(CMAKE_C_FLAGS "-O3")
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
-add_executable(8080_Emu src/main.c src/cpu.c src/cpu.h src/instructions.c src/instructions.h src/debug.c src/debug.h src/render.c src/render.h)
+add_executable(8080_Emu src/main.c src/cpu.c src/cpu.h src/instructions.c src/instructions.h src/debug.c src/debug.h src/render.c src/render.h src/sys.c src/sys.h src/defs.h)
 target_link_libraries(8080_Emu ${SDL2_LIBRARIES})
 target_link_libraries(8080_Emu m)
+
 # Testing
 enable_testing()
 add_executable(test_stack tests/test_stack.c)

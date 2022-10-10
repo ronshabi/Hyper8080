@@ -1,15 +1,13 @@
 /* Created to separate CPU core logic from instructions */
 
-#ifndef INSTRUCTIONS_H
-#define INSTRUCTIONS_H
-
-#include "cpu.h"
+#pragma once
+#include "defs.h"
 
 // https://en.wikipedia.org/wiki/FLAGS_register
 
 /* CARRY */
-void stc(cpu *c);	// STC		Set Carry
-void cmc(cpu *c);	// CMC		Complement Carry
+void stc (cpu *c); // STC		Set Carry
+void cmc (cpu *c); // CMC		Complement Carry
 
 /* JUMP */
 void pchl (cpu *c); // PCHL		Load program counter
@@ -129,6 +127,8 @@ void xra (cpu *c, const uint8_t *reg); // XRA A		Logical xor w/zero accumulator
 void xra_m (cpu *c);				   // XRA M
 void ora (cpu *c, const uint8_t *reg); // ORA A		Logical or w/ accumulator
 void ora_m (cpu *c);				   // ORA M
+void cmp (cpu *c, uint8_t *r);
+void cmp_m (cpu *c);
 
 /* DIRECT ADDRESSING C_INSTRUCTIONS */
 void sta (cpu *c);	// STA		Store accumulator direct
@@ -136,8 +136,5 @@ void lda (cpu *c);	// LDA		Load accumulator direct
 void shld (cpu *c); // SHLD		Store H and L direct
 void lhld (cpu *c); // LHLD		Load H and L direct
 
-
 /* INTERRUPT C_INSTRUCTIONS */
 void set_interrupt (cpu *c, uint8_t state);
-
-#endif // INSTRUCTIONS_H

@@ -1,8 +1,4 @@
-#include "cpu.h"
-#include "instructions.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include "debug.h"
+#include "defs.h"
 
 const uint8_t C_CYCLES[] = {
 	4, 10, 7, 5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5, 7,	 4,	 4,	 10, 16, 5,	 5,
@@ -78,19 +74,18 @@ void C_Init (cpu *c)
 }
 void C_DisAsm (cpu *c)
 {
-	printf ("0x%04x\t%02x\t\t%02x|%02x|%02x|%02x|%02x|%02x|%02x|%04x|%04x|%d%d%d%d%d\t%s", c->pc, C_GetByte (c, c->pc), c->a, c->b, c->c, c->d, c->e,
-			c->h, c->l, c->sp, c->pc, c->flag_z, c->flag_s, c->flag_p, c->flag_c, c->flag_ac, C_INSTRUCTIONS[C_GetByte (c, c->pc)]);
+	printf ("0x%04x\t%02x\t\t%02x|%02x|%02x|%02x|%02x|%02x|%02x|%04x|%d%d%d%d%d\t%s", c->pc, C_GetByte (c, c->pc), c->a, c->b, c->c, c->d, c->e, c->h,
+			c->l, c->sp, c->flag_z, c->flag_s, c->flag_p, c->flag_c, c->flag_ac, C_INSTRUCTIONS[C_GetByte (c, c->pc)]);
 }
 
 void C_GenerateInterrupt (cpu *c, int intnum)
 {
-#ifdef DEBUG_MODE_REGULAR
-	printf ("\n~~~~~~~~~~ INT %d -~~~~~~~~~~\n", intnum);
-#endif
-
-	S_Push (c, c->pc);
-	// rst intnum
-	c->pc = intnum * 8;
+	if (c->interrupts_enabled)
+	{
+		S_Push (c, c->pc);
+		c->pc				  = intnum * 8;
+		c->interrupts_enabled = 0;
+	}
 }
 
 // Memory
@@ -98,16 +93,7 @@ void	C_SetMemory (cpu *c, uint8_t *memory_ptr) { c->memory = memory_ptr; }
 uint8_t C_GetByte (cpu *c, uint16_t address) { return c->memory[address]; }
 void	C_SetByte (cpu *c, uint16_t address, uint8_t val)
 {
-	// Prevent writing to ROM
-	if (address >= 0x1fff && address <= 0x4000) { c->memory[address] = val; }
-	else
-	{
-		// fprintf (stderr, "\nWARNING: Write to ROM @ $%04x.\n", address);
-		//  left here for debug purposes
-		//  struct timespec ts = { .tv_sec = 1, .tv_nsec = 0};
-		//  nanosleep (&ts, NULL);
-		// exit (2);
-	}
+	if (address >= 0x2000 && address <= 0x4000) { c->memory[address] = val; }
 }
 uint16_t C_GetWord (cpu *c, uint16_t address) { return c->memory[address + 1] << 8 | c->memory[address]; }
 void	 C_SetWord (cpu *c, uint16_t address, uint16_t val)
@@ -278,12 +264,11 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xe8: rpe (c); break;
 		case 0xe0: rpo (c); break;
 
-		// IMMEDIATE C_INSTRUCTIONS
+		// IMMEDIATE
 		case 0x01: lxi_b (c); break;
 		case 0x11: lxi_d (c); break;
 		case 0x21: lxi_h (c); break;
 		case 0x31: lxi_sp (c); break;
-
 		case 0x3e: mvi (c, REG (a)); break;
 		case 0x06: mvi (c, REG (b)); break;
 		case 0x0e: mvi (c, REG (c)); break;
@@ -292,7 +277,6 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x26: mvi (c, REG (h)); break;
 		case 0x2e: mvi (c, REG (l)); break;
 		case 0x36: mvi_m (c); break;
-
 		case 0xc6: adi (c); break;
 		case 0xce: aci (c); break;
 		case 0xd6: sui (c); break;
@@ -361,7 +345,6 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x7b: mov (c, REG (a), REG (e)); break;
 		case 0x7c: mov (c, REG (a), REG (h)); break;
 		case 0x7d: mov (c, REG (a), REG (l)); break;
-
 		case 0x7e: mov_m_to_dest (c, REG (a)); break;
 		case 0x46: mov_m_to_dest (c, REG (b)); break;
 		case 0x4e: mov_m_to_dest (c, REG (c)); break;
@@ -369,11 +352,10 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x5e: mov_m_to_dest (c, REG (e)); break;
 		case 0x66: mov_m_to_dest (c, REG (h)); break;
 		case 0x6e: mov_m_to_dest (c, REG (l)); break;
-
 		case 0x02: stax_b (c); break;
 		case 0x12: stax_d (c); break;
 
-		// REGISTER PAIR C_INSTRUCTIONS
+		// REGISTER PAIR
 		case 0xc5: push_b (c); break;
 		case 0xd5: push_d (c); break;
 		case 0xe5: push_h (c); break;
@@ -398,7 +380,7 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xe3: xthl (c); break;
 		case 0xf9: sphl (c); break;
 
-		// SINGLE REGISTER C_INSTRUCTIONS
+		// SINGLE REGISTER
 		case 0x3c: inr (c, REG (a)); break;
 		case 0x04: inr (c, REG (b)); break;
 		case 0x0c: inr (c, REG (c)); break;
@@ -428,7 +410,7 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xd3: out (c); break;
 		case 0x76: hlt (c); break;
 
-		// REGISTER OR MEMORY TO ACCUMULATOR C_INSTRUCTIONS
+		// REGISTER OR MEMORY TO ACCUMULATOR
 		case 0x87: add (c, REG (a)); break;
 		case 0x80: add (c, REG (a)); break;
 		case 0x81: add (c, REG (a)); break;
@@ -485,26 +467,34 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xb4: ora (c, REG (h)); break;
 		case 0xb5: ora (c, REG (l)); break;
 		case 0xb6: ora_m (c); break;
+		case 0xb8: cmp (c, REG (b)); break;
+		case 0xb9: cmp (c, REG (c)); break;
+		case 0xba: cmp (c, REG (d)); break;
+		case 0xbb: cmp (c, REG (e)); break;
+		case 0xbc: cmp (c, REG (h)); break;
+		case 0xbd: cmp (c, REG (l)); break;
+		case 0xbe: cmp_m (c); break;
+		case 0xbf: cmp (c, REG (a)); break;
 
-		// DIRECT ADDRESSING C_INSTRUCTIONS
+		// DIRECT ADDRESSING
 		case 0x32: sta (c); break;
 		case 0x3a: lda (c); break;
 		case 0x22: shld (c); break;
 		case 0x2a: lhld (c); break;
 
-		// INTERRUPT TOGGLE C_INSTRUCTIONS
+		// INTERRUPT TOGGLE
 		case 0xfb: set_interrupt (c, 1); break;
 		case 0xf3: set_interrupt (c, 0); break;
 
 		// RST
-		case 0xc7: C_GenerateInterrupt (c, 0);
-		case 0xcf: C_GenerateInterrupt (c, 1);
-		case 0xd7: C_GenerateInterrupt (c, 2);
-		case 0xdf: C_GenerateInterrupt (c, 3);
-		case 0xe7: C_GenerateInterrupt (c, 4);
-		case 0xef: C_GenerateInterrupt (c, 5);
-		case 0xf7: C_GenerateInterrupt (c, 6);
-		case 0xff: C_GenerateInterrupt (c, 7);
+		case 0xc7: C_GenerateInterrupt (c, 0); break;
+		case 0xcf: C_GenerateInterrupt (c, 1); break;
+		case 0xd7: C_GenerateInterrupt (c, 2); break;
+		case 0xdf: C_GenerateInterrupt (c, 3); break;
+		case 0xe7: C_GenerateInterrupt (c, 4); break;
+		case 0xef: C_GenerateInterrupt (c, 5); break;
+		case 0xf7: C_GenerateInterrupt (c, 6); break;
+		case 0xff: C_GenerateInterrupt (c, 7); break;
 
 		default: C_Unimplemented (c); break;
 	}
