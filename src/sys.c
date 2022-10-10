@@ -32,6 +32,11 @@ void Sys_LoadROM (FILE *fptr, char *filename, unsigned char *memptr)
 
 void Sys_AllocateMemory (unsigned char **ptr, int howmuch) { *ptr = calloc (howmuch, 1); }
 
+void Sys_MirrorRAM (unsigned char **ptr, uint16_t from, uint16_t howmuch)
+{
+	for (int i = from; i < (from + howmuch); i++) { (*ptr)[from + i] = (*ptr)[i]; }
+}
+
 void Sys_PollEvents (cpu *c, SDL_Event *e, bool *quit)
 {
 	while (SDL_PollEvent (e) != 0)
