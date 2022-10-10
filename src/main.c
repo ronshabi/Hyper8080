@@ -32,6 +32,9 @@ int main (int argc, char *argv[])
 	long		   now = 0, lastInterrupt = 0, delta_interruptTime = 0;
 	int			   interrupt	   = 0;
 	long		   c_LastExecution = 0;
+	long		   c_CycleCount	   = 0;
+	long		   c_CycleLast	   = 0;
+	long		   c_CycleDelta	   = 0;
 	long		   c_Delta		   = 0;
 
 	Sys_AllocateMemory (&buffer, 0xffff);
@@ -54,24 +57,22 @@ int main (int argc, char *argv[])
 	//
 	while (!quit && !c.halt)
 	{
-		// Get user input
-		Sys_PollEvents (&c, &e, &quit);
 
-		// Get time
-		now = Sys_UnixTime ();
+		now			 = Sys_UnixTime ();
+		c_CycleCount = c.cycles;
+		c_CycleDelta = c_CycleCount - c_CycleLast;
+		c_Delta		 = now - c_LastExecution;
+		Sys_PollEvents (&c, &e, &quit);
 
 		//
 		// Emulate
-		// 2mhz -> 2 million cycles per second -> -> 2 cycles per 1000 ns
-
-#ifdef DEBUG_MODE_REGULAR
-		C_DisAsm (&c);
-#endif
-		c_currentOpcode = C_GetByte (&c, c.pc);
-		C_Emulate (&c, c_currentOpcode);
-#ifdef DEBUG_MODE_REGULAR
-		printf ("\n");
-#endif
+		// 2mhz -> 2 million cycles per second
+		if (c_Delta > 1000000000 / 1000 * 4)
+		{
+			printf ("Cycles: %lu\n", c_CycleDelta);
+			c_CycleLast		= c_CycleCount;
+			c_LastExecution = now;
+		}
 
 		// Send interrupts @ 60hz
 		delta_interruptTime = now - lastInterrupt;
@@ -85,6 +86,11 @@ int main (int argc, char *argv[])
 				interrupt	  = 1 - interrupt;
 			}
 		}
+
+		// C_DisAsm (&c);
+		c_currentOpcode = C_GetByte (&c, c.pc);
+		C_Emulate (&c, c_currentOpcode);
+		// printf ("\n");
 	}
 
 	R_Exit (&Window, &Renderer);
