@@ -5,7 +5,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define HZ(v) (1.0 / v)
+#define HZ(v) (1000000000 / v)
 #define FPS	  20
 
 #include "defs.h"
@@ -30,7 +30,9 @@ int main (int argc, char *argv[])
 	SDL_Window	  *Window	= NULL;
 	SDL_Renderer  *Renderer = NULL;
 	long		   now = 0, lastInterrupt = 0, delta_interruptTime = 0;
-	int			   sign = 0;
+	int			   interrupt	   = 0;
+	long		   c_LastExecution = 0;
+	long		   c_Delta		   = 0;
 
 	Sys_AllocateMemory (&buffer, 0xffff);
 	Sys_LoadROM (f, argv[1], buffer);
@@ -60,7 +62,8 @@ int main (int argc, char *argv[])
 
 		//
 		// Emulate
-		//
+		// 2mhz -> 2 million cycles per second -> -> 2 cycles per 1000 ns
+
 #ifdef DEBUG_MODE_REGULAR
 		C_DisAsm (&c);
 #endif
@@ -72,14 +75,14 @@ int main (int argc, char *argv[])
 
 		// Send interrupts @ 60hz
 		delta_interruptTime = now - lastInterrupt;
-		if (delta_interruptTime > (long)(1E9 / 120))
+		if (delta_interruptTime > HZ (120))
 		{
 			if (c.interrupts_enabled)
 			{
-				if (sign == 1) { R_Render (&c, 0x2400, &Renderer); }
-				C_GenerateInterrupt (&c, sign + 1);
+				if (interrupt == 1) { R_Render (&c, 0x2400, &Renderer); }
+				C_GenerateInterrupt (&c, interrupt + 1);
 				lastInterrupt = now;
-				sign		  = 1 - sign;
+				interrupt	  = 1 - interrupt;
 			}
 		}
 	}

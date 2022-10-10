@@ -551,6 +551,10 @@ void in (cpu *c)
 		c->a = (c->shift >> (8 - c->shift_amt)) & 0xff;
 	}
 
+	// Add cycles
+	// FIXME: should be removed if unnecessary
+	c->cycles += 3;
+
 	PC2;
 }
 void out (cpu *c)
@@ -587,6 +591,11 @@ void out (cpu *c)
 		// OUT DEVICE 6
 		c->o6 = c->a;
 	}
+
+	// Add cycles
+	// FIXME: should be removed if unnecessary
+	c->cycles += 3;
+
 	PC2;
 }
 void hlt (cpu *c)
