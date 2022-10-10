@@ -496,8 +496,6 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xef: C_GenerateInterrupt (c, 5); break;
 		case 0xf7: C_GenerateInterrupt (c, 6); break;
 		case 0xff: {
-
-			exit (7);
 			C_GenerateInterrupt (c, 7);
 			break;
 		};

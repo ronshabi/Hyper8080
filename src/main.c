@@ -67,10 +67,20 @@ int main (int argc, char *argv[])
 		//
 		// Emulate
 		// 2mhz -> 2 million cycles per second
-		if (c_Delta > 1000000000 / 1000 * 4)
+		if (c_Delta > 1000000000 / 1000 * 2)
 		{
 			printf ("Cycles: %lu\n", c_CycleDelta);
-			c_CycleLast		= c_CycleCount;
+
+			// sleep based on cycle delta
+			if (c_CycleDelta > 10000)
+			{
+				long			howmuchsleep = c_CycleDelta - 10000;
+				struct timespec sleepts;
+				sleepts.tv_sec	= 0;
+				sleepts.tv_nsec = howmuchsleep * 1000;
+				nanosleep (&sleepts, NULL);
+				c_CycleLast = c_CycleCount;
+			}
 			c_LastExecution = now;
 		}
 

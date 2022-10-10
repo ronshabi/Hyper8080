@@ -74,6 +74,8 @@ void call (cpu *c)
 	// +3
 	S_Push (c, c->pc + 3);
 	jmp (c);
+
+	c->cycles += 6;
 }
 void cc (cpu *c)
 {
@@ -117,7 +119,11 @@ void cpo (cpu *c)
 }
 
 /* RET */
-void ret (cpu *c) { c->pc = S_Pop (c); }
+void ret (cpu *c)
+{
+	c->pc = S_Pop (c);
+	c->cycles += 6;
+}
 void rc (cpu *c)
 {
 	if (c->flag_c) { ret (c); }
