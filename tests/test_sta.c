@@ -19,7 +19,7 @@ int main (void)
 
 	sta (&c);
 
-	if (cpu_get_byte (&c, 0xcafe) == 0xfe) { return 0; }
+	if (C_GetByte (&c, 0xcafe) == 0xfe) { return 0; }
 
 	return 1;
 }

@@ -1,13 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
-#include <time.h>
-#include <unistd.h>
-
-#define HZ(v) (1000000000 / v)
-#define FPS	  20
-
 #include "defs.h"
 
 int main (int argc, char *argv[])
@@ -26,16 +16,16 @@ int main (int argc, char *argv[])
 	unsigned char *buffer;
 	uint8_t		   c_currentOpcode;
 	SDL_Event	   e;
-	bool		   quit		= false;
-	SDL_Window	  *Window	= NULL;
-	SDL_Renderer  *Renderer = NULL;
-	long		   now = 0, lastInterrupt = 0, delta_interruptTime = 0;
-	int			   interrupt	   = 0;
-	long		   c_LastExecution = 0;
-	long		   c_CycleCount	   = 0;
-	long		   c_CycleLast	   = 0;
-	long		   c_CycleDelta	   = 0;
-	long		   c_Delta		   = 0;
+	bool		   quit				  = false;
+	SDL_Window	  *Window			  = NULL;
+	SDL_Renderer  *Renderer			  = NULL;
+	long		   now				  = 0;
+	long		   ms_Interrupt_Last  = 0;
+	long		   ms_Input_Last	  = 0;
+	long		   ms_Interrupt_Delta = 0;
+	const uint8_t *keyboard			  = SDL_GetKeyboardState (NULL);
+
+	int interrupt = 0;
 
 	Sys_AllocateMemory (&buffer, 0xffff);
 	Sys_LoadROM (f, argv[1], buffer);
@@ -50,7 +40,6 @@ int main (int argc, char *argv[])
 	R_CreateWindow (&Window, &Renderer, WINDOW_TITLE, WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_SCALE);
 	R_ClearScreen (&Renderer);
 	R_Update (&Renderer);
-	R_SetColorWhite (&Renderer);
 
 	//
 	// Event loop
@@ -58,56 +47,78 @@ int main (int argc, char *argv[])
 	while (!quit && !c.halt)
 	{
 
-		now			 = SDL_GetTicks ();
-		c_CycleCount = c.cycles;
-		c_CycleDelta = c_CycleCount - c_CycleLast;
-		c_Delta		 = now - c_LastExecution;
-		Sys_PollEvents (&c, &e, &quit);
+		now = SDL_GetTicks ();
 
-		//
-		// Emulate
-		// 2mhz -> 2 million cycles per second
-		if (c_Delta > 2000)
+		if ((now - ms_Interrupt_Last) > 1000 / 120 || ms_Interrupt_Last > now)
 		{
-			printf ("Cycles: %lu\n", SDL_GetTicks ());
-
-			// sleep based on cycle delta
-			if (c_CycleDelta > 2000)
+			ms_Interrupt_Last = now;
+			if (interrupt == 1)
 			{
-				//				long			howmuchsleep = c_CycleDelta - 10000;
-				//				struct timespec sleepts;
-				//				sleepts.tv_sec	= 0;
-				//				sleepts.tv_nsec = howmuchsleep * 1000;
-				//				nanosleep (&sleepts, NULL);
-				c_CycleLast = c_CycleCount;
+				R_Render (&c, 0x2400, &Renderer);
+				// send RST 2
+				C_GenerateInterrupt (&c, 0x10);
 			}
-			c_LastExecution = now;
+			else
+			{
+				// send RST 1
+				C_GenerateInterrupt (&c, 0x08);
+			}
+			interrupt = 1 - interrupt;
 		}
 
-		// Send interrupts @ 60hz
-		delta_interruptTime = now - lastInterrupt;
-		if (delta_interruptTime > 1000 / 120)
+		if (now - ms_Input_Last > 1000 / 30 || ms_Input_Last > now)
 		{
-			if (c.interrupts_enabled)
+			c.i0 &= 0b10001111;
+			c.i1 &= 0b10001000;
+			c.i2 &= 0b10001011;
+			// Sys_PollEvents (&c, &e, &quit);
+
+			SDL_PumpEvents ();
+
+			if (keyboard[SDL_SCANCODE_Q])
 			{
-				if (interrupt == 1) { R_Render (&c, 0x2400, &Renderer); }
-				C_GenerateInterrupt (&c, interrupt + 1);
-				lastInterrupt = now;
-				interrupt	  = 1 - interrupt;
+				println ("I wanna quit!");
+				quit = true;
 			}
+
+			if (keyboard[SDL_SCANCODE_C]) { c.i1 |= 1; }
+
+			if (keyboard[SDL_SCANCODE_1]) { c.i1 |= 0x4; }
+
+			if (keyboard[SDL_SCANCODE_SPACE])
+			{
+				c.i1 |= 0x10;
+				c.i0 |= 0x10;
+			}
+
+			if (keyboard[SDL_SCANCODE_LEFT]) { c.i1 |= 0x20; }
+
+			if (keyboard[SDL_SCANCODE_RIGHT]) { c.i1 |= 0x40; }
+
+			ms_Input_Last = now;
 		}
 
-		// C_DisAsm (&c);
+#ifdef DEBUG_MODE_REGULAR
+		C_DisAsm (&c);
+#endif
 		c_currentOpcode = C_GetByte (&c, c.pc);
-		c.i0			= 0b00001110;
-		c.i1			= 0b10001101;
-		c.i2			= 0b10001000;
+		c.pc += 1;
+
+#ifdef DEBUG_MODE_STOP
+		if (c.instructions == DEBUG_MODE_STOP_AT_INSTRUCTION) { quit = true; }
+#endif
 		C_Emulate (&c, c_currentOpcode);
-		// printf ("\n");
+
+#ifdef DEBUG_MODE_REGULAR
+		printf ("\n");
+#endif
 	}
 
 	R_Exit (&Window, &Renderer);
 	free (buffer);
-
+#ifdef DEBUG_MODE_STOP
+	printf ("Stopped at instruction %lu\n", c.instructions);
+	printf ("Cycles: %lu\n", c.cycles);
+#endif
 	return 0;
 }
