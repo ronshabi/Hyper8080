@@ -1,12 +1,5 @@
 #include "sys.h"
 
-long Sys_UnixTime (void)
-{
-	struct timespec ts;
-	clock_gettime (CLOCK_REALTIME, &ts);
-	return ts.tv_sec * 1E9 + ts.tv_nsec;
-}
-
 void Sys_LoadROM (FILE *fptr, char *filename, unsigned char *memptr)
 {
 	fptr = fopen (filename, "rb"); // (try to) open file
@@ -47,37 +40,38 @@ void Sys_PollEvents (cpu *c, SDL_Event *e, bool *quit)
 			case SDL_KEYDOWN: {
 				switch (e->key.keysym.sym)
 				{
-					case SDLK_q: *quit = true; break;
-					case SDLK_RETURN: c->i1 |= 1 << 0; break;
-					case SDLK_1: c->i1 |= 1 << 2; break;
-					case SDLK_2: c->i1 |= 1 << 1; break;
-					case SDLK_DELETE: c->i2 |= 1 << 2; break;
-					case SDLK_SPACE: {
-						c->i0 |= 1 << 4;
-						c->i1 |= 1 << 4;
-						c->i2 |= 1 << 4;
-						break;
-					}
-					case SDLK_LEFT: {
-						c->i0 |= 1 << 5;
-						c->i1 |= 1 << 5;
-						c->i2 |= 1 << 5;
-						break;
-					}
-					case SDLK_RIGHT: {
-						c->i0 |= 1 << 6;
-						c->i1 |= 1 << 6;
-						c->i2 |= 1 << 6;
-						break;
-					}
+					case SDLK_q: *quit = true; break; // Quit
+
+					case SDLK_RETURN:
+						c->i1 |= 1;
+						println ("+1 Coin");
+						break; // Coin
+					case SDLK_1:
+						c->i1 |= 0x4;
+						println ("Player 1 Start");
+						break; // P1 Start
+					case SDLK_SPACE:
+						c->i1 |= 0x10;
+						println ("Player 1 Fire");
+						break; // Fire
+					case SDLK_LEFT:
+						c->i1 |= 0x20;
+						println ("Player 1 Left");
+						break; // P1 Left
+					case SDLK_RIGHT:
+						c->i1 |= 0x40;
+						println ("Player 1 Right");
+						break; // P1 Right
 				}
 			}
 			case SDL_KEYUP: {
 				switch (e->key.keysym.sym)
 				{
-					case SDLK_SPACE: c->i1 &= 0b10001111; break; // P1 Shoot
-					case SDLK_LEFT: c->i1 &= 0xdf; break;		 // P1 Left
-					case SDLK_RIGHT: c->i1 &= 0xbf; break;		 // P1 Right
+					case SDLK_RETURN: c->i1 &= ~0x1; break; // Coin
+					case SDLK_1: c->i1 &= ~0x4; break;		// P1 Start
+					case SDLK_SPACE: c->i1 &= ~0x10; break; // Fire
+					case SDLK_LEFT: c->i1 &= ~0x20; break;	// P1 Left
+					case SDLK_RIGHT: c->i1 &= ~0x40; break; // P1 Right
 				}
 			}
 		}

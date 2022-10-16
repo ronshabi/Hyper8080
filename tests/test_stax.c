@@ -19,7 +19,7 @@ int main (void)
 
 	int passed = 0;
 
-	if (cpu_get_byte (&c, 0x3333) == 0x75) { passed++; }
+	if (C_GetByte (&c, 0x3333) == 0x75) { passed++; }
 
 	C_SetDE (&c, 0x4545);
 	C_SetByte (&c, 0x4545, 0xea);
@@ -27,7 +27,7 @@ int main (void)
 
 	stax_d (&c);
 
-	if (cpu_get_byte (&c, 0x4545) == 0xb2) { passed++; }
+	if (C_GetByte (&c, 0x4545) == 0xb2) { passed++; }
 
 	if (passed == 2) { return 0; }
 

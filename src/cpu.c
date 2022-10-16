@@ -32,7 +32,9 @@ const char *C_INSTRUCTIONS[] = {
 	"JPE",	   "XCHG",	  "CPE",	 "NOP",		"XRI",	   "RST 5",	  "RP",		 "POP PSW", "JP",	   "DI",	  "CP",		 "PUSH PSW", "ORI",
 	"RST 6",   "RM",	  "SPHL",	 "JM",		"EI",	   "CM",	  "NOP",	 "CPI",		"RST 7"};
 
+//
 // Core
+//
 void C_Init (cpu *c)
 {
 	c->a = 0;
@@ -78,17 +80,19 @@ void C_DisAsm (cpu *c)
 			c->l, c->sp, c->flag_z, c->flag_s, c->flag_p, c->flag_c, c->flag_ac, C_INSTRUCTIONS[C_GetByte (c, c->pc)]);
 }
 
-void C_GenerateInterrupt (cpu *c, int intnum)
+void C_GenerateInterrupt (cpu *c, uint16_t addr)
 {
 	if (c->interrupts_enabled)
 	{
 		S_Push (c, c->pc);
-		c->pc				  = intnum * 8;
+		c->pc				  = addr;
 		c->interrupts_enabled = 0;
 	}
 }
 
+//
 // Memory
+//
 void	C_SetMemory (cpu *c, uint8_t *memory_ptr) { c->memory = memory_ptr; }
 uint8_t C_GetByte (cpu *c, uint16_t address) { return c->memory[address]; }
 void	C_SetByte (cpu *c, uint16_t address, uint8_t val)
@@ -102,7 +106,9 @@ void	 C_SetWord (cpu *c, uint16_t address, uint16_t val)
 	C_SetByte (c, address + 1, val >> 8);
 }
 
+//
 // Register pairs
+//
 uint16_t C_GetBC (cpu *c) { return c->b << 8 | c->c; }
 uint16_t C_GetDE (cpu *c) { return c->d << 8 | c->e; }
 uint16_t C_GetHL (cpu *c) { return c->h << 8 | c->l; }
@@ -133,11 +139,13 @@ uint16_t C_DerefDE (cpu *c) { return C_GetByte (c, C_GetDE (c)); }
 uint16_t C_DerefHL (cpu *c) { return C_GetByte (c, C_GetHL (c)); }
 uint16_t C_DerefSP (cpu *c, uint16_t offset) { return C_GetByte (c, c->sp + offset); }
 
+//
 // Stack
-void S_Push (cpu *c, uint16_t val)
+//
+void S_Push (cpu *c, uint16_t word)
 {
 	c->sp -= 2;
-	C_SetWord (c, c->sp, val);
+	C_SetWord (c, c->sp, word);
 }
 uint16_t S_Pop (cpu *c)
 {
@@ -157,7 +165,9 @@ void S_PopPSW (cpu *c)
 	c->flag_c	 = psw & 0x1;
 }
 
+//
 // Flags
+//
 uint8_t F_Parity (uint8_t n)
 {
 	uint8_t parity = 0;
@@ -195,7 +205,10 @@ void C_Flags_SetZSP (cpu *c, uint8_t val)
 }
 void C_Flags_SetCarryAdd (cpu *c, uint8_t a, uint8_t b, uint8_t carry) { c->flag_c = F_Carry (a, b, carry); }
 void C_Flags_SetCarryFromWord (cpu *c, uint16_t num) { c->flag_c = (num > 0xff); }
-// Emualtion
+
+//
+// Emulation
+//
 void C_Unimplemented (cpu *c)
 {
 	printf ("\nUNIMPLEMENTED INSTRUCTION %02x\n", C_GetByte (c, c->pc));
@@ -203,7 +216,7 @@ void C_Unimplemented (cpu *c)
 	printf ("Cycles: %lu\n", c->cycles);
 	exit (1);
 }
-void C_Emulate (cpu *c, uint8_t opcode)
+long C_Emulate (cpu *c, uint8_t opcode)
 {
 	/* READ HEADER FILES FOR INSTRUCTION DOCUMENTATION */
 	c->instructions++;
@@ -221,13 +234,14 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x30:
 		case 0x38:
 		case 0xcb:
-		case 0xd9:
 		case 0xdd:
 		case 0xed:
-		case 0xfd: PC1; break;
+		case 0xfd: break;
 
+		case 0xd9: ret (c); break;
 		// CARRY
 		case 0x37: stc (c); break;
+		case 0x2f: cma (c); break;
 		case 0x3f: cmc (c); break;
 
 		// JUMP
@@ -420,12 +434,12 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x85: add (c, REG (a)); break;
 		case 0x86: add_m (c); break;
 		case 0x8f: adc (c, REG (a)); break;
-		case 0x88: adc (c, REG (a)); break;
-		case 0x89: adc (c, REG (a)); break;
-		case 0x8a: adc (c, REG (a)); break;
-		case 0x8b: adc (c, REG (a)); break;
-		case 0x8c: adc (c, REG (a)); break;
-		case 0x8d: adc (c, REG (a)); break;
+		case 0x88: adc (c, REG (b)); break;
+		case 0x89: adc (c, REG (c)); break;
+		case 0x8a: adc (c, REG (d)); break;
+		case 0x8b: adc (c, REG (e)); break;
+		case 0x8c: adc (c, REG (h)); break;
+		case 0x8d: adc (c, REG (l)); break;
 		case 0x8e: adc_m (c); break;
 		case 0x97: sub (c, REG (a)); break;
 		case 0x90: sub (c, REG (b)); break;
@@ -487,15 +501,17 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xf3: set_interrupt (c, 0); break;
 
 		// RST
-		case 0xc7: C_GenerateInterrupt (c, 0); break;
-		case 0xcf: C_GenerateInterrupt (c, 1); break;
-		case 0xd7: C_GenerateInterrupt (c, 2); break;
-		case 0xdf: C_GenerateInterrupt (c, 3); break;
-		case 0xe7: C_GenerateInterrupt (c, 4); break;
-		case 0xef: C_GenerateInterrupt (c, 5); break;
-		case 0xf7: C_GenerateInterrupt (c, 6); break;
-		case 0xff: C_GenerateInterrupt (c, 7); break;
+		case 0xc7: C_GenerateInterrupt (c, 0x0); break;
+		case 0xcf: C_GenerateInterrupt (c, 0x8); break;
+		case 0xd7: C_GenerateInterrupt (c, 0x10); break;
+		case 0xdf: C_GenerateInterrupt (c, 0x18); break;
+		case 0xe7: C_GenerateInterrupt (c, 0x20); break;
+		case 0xef: C_GenerateInterrupt (c, 0x28); break;
+		case 0xf7: C_GenerateInterrupt (c, 0x30); break;
+		case 0xff: C_GenerateInterrupt (c, 0x38); break;
 
 		default: C_Unimplemented (c); break;
 	}
+
+	return C_CYCLES[opcode];
 }

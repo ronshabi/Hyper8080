@@ -53,7 +53,6 @@ void R_CompletePixel (SDL_Renderer **ren, int r, int g, int b, int x, int y)
 }
 
 void R_SetColorBlack (SDL_Renderer **ren) { SDL_SetRenderDrawColor (*ren, 0, 0, 0, 0xff); }
-
 void R_SetColorWhite (SDL_Renderer **ren) { SDL_SetRenderDrawColor (*ren, 0xff, 0xff, 0xff, 0xff); }
 
 void R_PlacePixel (SDL_Renderer **ren, int x, int y) { SDL_RenderDrawPoint (*ren, x, y); }
@@ -64,19 +63,18 @@ void R_PlacePixel (SDL_Renderer **ren, int x, int y) { SDL_RenderDrawPoint (*ren
 void R_Render (cpu *c, int vramOffset, SDL_Renderer **ren)
 {
 	R_ClearScreen (ren);
+	R_SetColorWhite (ren);
 
 	for (int x = 0; x < WINDOW_WIDTH; x++)
 	{
 		for (int y = 0; y < WINDOW_HEIGHT; y += 8)
 		{
+
 			uint8_t pixel = c->memory[vramOffset + (x * (WINDOW_HEIGHT / 8)) + (y / 8)];
 
 			for (int bit = 0; bit < 8; bit++)
 			{
-				R_SetColorBlack (ren);
-				if ((pixel >> bit) & 1)
-				{
-					R_SetColorWhite (ren);
+				if ((pixel >> bit) & 1) {
 					R_PlacePixel (ren, x, WINDOW_HEIGHT - y - bit);
 				}
 			}

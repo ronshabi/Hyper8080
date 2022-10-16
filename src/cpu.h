@@ -1,13 +1,13 @@
 #pragma once
 #define PC1 c->pc += 1
 #define PC2 c->pc += 2
-#define PC3 c->pc += 3
 
 // Quickly access register location
 #define REG(reg) &(c->reg)
 
 // Quickly get immediate
-#define GET_IMMEDIATE_BYTE C_GetByte (c, c->pc + 1)
+#define ARG8  C_GetByte (c, c->pc)
+#define ARG16 C_GetWord (c, c->pc)
 
 #define FLIP(n) (~n + 1)
 
@@ -77,12 +77,12 @@ void	C_Flags_SetCarryAdd (cpu *c, uint8_t a, uint8_t b, uint8_t carry);
 void	C_Flags_SetCarryFromWord (cpu *c, uint16_t num);
 
 // Stack
-void	 S_Push (cpu *c, uint16_t val);
+void	 S_Push (cpu *c, uint16_t word);
 uint16_t S_Pop (cpu *c);
 void	 S_PushPSW (cpu *c);
 void	 S_PopPSW (cpu *c);
 
 // Emulation
-void C_Emulate (cpu *c, uint8_t opcode);
+long C_Emulate (cpu *c, uint8_t opcode);
 void C_Unimplemented (cpu *c);
-void C_GenerateInterrupt (cpu *c, int intnum);
+void C_GenerateInterrupt (cpu *c, uint16_t addr);

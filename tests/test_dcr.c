@@ -18,7 +18,7 @@ int main (void)
 
 	dcr_m (&c);
 
-	if (cpu_get_byte (&c, 0x3a7c) == 0x3f) { return 0; }
+	if (C_GetByte (&c, 0x3a7c) == 0x3f) { return 0; }
 
 	free (memory);
 	return 1;
