@@ -9,7 +9,7 @@
 #define ARG8  C_GetByte (c, c->pc)
 #define ARG16 C_GetWord (c, c->pc)
 
-#define FLIP(n) (~n + 1)
+#define FLIP(n) (~(n) + 1)
 
 // Device numbers
 // Output
@@ -36,7 +36,7 @@ typedef struct cpu
 	uint8_t	 halt, interrupts_enabled;
 
 	// flags
-	uint8_t flag_z, flag_s, flag_p, flag_c, flag_ac;
+	bool flag_z, flag_s, flag_p, flag_c, flag_ac;
 
 	// iX - input port X, oX - output port X
 	uint8_t i0, i1, i2, i3, o2, o3, o4, o5, o6;
@@ -44,6 +44,9 @@ typedef struct cpu
 	// bitshift register
 	uint16_t shift;
 	uint8_t	 shift_amt;
+
+	// debugging tools
+	uint8_t paused;
 
 } cpu;
 
@@ -83,6 +86,6 @@ void	 S_PushPSW (cpu *c);
 void	 S_PopPSW (cpu *c);
 
 // Emulation
-long C_Emulate (cpu *c, uint8_t opcode);
+void C_Emulate (cpu *c, uint8_t opcode);
 void C_Unimplemented (cpu *c);
 void C_GenerateInterrupt (cpu *c, uint16_t addr);

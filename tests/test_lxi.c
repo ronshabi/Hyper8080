@@ -15,14 +15,10 @@ int main (void)
 	int passed = 0;
 
 	C_SetWord (&c, 1, 0xcafe);
-	c.pc = 0;
 	lxi_b (&c);
-
 	if (c.b == 0xca && c.c == 0xfe) { passed++; }
 
 	C_SetWord (&c, 1, 0xefac);
-	c.pc = 0;
-
 	lxi_d (&c);
 
 	if (C_GetDE (&c) == 0xefac) { passed++; }
@@ -31,6 +27,7 @@ int main (void)
 	c.pc = 0;
 
 	lxi_h (&c);
+	c.pc++;
 
 	if (C_GetHL (&c) == 0xeb12) { passed++; }
 
@@ -38,6 +35,7 @@ int main (void)
 	c.pc = 0;
 
 	lxi_sp (&c);
+	c.pc++;
 
 	if (c.sp == 0x1f8e) { passed++; }
 

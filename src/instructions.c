@@ -125,7 +125,7 @@ void cm (cpu *c)
 	uint16_t to = ARG16;
 	PC2;
 
-	if (!c->flag_s) { call_addr (c, to); }
+	if (c->flag_s) { call_addr (c, to); }
 }
 void cp (cpu *c)
 {
@@ -150,42 +150,39 @@ void cpo (cpu *c)
 }
 
 /* RET */
-void ret (cpu *c)
-{
-	c->pc = S_Pop (c);
-}
+void ret (cpu *c) { c->pc = S_Pop (c); }
 
 void rc (cpu *c)
 {
-	if (c->flag_c) { ret (c); }
+	if (c->flag_c) { c->pc = S_Pop (c); }
 }
 void rnc (cpu *c)
 {
-	if (!c->flag_c) { ret (c); }
+	if (!c->flag_c) { c->pc = S_Pop (c); }
 }
 void rz (cpu *c)
 {
-	if (c->flag_z) { ret (c); }
+	if (c->flag_z) { c->pc = S_Pop (c); }
 }
 void rnz (cpu *c)
 {
-	if (!c->flag_z) { ret (c); }
+	if (!c->flag_z) { c->pc = S_Pop (c); }
 }
 void rm (cpu *c)
 {
-	if (c->flag_s) { ret (c); }
+	if (c->flag_s) { c->pc = S_Pop (c); }
 }
 void rp (cpu *c)
 {
-	if (!c->flag_s) { ret (c); }
+	if (!c->flag_s) { c->pc = S_Pop (c); }
 }
 void rpe (cpu *c)
 {
-	if (c->flag_p) { ret (c); }
+	if (c->flag_p) { c->pc = S_Pop (c); }
 }
 void rpo (cpu *c)
 {
-	if (!c->flag_p) { ret (c); }
+	if (!c->flag_p) { c->pc = S_Pop (c); }
 }
 
 /* IMMEDIATE C_INSTRUCTIONS */
@@ -272,7 +269,7 @@ void ori (cpu *c)
 	uint16_t result = c->a | ARG8;
 	c->a			= result & 0xff;
 	C_Flags_SetCarryFromWord (c, result);
-	C_Flags_SetZSP (c, c->a);
+	C_Flags_SetZSP (c, result & 0xff);
 	PC1;
 }
 void cpi (cpu *c)
@@ -285,10 +282,7 @@ void cpi (cpu *c)
 }
 
 /* DATA TRANSFER */
-void ldax_b (cpu *c)
-{
-	c->a = C_DerefBC (c);
-}
+void ldax_b (cpu *c) { c->a = C_DerefBC (c); }
 void ldax_d (cpu *c) { c->a = C_DerefDE (c); }
 void mov (cpu *c, uint8_t *dest, const uint8_t *src) { *dest = *src; }
 void mov_m_to_dest (cpu *c, uint8_t *dest)
@@ -313,29 +307,25 @@ void pop_psw (cpu *c) { S_PopPSW (c); }
 void dad_b (cpu *c)
 {
 	uint32_t result = C_GetBC (c) + C_GetHL (c);
-	if (result > 0xffff) { c->flag_c = 1; }
-	else { c->flag_c = 0; }
+	C_Flags_SetCarryFromWord (c, result & 0xffff);
 	C_SetHL (c, result & 0xffff);
 }
 void dad_d (cpu *c)
 {
 	uint32_t result = C_GetDE (c) + C_GetHL (c);
-	if (result > 0xffff) { c->flag_c = 1; }
-	else { c->flag_c = 0; }
+	C_Flags_SetCarryFromWord (c, result & 0xffff);
 	C_SetHL (c, result & 0xffff);
 }
 void dad_h (cpu *c)
 {
 	uint32_t result = C_GetHL (c) + C_GetHL (c);
-	if (result > 0xffff) { c->flag_c = 1; }
-	else { c->flag_c = 0; }
+	C_Flags_SetCarryFromWord (c, result & 0xffff);
 	C_SetHL (c, result & 0xffff);
 }
 void dad_sp (cpu *c)
 {
 	uint32_t result = c->sp + C_GetHL (c);
-	if (result > 0xffff) { c->flag_c = 1; }
-	else { c->flag_c = 0; }
+	C_Flags_SetCarryFromWord (c, result & 0xffff);
 	C_SetHL (c, result & 0xffff);
 }
 void inx_b (cpu *c) { C_SetBC (c, C_GetBC (c) + 1); }
@@ -435,7 +425,7 @@ void rrc (cpu *c)
 	uint8_t bit0 = (c->a & 0x1);
 	c->a >>= 1;
 	c->a |= bit0 << 7;
-	c->flag_c = bit0;
+	c->flag_c = (bit0 != 0);
 }
 void ral (cpu *c)
 {
@@ -448,7 +438,7 @@ void rar (cpu *c)
 {
 	uint8_t bit0 = c->a & 0x1;
 	c->a		 = c->a >> 1;
-	c->a		 = c->a | (c->flag_c << 7);
+	c->a		 = (c->a | (c->flag_c << 7));
 	c->flag_c	 = bit0;
 }
 
@@ -465,7 +455,7 @@ void in (cpu *c)
 	if (device_number == DEVICE_INP0) { c->a = c->i0; }
 	else if (device_number == DEVICE_INP1) { c->a = c->i1; }
 	else if (device_number == DEVICE_INP2) { c->a = c->i2; }
-	else if (device_number == DEVICE_SHIFT_IN) { c->a = (c->shift >> (8 - c->shift_amt)); }
+	else if (device_number == DEVICE_SHIFT_IN) { c->a = (c->shift >> ((8 - c->shift_amt)) & 0xff); }
 }
 void out (cpu *c)
 {
@@ -475,16 +465,19 @@ void out (cpu *c)
 #ifdef DEBUG_MODE_REGULAR
 	printf (" <DEVICE = %d>", device_number);
 #endif
-	if (device_number == DEVICE_SHIFT_AMT) { c->shift_amt = c->a & 0x7; }
+	if (device_number == 2) { c->shift_amt = (c->a & 7); }
 	else if (device_number == DEVICE_SOUND1) { c->o3 = c->a; }
-	else if (device_number == DEVICE_SHIFT_DATA)
+	else if (device_number == 4)
 	{
+
 		c->shift >>= 8;
-		c->shift |= c->a << 8;
+		c->shift |= (c->a << 8);
+		//		c->paused = 1;
 	}
 	else if (device_number == DEVICE_SOUND2) { c->o5 = c->a; }
 	else if (device_number == DEVICE_WATCHDOG) { c->o6 = c->a; }
 }
+
 void hlt (cpu *c)
 {
 #ifdef DEBUG_MODE_REGULAR
@@ -552,7 +545,7 @@ void sbb_m (cpu *c)
 }
 void ana (cpu *c, const uint8_t *reg)
 {
-	uint16_t result = c->a & *reg;
+	uint16_t result = (c->a & (*reg));
 	C_Flags_SetZSP (c, result & 0xff);
 	C_Flags_SetCarryFromWord (c, result);
 	c->a = result & 0xff;
@@ -566,7 +559,7 @@ void ana_m (cpu *c)
 }
 void xra (cpu *c, const uint8_t *reg)
 {
-	uint16_t result = c->a ^ *reg;
+	uint16_t result = (c->a ^ (*reg));
 	C_Flags_SetZSP (c, result & 0xff);
 	C_Flags_SetCarryFromWord (c, result);
 	c->a = result & 0xff;
@@ -615,30 +608,22 @@ void sta (cpu *c)
 }
 void lda (cpu *c)
 {
-	uint16_t adr = ARG16;
+	c->a = C_GetByte (c, ARG16);
 #ifdef DEBUG_MODE_REGULAR
-	printf (" $%04x", adr);
+	printf (" $%04x", ARG16);
 #endif
-	c->a = C_GetByte (c, adr);
-
 	PC2;
 }
 void shld (cpu *c)
 {
-	uint16_t adr = ARG16;
-	C_SetWord (c, adr, C_GetHL (c));
+	C_SetWord (c, ARG16, C_GetHL (c));
 	PC2;
 }
 void lhld (cpu *c)
 {
-	uint16_t adr  = ARG16;
-	uint16_t word = C_GetWord (c, adr);
-	C_SetHL (c, word);
+	C_SetHL (c, C_GetWord (c, ARG16));
 	PC2;
 }
 
 /* INTERRUPT C_INSTRUCTIONS */
-void set_interrupt (cpu *c, uint8_t state)
-{
-	c->interrupts_enabled = state;
-}
+void set_interrupt (cpu *c, uint8_t state) { c->interrupts_enabled = state; }

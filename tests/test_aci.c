@@ -18,6 +18,7 @@ int main (void)
 	C_SetByte (&c, 0x1, 0x56);
 	C_SetByte (&c, 0x3, 0xbe);
 	mvi (&c, &(c.a));
+	c.pc++;
 	aci (&c);
 
 	if (c.a == 0x14 && c.flag_c) { return 0; }

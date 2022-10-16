@@ -73,20 +73,22 @@ void C_Init (cpu *c)
 
 	c->shift	 = 0;
 	c->shift_amt = 0;
+
+	c->paused = 0;
 }
 void C_DisAsm (cpu *c)
 {
-	printf ("0x%04x\t%02x\t\t%02x|%02x|%02x|%02x|%02x|%02x|%02x|%04x|%d%d%d%d%d\t%s", c->pc, C_GetByte (c, c->pc), c->a, c->b, c->c, c->d, c->e, c->h,
-			c->l, c->sp, c->flag_z, c->flag_s, c->flag_p, c->flag_c, c->flag_ac, C_INSTRUCTIONS[C_GetByte (c, c->pc)]);
+	printf ("0x%04x\t%02x\t\t%02x|%02x|%02x|%02x|%02x|%02x|%02x|%04x|%d%d%d%d%d|%04x\t%s", c->pc, C_GetByte (c, c->pc), c->a, c->b, c->c, c->d, c->e,
+			c->h, c->l, c->sp, c->flag_z, c->flag_s, c->flag_p, c->flag_c, c->flag_ac, c->shift, C_INSTRUCTIONS[C_GetByte (c, c->pc)]);
 }
 
 void C_GenerateInterrupt (cpu *c, uint16_t addr)
 {
 	if (c->interrupts_enabled)
 	{
-		S_Push (c, c->pc);
-		c->pc				  = addr;
 		c->interrupts_enabled = 0;
+		S_Push (c, c->pc);
+		c->pc = addr;
 	}
 }
 
@@ -94,7 +96,7 @@ void C_GenerateInterrupt (cpu *c, uint16_t addr)
 // Memory
 //
 void	C_SetMemory (cpu *c, uint8_t *memory_ptr) { c->memory = memory_ptr; }
-uint8_t C_GetByte (cpu *c, uint16_t address) { return c->memory[address]; }
+uint8_t C_GetByte (cpu *c, uint16_t address) { return (c->memory[address]); }
 void	C_SetByte (cpu *c, uint16_t address, uint8_t val)
 {
 	if (address >= 0x2000 && address <= 0x4000) { c->memory[address] = val; }
@@ -178,8 +180,16 @@ uint8_t F_Parity (uint8_t n)
 	}
 	return 1 - parity;
 }
-uint8_t F_Zero (uint8_t n) { return (n == 0); }
-uint8_t F_Sign (uint8_t n) { return ((n & 0x80) == 0x80); }
+uint8_t F_Zero (uint8_t n)
+{
+	if (n == 0) { return 1; }
+	else { return 0; }
+}
+uint8_t F_Sign (uint8_t n)
+{
+	if ((n & 0x80) == 0x80) { return 1; }
+	else { return 0; }
+}
 uint8_t F_Carry (uint8_t a, uint8_t b, uint8_t carry)
 {
 	uint16_t sum = a + b + carry;
@@ -194,7 +204,7 @@ uint8_t C_Flags_Get (cpu *c)
 	ret |= 0 << 3;
 	ret |= c->flag_p << 2;
 	ret |= 1 << 1;
-	ret |= c->flag_c;
+	ret |= c->flag_c & 0xff;
 	return ret;
 }
 void C_Flags_SetZSP (cpu *c, uint8_t val)
@@ -216,7 +226,7 @@ void C_Unimplemented (cpu *c)
 	printf ("Cycles: %lu\n", c->cycles);
 	exit (1);
 }
-long C_Emulate (cpu *c, uint8_t opcode)
+void C_Emulate (cpu *c, uint8_t opcode)
 {
 	/* READ HEADER FILES FOR INSTRUCTION DOCUMENTATION */
 	c->instructions++;
@@ -232,11 +242,12 @@ long C_Emulate (cpu *c, uint8_t opcode)
 		case 0x20:
 		case 0x28:
 		case 0x30:
-		case 0x38:
-		case 0xcb:
-		case 0xdd:
-		case 0xed:
-		case 0xfd: break;
+		case 0x38: break; // nop
+
+		case 0xcb: jmp (c); break;
+		case 0xdd: call (c); break;
+		case 0xed: call (c); break;
+		case 0xfd: call (c); break;
 
 		case 0xd9: ret (c); break;
 		// CARRY
@@ -501,17 +512,15 @@ long C_Emulate (cpu *c, uint8_t opcode)
 		case 0xf3: set_interrupt (c, 0); break;
 
 		// RST
-		case 0xc7: C_GenerateInterrupt (c, 0x0); break;
-		case 0xcf: C_GenerateInterrupt (c, 0x8); break;
-		case 0xd7: C_GenerateInterrupt (c, 0x10); break;
-		case 0xdf: C_GenerateInterrupt (c, 0x18); break;
-		case 0xe7: C_GenerateInterrupt (c, 0x20); break;
-		case 0xef: C_GenerateInterrupt (c, 0x28); break;
-		case 0xf7: C_GenerateInterrupt (c, 0x30); break;
-		case 0xff: C_GenerateInterrupt (c, 0x38); break;
+		case 0xc7: call_addr (c, 0x0); break;
+		case 0xcf: call_addr (c, 0x8); break;
+		case 0xd7: call_addr (c, 0x10); break;
+		case 0xdf: call_addr (c, 0x18); break;
+		case 0xe7: call_addr (c, 0x20); break;
+		case 0xef: call_addr (c, 0x28); break;
+		case 0xf7: call_addr (c, 0x30); break;
+		case 0xff: call_addr (c, 0x38); break;
 
 		default: C_Unimplemented (c); break;
 	}
-
-	return C_CYCLES[opcode];
 }

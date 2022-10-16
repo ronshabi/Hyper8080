@@ -63,7 +63,6 @@ void R_PlacePixel (SDL_Renderer **ren, int x, int y) { SDL_RenderDrawPoint (*ren
 void R_Render (cpu *c, int vramOffset, SDL_Renderer **ren)
 {
 	R_ClearScreen (ren);
-	R_SetColorWhite (ren);
 
 	for (int x = 0; x < WINDOW_WIDTH; x++)
 	{
@@ -74,7 +73,10 @@ void R_Render (cpu *c, int vramOffset, SDL_Renderer **ren)
 
 			for (int bit = 0; bit < 8; bit++)
 			{
-				if ((pixel >> bit) & 1) {
+
+				if ((pixel >> bit) & 1)
+				{
+					R_SetColorWhite (ren);
 					R_PlacePixel (ren, x, WINDOW_HEIGHT - y - bit);
 				}
 			}

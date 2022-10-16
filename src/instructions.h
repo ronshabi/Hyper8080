@@ -23,6 +23,7 @@ void jpe (cpu *c);	// JPE		JMP parity even
 void jpo (cpu *c);	// JPO		JMP parity odd
 
 /* CALL */
+void call_addr (cpu *c, uint16_t addr);
 void call (cpu *c); // CALL
 void cc (cpu *c);	// CC       CALL carry
 void cnc (cpu *c);	// CNC      CALL not carry
