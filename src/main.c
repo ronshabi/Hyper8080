@@ -1,12 +1,4 @@
 #include "defs.h"
-#include <sys/time.h>
-
-uint64_t UnixMS ()
-{
-	struct timeval tv;
-	gettimeofday (&tv, NULL);
-	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
-}
 
 int main (int argc, char *argv[])
 {
@@ -23,21 +15,19 @@ int main (int argc, char *argv[])
 	cpu			   c;
 	unsigned char *buffer;
 	uint8_t		   c_currentOpcode;
-	SDL_Event	   e;
 	bool		   quit				  = false;
 	SDL_Window	  *Window			  = NULL;
 	SDL_Renderer  *Renderer			  = NULL;
 	uint64_t	   now				  = 0;
 	uint64_t	   ms_Interrupt_Last  = 0;
-	uint64_t	   ms_Input_Last	  = 0;
-	uint64_t	   ms_DebugPrint_Last = 0;
-	const uint8_t *keyboard			  = SDL_GetKeyboardState (NULL);
+	uint64_t	   ms_Input_Last			 = 0;
+	uint64_t	   ms_ClockSpeedMeasure_Last = 0;
+	const uint8_t *keyboard					 = SDL_GetKeyboardState (NULL);
 
 	int interrupt = 1;
 
 	uint64_t cyclesLast = 0;
 	uint64_t cyclesNow	= 0;
-
 
 	Sys_AllocateMemory (&buffer, 65535);
 	Sys_LoadROM (f, argv[1], buffer);
@@ -61,7 +51,7 @@ int main (int argc, char *argv[])
 
 		now = SDL_GetTicks ();
 
-		if ((double)(now - ms_Interrupt_Last) > (double)(1000.0 / 120.0))
+		if ((double)(now - ms_Interrupt_Last) > HZ (120))
 		{
 			if (interrupt ^= 1)
 			{
@@ -77,41 +67,37 @@ int main (int argc, char *argv[])
 			ms_Interrupt_Last = now;
 		}
 
-		if ((double)(now - ms_Input_Last) > (double)(1000.0 / 30.0))
+		if ((double)(now - ms_Input_Last) > HZ (30))
 		{
+			// Reset inputs instead of handling KEYUP events
 			c.i0 &= 0b10001111;
 			c.i1 &= 0b10001000;
 			c.i2 &= 0b10001011;
-			// Sys_PollEvents (&c, &e, &quit);
 
 			SDL_PumpEvents ();
 
-			if (keyboard[SDL_SCANCODE_Q])
-			{
-				println ("I wanna quit!");
-				quit = true;
-			}
+			if (keyboard[SDL_SCANCODE_Q]) { quit = true; }	 // QUIT
+			if (keyboard[SDL_SCANCODE_C]) { c.i1 |= 1; }	 // INSERT COIN
+			if (keyboard[SDL_SCANCODE_Z]) { c.paused ^= 1; } // PAUSE (for debugging, not implemented in the 8080 itself -r.s.)
 
-			if (keyboard[SDL_SCANCODE_C]) { c.i1 |= 1; }
-			if (keyboard[SDL_SCANCODE_Z]) { c.paused ^= 1; }
+			if (keyboard[SDL_SCANCODE_1]) { c.i1 |= 0x4; } // P1 Start
+			if (keyboard[SDL_SCANCODE_1]) { c.i1 |= 0x2; } // P2 Start
 
-			if (keyboard[SDL_SCANCODE_1]) { c.i1 |= 0x4; }
-
-			if (keyboard[SDL_SCANCODE_SPACE])
+			if (keyboard[SDL_SCANCODE_SPACE]) // Player 1/2 Shoot
 			{
 				c.i0 |= 0x10;
 				c.i1 |= 0x10;
 				c.i2 |= 0x10;
 			}
 
-			if (keyboard[SDL_SCANCODE_LEFT])
+			if (keyboard[SDL_SCANCODE_LEFT]) // Player 1/2 Left
 			{
 				c.i0 |= 0x20;
 				c.i1 |= 0x20;
 				c.i2 |= 0x20;
 			}
 
-			if (keyboard[SDL_SCANCODE_RIGHT])
+			if (keyboard[SDL_SCANCODE_RIGHT]) // Player 1/2 Right
 			{
 				c.i0 |= 0x40;
 				c.i1 |= 0x40;
@@ -123,11 +109,11 @@ int main (int argc, char *argv[])
 
 		cyclesNow = c.cycles;
 
-		if (now - ms_DebugPrint_Last > 1000)
+		if (now - ms_ClockSpeedMeasure_Last > 1000)
 		{
-			printf ("%f mhz\n", (cyclesNow - cyclesLast) / 10E6);
-			cyclesLast		   = cyclesNow;
-			ms_DebugPrint_Last = now;
+			printf ("Running @ %.2f mhz\n", (cyclesNow - cyclesLast) / 10E6);
+			cyclesLast				  = cyclesNow;
+			ms_ClockSpeedMeasure_Last = now;
 		}
 
 		if (!c.paused)

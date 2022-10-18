@@ -228,19 +228,20 @@ void C_Emulate (cpu *c, uint8_t opcode)
 	switch (opcode)
 	{
 		// NOP
-		case 0x00: break;
-		case 0x08: break;
-		case 0x10: break;
-		case 0x18: break;
-		case 0x20: break;
-		case 0x28: break;
-		case 0x30: break;
-		case 0x38: break; // nop
+		case 0x00:
+		case 0x08:
+		case 0x10:
+		case 0x18:
+		case 0x20:
+		case 0x28:
+		case 0x30: 
+		case 0xcb:
+		case 0xdd:
+		case 0xed:
+		case 0xfd:
+		case 0x38: break;
 
-		case 0xcb: jmp (c, true, ARG16); break;
-		case 0xdd: call (c, true, ARG16); break;
-		case 0xed: call (c, true, ARG16); break;
-		case 0xfd: call (c, true, ARG16); break;
+		// RET alternative, see: https://pastraiser.com/cpu/i8080/i8080_opcodes.html
 		case 0xd9: ret (c, true); break;
 
 		// CARRY
@@ -248,7 +249,6 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x2f: c->a = ~c->a; break;
 		case 0x3f: c->flag_c ^= 1; break;
 
-		case 0xe9: c->pc = C_GetHL (c); break;
 
 		case 0xc3: jmp (c, true, ARG16); break;         			// jmp
 		case 0xda: jmp (c, c->flag_c, ARG16); break;    			// jc
@@ -371,20 +371,16 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x7f: c->a = c->a; break;						// MOV A, A
 
 		case 0x02: C_SetByte (c, C_GetBC (c), c->a); break; // STAX B
-		case 0x12:
-			C_SetByte (c, C_GetDE (c), c->a);
-			break; // STAX D
+		case 0x12: C_SetByte (c, C_GetDE (c), c->a); break; // STAX D
 
-		// REGISTER PAIR
-		case 0xc5: S_Push (c, C_GetBC (c)); break; // PUSH B
-		case 0xd5: S_Push (c, C_GetDE (c)); break; // PUSH D
-		case 0xe5: S_Push (c, C_GetHL (c)); break; // PUSH H
-		case 0xf5: S_PushPSW (c); break;		   // PUSH PSW
-
-		case 0xc1: C_SetBC (c, S_Pop (c)); break; // POP B
-		case 0xd1: C_SetDE (c, S_Pop (c)); break; // POP D
-		case 0xe1: C_SetHL (c, S_Pop (c)); break; // POP H
-		case 0xf1: S_PopPSW (c); break;			  // POP PSW
+		case 0xc5: S_Push (c, C_GetBC (c)); break; 			// PUSH B
+		case 0xd5: S_Push (c, C_GetDE (c)); break; 			// PUSH D
+		case 0xe5: S_Push (c, C_GetHL (c)); break; 			// PUSH H
+		case 0xf5: S_PushPSW (c); break;		   			// PUSH PSW
+		case 0xc1: C_SetBC (c, S_Pop (c)); break; 			// POP B
+		case 0xd1: C_SetDE (c, S_Pop (c)); break; 			// POP D
+		case 0xe1: C_SetHL (c, S_Pop (c)); break; 			// POP H
+		case 0xf1: S_PopPSW (c); break;			  			// POP PSW
 
 		case 0x09: dad_b (c); break;
 		case 0x19: dad_d (c); break;
@@ -498,19 +494,15 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xbe: cmp_m (c); break;
 		case 0xbf: cmp (c, REG (a)); break;
 
-		// clang-format off
-		// DIRECT ADDRESSING
-		case 0x32: C_SetByte (c, ARG16, c->a); PC2; break; // STA adr
-		case 0x3a: c->a = C_GetByte (c, ARG16); PC2; break; // LDA adr
-		case 0x22: C_SetWord (c, ARG16, C_GetHL (c)); PC2; break; // SHLD adr
-		case 0x2a: C_SetHL (c, C_GetWord (c, ARG16)); PC2; break; // LHLD adr
-		// clang-format on
+		case 0x32: C_SetByte (c, ARG16, c->a); PC2; break; 			// STA adr
+		case 0x3a: c->a = C_GetByte (c, ARG16); PC2; break; 		// LDA adr
+		case 0x22: C_SetWord (c, ARG16, C_GetHL (c)); PC2; break;	// SHLD adr
+		case 0x2a: C_SetHL (c, C_GetWord (c, ARG16)); PC2; break; 	// LHLD adr
+		case 0xe9: c->pc = C_GetHL (c); break;						// PCHL
 
-		// EI/DI
+		// INTERRUPTS
 		case 0xfb: c->interrupts_enabled = true; break;
 		case 0xf3: c->interrupts_enabled = false; break;
-
-		// RST
 		case 0xc7: call (c, true, 0x0); break;
 		case 0xcf: call (c, true, 0x8); break;
 		case 0xd7: call (c, true, 0x10); break;
@@ -522,5 +514,5 @@ void C_Emulate (cpu *c, uint8_t opcode)
 
 		default: C_Unimplemented (c); break;
 	}
-	// clang-format on5
+	// clang-format on
 }

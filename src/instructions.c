@@ -1,6 +1,5 @@
 #include "defs.h"
 
-/* JUMP */
 void jmp (cpu *c, bool condition, uint16_t addr)
 {
 #ifdef DEBUG_MODE_REGULAR
@@ -10,18 +9,8 @@ void jmp (cpu *c, bool condition, uint16_t addr)
 	if (condition) { c->pc = addr; }
 }
 
-void jmp_addr (cpu *c, uint16_t to)
-{
-#ifdef DEBUG_MODE_REGULAR
-	printf (" $%04x", to);
-#endif
-	c->pc = to;
-}
-
-/* CALL */
 void call (cpu *c, bool condition, uint16_t addr)
 {
-
 #ifdef DEBUG_MODE_REGULAR
 	printf (" $%04x", ARG16);
 #endif
@@ -33,32 +22,9 @@ void call (cpu *c, bool condition, uint16_t addr)
 	}
 }
 
-/* RET */
 void ret (cpu *c, bool condition)
 {
 	if (condition) c->pc = S_Pop (c);
-}
-
-/* IMMEDIATE C_INSTRUCTIONS */
-void lxi_b (cpu *c)
-{
-	C_SetBC (c, ARG16);
-	PC2;
-}
-void lxi_d (cpu *c)
-{
-	C_SetDE (c, ARG16);
-	PC2;
-}
-void lxi_h (cpu *c)
-{
-	C_SetHL (c, ARG16);
-	PC2;
-}
-void lxi_sp (cpu *c)
-{
-	c->sp = ARG16;
-	PC2;
 }
 
 void adi (cpu *c)
@@ -127,9 +93,6 @@ void cpi (cpu *c)
 }
 
 /* DATA TRANSFER */
-void stax_b (cpu *c) { C_SetByte (c, C_GetBC (c), c->a); }
-void stax_d (cpu *c) { C_SetByte (c, C_GetDE (c), c->a); }
-
 void dad_b (cpu *c)
 {
 	uint16_t result = C_GetBC (c) + C_GetHL (c);
@@ -291,14 +254,12 @@ void out (cpu *c)
 #ifdef DEBUG_MODE_REGULAR
 	printf (" <DEVICE = %d>", device_number);
 #endif
-	if (device_number == 2) { c->shift_amt = (c->a & 7); }
+	if (device_number == DEVICE_SHIFT_AMT) { c->shift_amt = (c->a & 7); }
 	else if (device_number == DEVICE_SOUND1) { c->o3 = c->a; }
-	else if (device_number == 4)
+	else if (device_number == DEVICE_SHIFT_DATA)
 	{
-
 		c->shift >>= 8;
 		c->shift |= (c->a << 8);
-		//		c->paused = 1;
 	}
 	else if (device_number == DEVICE_SOUND2) { c->o5 = c->a; }
 	else if (device_number == DEVICE_WATCHDOG) { c->o6 = c->a; }
@@ -312,7 +273,7 @@ void hlt (cpu *c)
 	c->halt = 1;
 }
 
-/* REGISTER OR MEMORY TO ACCUMULATOR C_INSTRUCTIONS */
+/* REGISTER OR MEMORY TO ACCUMULATOR */
 void add (cpu *c, const uint8_t *reg)
 {
 	uint16_t result = c->a + *reg;
@@ -423,30 +384,4 @@ void cmp_m (cpu *c)
 	uint16_t result = c->a + FLIP (C_DerefHL (c));
 	C_Flags_SetZSP (c, result & 0xff);
 	C_Flags_SetCarryFromWord (c, result);
-}
-
-/* DIRECT ADDRESSING C_INSTRUCTIONS */
-void sta (cpu *c)
-{
-	uint16_t adr = ARG16;
-	C_SetByte (c, adr, c->a);
-	PC2;
-}
-void lda (cpu *c)
-{
-	c->a = C_GetByte (c, ARG16);
-#ifdef DEBUG_MODE_REGULAR
-	printf (" $%04x", ARG16);
-#endif
-	PC2;
-}
-void shld (cpu *c)
-{
-	C_SetWord (c, ARG16, C_GetHL (c));
-	PC2;
-}
-void lhld (cpu *c)
-{
-	C_SetHL (c, C_GetWord (c, ARG16));
-	PC2;
 }
