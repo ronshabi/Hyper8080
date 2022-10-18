@@ -5,6 +5,22 @@ It's an Intel 8080 Emulator!
 - Uses SDL2
 - Built-in Disassembler & Debug macros (see *Debugging*)
 
+## Controls
+`q` - Exit
+
+`c` - Insert coin
+
+`z` - Pause *(added as a debug feature, also pauses the disassembly -- not avaliable in original 8080)*
+
+`Space` - Fire
+
+`Arrow keys` - P1/P2 Move
+
+`1` - Start a 1 player game
+
+`2` - Start a 2 player game
+
+
 ## Build
 `cmake --build <SOURCE_PATH>`
 
@@ -14,7 +30,7 @@ It's an Intel 8080 Emulator!
 
 ## Debugging
 `debug.h` is your goto file to apply debug macros!
-### Activating the disassembler:
+### Activating the disassembler
 Enable `DEBUG_MODE_REGULAR` in `debug.h`
 ### Stopping at instruction
 Enable `DEBUG_MODE_STOP` in `debug.h`, edit `DEBUG_MODE_STOP_AT_INSTRUCTION` to your liking.
