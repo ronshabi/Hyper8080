@@ -1,12 +1,14 @@
 #include "defs.h"
 
 /* JUMP */
-void jmp (cpu *c)
+void jmp (cpu *c, bool condition)
 {
+	uint16_t addr = ARG16;
 #ifdef DEBUG_MODE_REGULAR
 	printf (" $%04x", ARG16);
 #endif
-	c->pc = ARG16;
+	PC2;
+	if (condition) { c->pc = addr; }
 }
 
 void jmp_addr (cpu *c, uint16_t to)

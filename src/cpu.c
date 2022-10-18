@@ -227,13 +227,6 @@ void C_Unimplemented (cpu *c)
 	exit (1);
 }
 
-void tempJump (cpu *c, bool condition)
-{
-	uint16_t addr = ARG16;
-	PC2;
-	if (condition) { c->pc = addr; }
-}
-
 // clang-format off
 void C_Emulate (cpu *c, uint8_t opcode)
 {
@@ -253,7 +246,7 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x30: break;
 		case 0x38: break; // nop
 
-		case 0xcb: jmp (c); break;
+		case 0xcb: jmp (c, true); break;
 		case 0xdd: call (c); break;
 		case 0xed: call (c); break;
 		case 0xfd: call (c); break;
@@ -267,15 +260,15 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		// JUMP
 		case 0xe9: c->pc = C_GetHL (c); break;
 
-		case 0xc3: tempJump(c, true); break;
-		case 0xda: tempJump(c, c->flag_c); break;
-		case 0xd2: tempJump(c, !c->flag_c); break;
-		case 0xca: tempJump(c, c->flag_z); break;
-		case 0xc2: tempJump(c, !c->flag_z); break;
-		case 0xfa: tempJump(c, c->flag_s); break;
-		case 0xf2: tempJump(c, !c->flag_s); break;
-		case 0xea: tempJump(c, c->flag_p); break;
-		case 0xe2: tempJump(c, !c->flag_p); break;
+		case 0xc3: jmp(c, true); break;
+		case 0xda: jmp(c, c->flag_c); break;
+		case 0xd2: jmp(c, !c->flag_c); break;
+		case 0xca: jmp(c, c->flag_z); break;
+		case 0xc2: jmp(c, !c->flag_z); break;
+		case 0xfa: jmp(c, c->flag_s); break;
+		case 0xf2: jmp(c, !c->flag_s); break;
+		case 0xea: jmp(c, c->flag_p); break;
+		case 0xe2: jmp(c, !c->flag_p); break;
 
 		// CALL
 		case 0xcd: call (c); break;
