@@ -18,55 +18,6 @@ void jmp_addr (cpu *c, uint16_t to)
 	c->pc = to;
 }
 
-void jc (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-	if (c->flag_c) { jmp_addr (c, to); }
-}
-void jnc (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-	if (!c->flag_c) { jmp_addr (c, to); }
-}
-void jz (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-	if (c->flag_z) { jmp_addr (c, to); }
-}
-void jnz (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-	if (!c->flag_z) { jmp_addr (c, to); }
-}
-void jm (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-	if (c->flag_s) { jmp_addr (c, to); }
-}
-void jp (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-	if (!c->flag_s) { jmp_addr (c, to); }
-}
-void jpe (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-	if (c->flag_p) { jmp_addr (c, to); }
-}
-void jpo (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-	if (!c->flag_p) { jmp_addr (c, to); }
-}
-
 /* CALL */
 void call (cpu *c)
 {

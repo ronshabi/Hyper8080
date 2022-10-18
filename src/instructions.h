@@ -9,14 +9,6 @@
 
 /* JUMP */
 void jmp (cpu *c, bool condition, uint16_t addr); // JMP		Jump
-void jc (cpu *c);								  // JC		JMP carry
-void jnc (cpu *c);								  // JNC		JMP not carry
-void jz (cpu *c);								  // JZ		JMP zero
-void jnz (cpu *c);								  // JNZ		JMP not zero
-void jm (cpu *c);								  // JM		JMP minus
-void jp (cpu *c);								  // JP		JMP positive
-void jpe (cpu *c);								  // JPE		JMP parity even
-void jpo (cpu *c);								  // JPO		JMP parity odd
 
 /* CALL */
 void call_addr (cpu *c, uint16_t addr);

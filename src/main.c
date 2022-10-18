@@ -38,7 +38,6 @@ int main (int argc, char *argv[])
 	uint64_t cyclesLast = 0;
 	uint64_t cyclesNow	= 0;
 
-	uint64_t cpuLastSlowdown = 0;
 
 	Sys_AllocateMemory (&buffer, 65535);
 	Sys_LoadROM (f, argv[1], buffer);
@@ -61,7 +60,6 @@ int main (int argc, char *argv[])
 	{
 
 		now		  = UnixMS ();
-		cyclesNow = c.cycles;
 
 		if ((double)(now - ms_Interrupt_Last) > (double)(1000.0 / 120.0))
 		{
@@ -124,14 +122,14 @@ int main (int argc, char *argv[])
 			ms_Input_Last = now;
 		}
 
-		//		if ((double)(now - ms_DebugPrint_Last) > (double)(1000))
-		//		{
-		//			printf ("%f mhz\n", ((cyclesNow - cyclesLast) / 1000000.0));
-		//
-		//			// if (cyclesNow - cyclesLast > 2000000) { c_currentOpcode = 0; }
-		//			// else { c.halt = 0; }
-		//			ms_DebugPrint_Last = now;
-		//		}
+		cyclesNow = c.cycles;
+
+		if (now - ms_DebugPrint_Last > 1000)
+		{
+			printf ("%f mhz\n", (double)(cyclesNow - cyclesLast) / 10E6);
+			cyclesLast		   = cyclesNow;
+			ms_DebugPrint_Last = now;
+		}
 
 		if (!c.paused)
 		{
@@ -145,7 +143,7 @@ int main (int argc, char *argv[])
 			if (c.instructions == DEBUG_MODE_STOP_AT_INSTRUCTION) { quit = true; }
 #endif
 			C_Emulate (&c, c_currentOpcode);
-			for (int i = 0; i < 2000; i++) {}
+
 #ifdef DEBUG_MODE_REGULAR
 			printf ("\n");
 #endif
