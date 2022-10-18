@@ -268,14 +268,14 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xe9: c->pc = C_GetHL (c); break;
 
 		case 0xc3: tempJump(c, true); break;
-		case 0xda: tempJump(c, true); break;
-		case 0xd2: tempJump(c, true); break;
-		case 0xca: tempJump(c, true); break;
-		case 0xc2: tempJump(c, true); break;
-		case 0xfa: tempJump(c, true); break;
-		case 0xf2: tempJump(c, true); break;
-		case 0xea: tempJump(c, true); break;
-		case 0xe2: tempJump(c, true); break;
+		case 0xda: tempJump(c, c->flag_c); break;
+		case 0xd2: tempJump(c, !c->flag_c); break;
+		case 0xca: tempJump(c, c->flag_z); break;
+		case 0xc2: tempJump(c, !c->flag_z); break;
+		case 0xfa: tempJump(c, c->flag_s); break;
+		case 0xf2: tempJump(c, !c->flag_s); break;
+		case 0xea: tempJump(c, c->flag_p); break;
+		case 0xe2: tempJump(c, !c->flag_p); break;
 
 		// CALL
 		case 0xcd: call (c); break;
@@ -327,11 +327,6 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		// DATA TRANSFER
 		case 0x0a: c->a = C_DerefBC(c); break;				// LDAX B
 		case 0x1a: c->a = C_DerefDE(c); break;  			// LDAX D
-
-
-		
-
-
 		case 0x40: c->b = c->b; break;                      // MOV B, B
 		case 0x41: c->b = c->c; break;                      // MOV B, C
 		case 0x42: c->b = c->d; break;                      // MOV B, D
@@ -460,12 +455,12 @@ void C_Emulate (cpu *c, uint8_t opcode)
 
 		// REGISTER OR MEMORY TO ACCUMULATOR
 		case 0x87: add (c, REG (a)); break;
-		case 0x80: add (c, REG (a)); break;
-		case 0x81: add (c, REG (a)); break;
-		case 0x82: add (c, REG (a)); break;
-		case 0x83: add (c, REG (a)); break;
-		case 0x84: add (c, REG (a)); break;
-		case 0x85: add (c, REG (a)); break;
+		case 0x80: add (c, REG (b)); break;
+		case 0x81: add (c, REG (c)); break;
+		case 0x82: add (c, REG (d)); break;
+		case 0x83: add (c, REG (e)); break;
+		case 0x84: add (c, REG (h)); break;
+		case 0x85: add (c, REG (l)); break;
 		case 0x86: add_m (c); break;
 		case 0x8f: adc (c, REG (a)); break;
 		case 0x88: adc (c, REG (b)); break;
