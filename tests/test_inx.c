@@ -7,7 +7,6 @@ int main (void)
 {
 	cpu c;
 	C_Init (&c);
-	int passed = 0;
 
 	C_SetBC (&c, 0x00ff);
 	C_SetDE (&c, 0x0200);

@@ -15,15 +15,7 @@ void call_addr (cpu *c, uint16_t addr);
 void call (cpu *c, bool condition, uint16_t addr); // CALL
 
 /* RET */
-void ret (cpu *c); // RET
-void rc (cpu *c);  // RC       RET carry
-void rnc (cpu *c); // RNC      RET not carry
-void rz (cpu *c);  // RZ       RET zero
-void rnz (cpu *c); // RNZ      RET not zero
-void rm (cpu *c);  // RM       RET minus
-void rp (cpu *c);  // RP       RET positive
-void rpe (cpu *c); // RPE      RET parity even
-void rpo (cpu *c); // RPO      RET parity odd
+void ret (cpu *c, bool condition); // RET
 
 /* IMMEDIATE C_INSTRUCTIONS */
 void lxi_b (cpu *c);  // LXI B	Load register pair immediate

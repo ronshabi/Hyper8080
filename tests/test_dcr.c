@@ -8,7 +8,7 @@ int main (void)
 	cpu c;
 	C_Init (&c);
 
-	uint8_t *memory = calloc (10000, 1);
+	uint8_t *memory = calloc (0xffff, 1);
 	C_SetMemory (&c, memory);
 
 	c.h = 0x3a;

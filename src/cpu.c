@@ -205,7 +205,6 @@ void C_Flags_SetZSP (cpu *c, uint8_t val)
 	c->flag_s = F_Sign (val);
 	c->flag_p = F_Parity (val);
 }
-void C_Flags_SetCarryAdd (cpu *c, uint8_t a, uint8_t b, uint8_t carry) { c->flag_c = F_Carry (a, b, carry); }
 void C_Flags_SetCarryFromWord (cpu *c, uint16_t num) { c->flag_c = (num > 0xff); }
 
 //
@@ -225,6 +224,7 @@ void C_Emulate (cpu *c, uint8_t opcode)
 	c->instructions++;
 	c->cycles += C_CYCLES[opcode];
 
+	// clang-format off
 	switch (opcode)
 	{
 		// NOP
@@ -241,98 +241,58 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xdd: call (c, true, ARG16); break;
 		case 0xed: call (c, true, ARG16); break;
 		case 0xfd: call (c, true, ARG16); break;
-		case 0xd9: ret (c); break;
+		case 0xd9: ret (c, true); break;
 
 		// CARRY
 		case 0x37: c->flag_c = 1; break;
 		case 0x2f: c->a = ~c->a; break;
 		case 0x3f: c->flag_c ^= 1; break;
 
-		// JUMP
 		case 0xe9: c->pc = C_GetHL (c); break;
 
-		case 0xc3: jmp (c, true, ARG16); break;
-		case 0xda: jmp (c, c->flag_c, ARG16); break;
-		case 0xd2: jmp (c, !c->flag_c, ARG16); break;
-		case 0xca: jmp (c, c->flag_z, ARG16); break;
-		case 0xc2: jmp (c, !c->flag_z, ARG16); break;
-		case 0xfa: jmp (c, c->flag_s, ARG16); break;
-		case 0xf2: jmp (c, !c->flag_s, ARG16); break;
-		case 0xea: jmp (c, c->flag_p, ARG16); break;
-		case 0xe2: jmp (c, !c->flag_p, ARG16); break;
+		case 0xc3: jmp (c, true, ARG16); break;         			// jmp
+		case 0xda: jmp (c, c->flag_c, ARG16); break;    			// jc
+		case 0xd2: jmp (c, !c->flag_c, ARG16); break;   			// jnc
+		case 0xca: jmp (c, c->flag_z, ARG16); break;    			// jz
+		case 0xc2: jmp (c, !c->flag_z, ARG16); break;   			// jnz
+		case 0xfa: jmp (c, c->flag_s, ARG16); break;    			// jm
+		case 0xf2: jmp (c, !c->flag_s, ARG16); break;   			// jp
+		case 0xea: jmp (c, c->flag_p, ARG16); break;    			// jpe
+		case 0xe2: jmp (c, !c->flag_p, ARG16); break;   			// jpo
+		
+		case 0xcd: call (c, true, ARG16); break;					// call
+		case 0xdc: call (c, c->flag_c, ARG16); break;   			// cc
+		case 0xd4: call (c, !c->flag_c, ARG16); break;  			// cnc
+		case 0xcc: call (c, c->flag_z, ARG16); break;   			// cz
+		case 0xc4: call (c, !c->flag_z, ARG16); break;  			// cnz
+		case 0xfc: call (c, c->flag_s, ARG16); break;   			// cm
+		case 0xf4: call (c, !c->flag_s, ARG16); break;  			// cp
+		case 0xec: call (c, c->flag_p, ARG16); break;   			// cpe
+		case 0xe4: call (c, !c->flag_p, ARG16); break;  			// cpo
+		
+		case 0xc9: ret (c, true); break;							// ret
+		case 0xd8: ret (c, c->flag_c); break;						// rc
+		case 0xd0: ret (c, !c->flag_c); break;						// rnc
+		case 0xc8: ret (c, c->flag_z); break;						// rz
+		case 0xc0: ret (c, !c->flag_z); break;						// rnz
+		case 0xf8: ret (c, c->flag_s); break;						// rm
+		case 0xf0: ret (c, !c->flag_s); break;						// rp
+		case 0xe8: ret (c, c->flag_p); break;						// rpe
+		case 0xe0: ret (c, !c->flag_p); break;						// rpo
 
-		// CALL
-		case 0xcd: call (c, true, ARG16); break;
-		case 0xdc: call (c, c->flag_c, ARG16); break;
-		case 0xd4: call (c, !c->flag_c, ARG16); break;
-		case 0xcc: call (c, c->flag_z, ARG16); break;
-		case 0xc4: call (c, !c->flag_z, ARG16); break;
-		case 0xfc: call (c, c->flag_s, ARG16); break;
-		case 0xf4: call (c, !c->flag_s, ARG16); break;
-		case 0xec: call (c, c->flag_p, ARG16); break;
-		case 0xe4: call (c, !c->flag_p, ARG16); break;
+		case 0x01: C_SetBC (c, ARG16); PC2; break; 					// LXI B
+		case 0x11: C_SetDE (c, ARG16); PC2; break; 					// LXI D
+		case 0x21: C_SetHL (c, ARG16); PC2; break; 					// LXI H
+		case 0x31: c->sp = ARG16; PC2; break; 						// LXI SP
 
-		// RET
-		case 0xc9: ret (c); break;
-		case 0xd8: rc (c); break;
-		case 0xd0: rnc (c); break;
-		case 0xc8: rz (c); break;
-		case 0xc0: rnz (c); break;
-		case 0xf8: rm (c); break;
-		case 0xf0: rp (c); break;
-		case 0xe8: rpe (c); break;
-		case 0xe0: rpo (c); break;
-
-		// IMMEDIATE
-		case 0x01:
-			C_SetBC (c, ARG16);
-			PC2;
-			break; // LXI B
-		case 0x11:
-			C_SetDE (c, ARG16);
-			PC2;
-			break; // LXI D
-		case 0x21:
-			C_SetHL (c, ARG16);
-			PC2;
-			break; // LXI H
-		case 0x31:
-			c->sp = ARG16;
-			PC2;
-			break; // LXI SP
-
-		case 0x06:
-			c->b = ARG8;
-			PC1;
-			break; // MVI B
-		case 0x0e:
-			c->c = ARG8;
-			PC1;
-			break; // MVI C
-		case 0x16:
-			c->d = ARG8;
-			PC1;
-			break; // MVI D
-		case 0x1e:
-			c->e = ARG8;
-			PC1;
-			break; // MVI E
-		case 0x26:
-			c->h = ARG8;
-			PC1;
-			break; // MVI H
-		case 0x2e:
-			c->l = ARG8;
-			PC1;
-			break; // MVI L
-		case 0x36:
-			C_SetByte (c, C_GetHL (c), ARG8);
-			PC1;
-			break; // MVI M
-		case 0x3e:
-			c->a = ARG8;
-			PC1;
-			break;
+		case 0x06: c->b = ARG8; PC1; break; 						// MVI B
+		case 0x0e: c->c = ARG8; PC1; break; 						// MVI C
+		case 0x16: c->d = ARG8;	PC1; break; 						// MVI D
+		case 0x1e: c->e = ARG8; PC1; break; 						// MVI E
+		case 0x26: c->h = ARG8;	PC1; break; 						// MVI H
+		case 0x2e: c->l = ARG8; PC1; break; 						// MVI L
+		case 0x36: C_SetByte (c, C_GetHL (c), ARG8); PC1; break; 	// MVI M
+		case 0x3e: c->a = ARG8; PC1; break;							// MVI A
 
 		case 0xc6: adi (c); break;
 		case 0xce: aci (c); break;
@@ -562,4 +522,5 @@ void C_Emulate (cpu *c, uint8_t opcode)
 
 		default: C_Unimplemented (c); break;
 	}
+	// clang-format on5
 }

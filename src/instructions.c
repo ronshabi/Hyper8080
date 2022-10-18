@@ -33,46 +33,10 @@ void call (cpu *c, bool condition, uint16_t addr)
 	}
 }
 
-void call_addr (cpu *c, uint16_t addr)
-{
-	S_Push (c, c->pc);
-	jmp_addr (c, addr);
-}
-
 /* RET */
-void ret (cpu *c) { c->pc = S_Pop (c); }
-
-void rc (cpu *c)
+void ret (cpu *c, bool condition)
 {
-	if (c->flag_c) { c->pc = S_Pop (c); }
-}
-void rnc (cpu *c)
-{
-	if (!c->flag_c) { c->pc = S_Pop (c); }
-}
-void rz (cpu *c)
-{
-	if (c->flag_z) { c->pc = S_Pop (c); }
-}
-void rnz (cpu *c)
-{
-	if (!c->flag_z) { c->pc = S_Pop (c); }
-}
-void rm (cpu *c)
-{
-	if (c->flag_s) { c->pc = S_Pop (c); }
-}
-void rp (cpu *c)
-{
-	if (!c->flag_s) { c->pc = S_Pop (c); }
-}
-void rpe (cpu *c)
-{
-	if (c->flag_p) { c->pc = S_Pop (c); }
-}
-void rpo (cpu *c)
-{
-	if (!c->flag_p) { c->pc = S_Pop (c); }
+	if (condition) c->pc = S_Pop (c);
 }
 
 /* IMMEDIATE C_INSTRUCTIONS */
@@ -222,7 +186,7 @@ void xthl (cpu *c)
 }
 void sphl (cpu *c) { c->sp = C_GetHL (c); }
 
-/* SINGLE REGISTER C_INSTRUCTIONS */
+/* SINGLE REGISTER INSTRUCTIONS */
 void inr (cpu *c, uint8_t *reg)
 {
 	uint16_t result = ++*reg;
