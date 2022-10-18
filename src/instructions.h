@@ -8,16 +8,15 @@
 /* CARRY */
 
 /* JUMP */
-void pchl (cpu *c); // PCHL		Load program counter
-void jmp (cpu *c);	// JMP		Jump
-void jc (cpu *c);	// JC		JMP carry
-void jnc (cpu *c);	// JNC		JMP not carry
-void jz (cpu *c);	// JZ		JMP zero
-void jnz (cpu *c);	// JNZ		JMP not zero
-void jm (cpu *c);	// JM		JMP minus
-void jp (cpu *c);	// JP		JMP positive
-void jpe (cpu *c);	// JPE		JMP parity even
-void jpo (cpu *c);	// JPO		JMP parity odd
+void jmp (cpu *c); // JMP		Jump
+void jc (cpu *c);  // JC		JMP carry
+void jnc (cpu *c); // JNC		JMP not carry
+void jz (cpu *c);  // JZ		JMP zero
+void jnz (cpu *c); // JNZ		JMP not zero
+void jm (cpu *c);  // JM		JMP minus
+void jp (cpu *c);  // JP		JMP positive
+void jpe (cpu *c); // JPE		JMP parity even
+void jpo (cpu *c); // JPO		JMP parity odd
 
 /* CALL */
 void call_addr (cpu *c, uint16_t addr);
@@ -43,12 +42,10 @@ void rpe (cpu *c); // RPE      RET parity even
 void rpo (cpu *c); // RPO      RET parity odd
 
 /* IMMEDIATE C_INSTRUCTIONS */
-void lxi_b (cpu *c);			 // LXI B	Load register pair immediate
-void lxi_d (cpu *c);			 // LXI D
-void lxi_h (cpu *c);			 // LXI H
-void lxi_sp (cpu *c);			 // LXI SP
-void mvi (cpu *c, uint8_t *reg); // MVI 	Move immediate data
-void mvi_m (cpu *c);			 // MVI M
+void lxi_b (cpu *c);  // LXI B	Load register pair immediate
+void lxi_d (cpu *c);  // LXI D
+void lxi_h (cpu *c);  // LXI H
+void lxi_sp (cpu *c); // LXI SP
 
 void adi (cpu *c); // ADI - Add immediate to accumulator
 void aci (cpu *c); // ACI - Move Immediate data
@@ -68,30 +65,22 @@ void mov_m (cpu *c, const uint8_t *reg);
 void stax_b (cpu *c);
 void stax_d (cpu *c);
 
-/* REGISTER PAIR C_INSTRUCTIONS */
-void push_b (cpu *c);	// PUSH B
-void push_d (cpu *c);	// PUSH D
-void push_h (cpu *c);	// PUSH H
-void push_psw (cpu *c); // PUSH PSW
-void pop_b (cpu *c);	// POP B
-void pop_d (cpu *c);	// POP D
-void pop_h (cpu *c);	// POP H
-void pop_psw (cpu *c);	// POP PSW
-void dad_b (cpu *c);	// DAD B		Double add
-void dad_d (cpu *c);	// DAD D
-void dad_h (cpu *c);	// DAD H
-void dad_sp (cpu *c);	// DAD SP
-void inx_b (cpu *c);	// INX B		Increment register pair
-void inx_d (cpu *c);	// INX D
-void inx_h (cpu *c);	// INX H
-void inx_sp (cpu *c);	// INX SP
-void dcx_b (cpu *c);	// DCX B		Decrement register pair
-void dcx_d (cpu *c);	// DCX D
-void dcx_h (cpu *c);	// DCX H
-void dcx_sp (cpu *c);	// DCX SP
-void xchg (cpu *c);		// XCHG		Exchange Registers
-void xthl (cpu *c);		// XTHL		Exchange Stack
-void sphl (cpu *c);		// SPHL		Load SP from H and L
+/* REGISTER PAIR */
+void dad_b (cpu *c);  // DAD B		Double add
+void dad_d (cpu *c);  // DAD D
+void dad_h (cpu *c);  // DAD H
+void dad_sp (cpu *c); // DAD SP
+void inx_b (cpu *c);  // INX B		Increment register pair
+void inx_d (cpu *c);  // INX D
+void inx_h (cpu *c);  // INX H
+void inx_sp (cpu *c); // INX SP
+void dcx_b (cpu *c);  // DCX B		Decrement register pair
+void dcx_d (cpu *c);  // DCX D
+void dcx_h (cpu *c);  // DCX H
+void dcx_sp (cpu *c); // DCX SP
+void xchg (cpu *c);	  // XCHG		Exchange Registers
+void xthl (cpu *c);	  // XTHL		Exchange Stack
+void sphl (cpu *c);	  // SPHL		Load SP from H and L
 
 /* SINGLE REGISTER C_INSTRUCTIONS */
 void inr (cpu *c, uint8_t *reg); // INR	Increment
@@ -126,8 +115,8 @@ void xra (cpu *c, const uint8_t *reg); // XRA A		Logical xor w/zero accumulator
 void xra_m (cpu *c);				   // XRA M
 void ora (cpu *c, const uint8_t *reg); // ORA A		Logical or w/ accumulator
 void ora_m (cpu *c);				   // ORA M
-void cmp (cpu *c, uint8_t *r);
-void cmp_m (cpu *c);
+void cmp (cpu *c, const uint8_t *reg); // CMP A
+void cmp_m (cpu *c);				   // CMP M
 
 /* DIRECT ADDRESSING C_INSTRUCTIONS */
 void sta (cpu *c);	// STA		Store accumulator direct

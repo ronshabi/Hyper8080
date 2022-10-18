@@ -1,7 +1,6 @@
 #include "defs.h"
 
 /* JUMP */
-void pchl (cpu *c) { c->pc = C_GetHL (c); }
 void jmp (cpu *c)
 {
 #ifdef DEBUG_MODE_REGULAR
@@ -262,28 +261,9 @@ void cpi (cpu *c)
 }
 
 /* DATA TRANSFER */
-void ldax_b (cpu *c) { c->a = C_DerefBC (c); }
-void ldax_d (cpu *c) { c->a = C_DerefDE (c); }
-void mov (cpu *c, uint8_t *dest, const uint8_t *src) { *dest = *src; }
-void mov_m_to_dest (cpu *c, uint8_t *dest)
-{
-	uint8_t m = C_DerefHL (c);
-	*dest	  = m;
-}
-void mov_m (cpu *c, const uint8_t *reg) { C_SetByte (c, C_GetHL (c), *reg); }
 void stax_b (cpu *c) { C_SetByte (c, C_GetBC (c), c->a); }
 void stax_d (cpu *c) { C_SetByte (c, C_GetDE (c), c->a); }
 
-/* REGISTER PAIR INSTRUCTIONS */
-void push_b (cpu *c) { S_Push (c, C_GetBC (c)); }
-void push_d (cpu *c) { S_Push (c, C_GetDE (c)); }
-void push_h (cpu *c) { S_Push (c, C_GetHL (c)); }
-void push_psw (cpu *c) { S_PushPSW (c); }
-void pop_b (cpu *c) { C_SetBC (c, S_Pop (c)); }
-
-void pop_d (cpu *c) { C_SetDE (c, S_Pop (c)); }
-void pop_h (cpu *c) { C_SetHL (c, S_Pop (c)); }
-void pop_psw (cpu *c) { S_PopPSW (c); }
 void dad_b (cpu *c)
 {
 	uint16_t result = C_GetBC (c) + C_GetHL (c);
@@ -565,16 +545,16 @@ void ora_m (cpu *c)
 	C_Flags_SetCarryFromWord (c, result);
 	c->a = result & 0xff;
 }
-void cmp (cpu *c, uint8_t *r)
+void cmp (cpu *c, const uint8_t *reg)
 {
-	uint16_t result = c->a - *r;
+	uint16_t result = c->a + FLIP (*reg);
 	C_Flags_SetZSP (c, result & 0xff);
 	C_Flags_SetCarryFromWord (c, result);
 }
 
 void cmp_m (cpu *c)
 {
-	uint16_t result = c->a - C_DerefHL (c);
+	uint16_t result = c->a + FLIP (C_DerefHL (c));
 	C_Flags_SetZSP (c, result & 0xff);
 	C_Flags_SetCarryFromWord (c, result);
 }
@@ -604,6 +584,3 @@ void lhld (cpu *c)
 	C_SetHL (c, C_GetWord (c, ARG16));
 	PC2;
 }
-
-/* INTERRUPT C_INSTRUCTIONS */
-void set_interrupt (cpu *c, uint8_t state) { c->interrupts_enabled = state; }

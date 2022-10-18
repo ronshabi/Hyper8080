@@ -33,7 +33,7 @@ typedef struct cpu
 
 	// condition
 	uint64_t cycles, instructions;
-	uint8_t	 halt, interrupts_enabled;
+	bool	 halt, interrupts_enabled;
 
 	// flags
 	bool flag_z, flag_s, flag_p, flag_c, flag_ac;

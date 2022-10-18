@@ -518,15 +518,19 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xbe: cmp_m (c); break;
 		case 0xbf: cmp (c, REG (a)); break;
 
+		//
+		// 3 opcodes
+		//
+
 		// DIRECT ADDRESSING
-		case 0x32: sta (c); break;
-		case 0x3a: lda (c); break;
-		case 0x22: shld (c); break;
-		case 0x2a: lhld (c); break;
+		case 0x32: C_SetByte(c, ARG16, c->a); PC2; break;		// STA adr
+		case 0x3a: c->a = C_GetByte(c, ARG16); PC2; break;		// LDA adr
+		case 0x22: C_SetWord(c, ARG16, C_GetHL(c)); PC2; break;	// SHLD adr
+		case 0x2a: C_SetHL(c, C_GetWord(c, ARG16)); PC2; break;	// LHLD adr
 
 		// INTERRUPT TOGGLE
-		case 0xfb: set_interrupt (c, 1); break;
-		case 0xf3: set_interrupt (c, 0); break;
+		case 0xfb: c->interrupts_enabled = true; break;			// EI
+		case 0xf3: c->interrupts_enabled = false; break;		// DI
 
 		// RST
 		case 0xc7: call_addr (c, 0x0); break;
