@@ -12,7 +12,5 @@ void R_CreateWindow (SDL_Window **win, SDL_Renderer **ren, const char *title, in
 void R_Exit (SDL_Window **win, SDL_Renderer **ren);
 void R_Update (SDL_Renderer **ren);
 void R_ClearScreen (SDL_Renderer **ren);
-void R_SetColorBlack (SDL_Renderer **ren);
-void R_SetColorWhite (SDL_Renderer **ren);
 void R_PlacePixel (SDL_Renderer **ren, int x, int y);
 void R_Render (cpu *c, int vramOffset, SDL_Renderer **ren);

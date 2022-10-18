@@ -44,8 +44,10 @@ void R_ClearScreen (SDL_Renderer **ren)
 	SDL_RenderClear (*ren);
 }
 
-void R_SetColorBlack (SDL_Renderer **ren) { SDL_SetRenderDrawColor (*ren, 0, 0, 0, 0xff); }
-void R_SetColorWhite (SDL_Renderer **ren) { SDL_SetRenderDrawColor (*ren, 0xff, 0xff, 0xff, 0xff); }
+void R_SetColorBlack (SDL_Renderer **ren) { SDL_SetRenderDrawColor (*ren, 0, 0, 0, 0); }
+void R_SetColorWhite (SDL_Renderer **ren) { SDL_SetRenderDrawColor (*ren, 0xff, 0xff, 0xff, 0); }
+void R_SetColorGreen (SDL_Renderer **ren) { SDL_SetRenderDrawColor (*ren, 0, 0xff, 0, 0); }
+void R_SetColorRed (SDL_Renderer **ren) { SDL_SetRenderDrawColor (*ren, 0xff, 0, 0, 0); }
 
 void R_PlacePixel (SDL_Renderer **ren, int x, int y) { SDL_RenderDrawPoint (*ren, x, y); }
 
@@ -65,12 +67,11 @@ void R_Render (cpu *c, int vramOffset, SDL_Renderer **ren)
 
 			for (int bit = 0; bit < 8; bit++)
 			{
+				if (WINDOW_HEIGHT - 32 > y && WINDOW_HEIGHT - 64 < y) { R_SetColorRed (ren); }
+				else if (y < 75 && y > 32) { R_SetColorGreen (ren); }
+				else { R_SetColorWhite (ren); }
 
-				if ((pixel >> bit) & 1)
-				{
-					R_SetColorWhite (ren);
-					R_PlacePixel (ren, x, WINDOW_HEIGHT - y - bit);
-				}
+				if ((pixel >> bit) & 1) { R_PlacePixel (ren, x, WINDOW_HEIGHT - y - bit); }
 				else { R_SetColorBlack (ren); }
 			}
 		}
