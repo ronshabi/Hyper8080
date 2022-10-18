@@ -248,12 +248,12 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xdd: call (c); break;
 		case 0xed: call (c); break;
 		case 0xfd: call (c); break;
-
 		case 0xd9: ret (c); break;
+
 		// CARRY
-		case 0x37: stc (c); break;
-		case 0x2f: cma (c); break;
-		case 0x3f: cmc (c); break;
+		case 0x37: c->flag_c = 1; break;
+		case 0x2f: c->a = ~c->a; break;
+		case 0x3f: c->flag_c ^= 1; break;
 
 		// JUMP
 		case 0xe9: pchl (c); break;
