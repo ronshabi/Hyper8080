@@ -227,7 +227,6 @@ void C_Unimplemented (cpu *c)
 	exit (1);
 }
 
-// clang-format off
 void C_Emulate (cpu *c, uint8_t opcode)
 {
 	/* READ HEADER FILES FOR INSTRUCTION DOCUMENTATION */
@@ -247,9 +246,9 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x38: break; // nop
 
 		case 0xcb: jmp (c, true, ARG16); break;
-		case 0xdd: call (c); break;
-		case 0xed: call (c); break;
-		case 0xfd: call (c); break;
+		case 0xdd: call (c, true, ARG16); break;
+		case 0xed: call (c, true, ARG16); break;
+		case 0xfd: call (c, true, ARG16); break;
 		case 0xd9: ret (c); break;
 
 		// CARRY
@@ -260,26 +259,26 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		// JUMP
 		case 0xe9: c->pc = C_GetHL (c); break;
 
-		case 0xc3: jmp(c, true, ARG16); break;
-		case 0xda: jmp(c, c->flag_c, ARG16); break;
-		case 0xd2: jmp(c, !c->flag_c, ARG16); break;
-		case 0xca: jmp(c, c->flag_z, ARG16); break;
-		case 0xc2: jmp(c, !c->flag_z, ARG16); break;
-		case 0xfa: jmp(c, c->flag_s, ARG16); break;
-		case 0xf2: jmp(c, !c->flag_s, ARG16); break;
-		case 0xea: jmp(c, c->flag_p, ARG16); break;
-		case 0xe2: jmp(c, !c->flag_p, ARG16); break;
+		case 0xc3: jmp (c, true, ARG16); break;
+		case 0xda: jmp (c, c->flag_c, ARG16); break;
+		case 0xd2: jmp (c, !c->flag_c, ARG16); break;
+		case 0xca: jmp (c, c->flag_z, ARG16); break;
+		case 0xc2: jmp (c, !c->flag_z, ARG16); break;
+		case 0xfa: jmp (c, c->flag_s, ARG16); break;
+		case 0xf2: jmp (c, !c->flag_s, ARG16); break;
+		case 0xea: jmp (c, c->flag_p, ARG16); break;
+		case 0xe2: jmp (c, !c->flag_p, ARG16); break;
 
 		// CALL
-		case 0xcd: call (c); break;
-		case 0xdc: cc (c); break;
-		case 0xd4: cnc (c); break;
-		case 0xcc: cz (c); break;
-		case 0xc4: cnz (c); break;
-		case 0xfc: cm (c); break;
-		case 0xf4: cp (c); break;
-		case 0xec: cpe (c); break;
-		case 0xe4: cpo (c); break;
+		case 0xcd: call (c, true, ARG16); break;
+		case 0xdc: call (c, c->flag_c, ARG16); break;
+		case 0xd4: call (c, !c->flag_c, ARG16); break;
+		case 0xcc: call (c, c->flag_z, ARG16); break;
+		case 0xc4: call (c, !c->flag_z, ARG16); break;
+		case 0xfc: call (c, c->flag_s, ARG16); break;
+		case 0xf4: call (c, !c->flag_s, ARG16); break;
+		case 0xec: call (c, c->flag_p, ARG16); break;
+		case 0xe4: call (c, !c->flag_p, ARG16); break;
 
 		// RET
 		case 0xc9: ret (c); break;
@@ -293,21 +292,56 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xe0: rpo (c); break;
 
 		// IMMEDIATE
-		case 0x01: C_SetBC(c, ARG16); PC2; break;       			// LXI B
-		case 0x11: C_SetDE(c, ARG16); PC2; break;         			// LXI D
-		case 0x21: C_SetHL(c, ARG16); PC2; break;         			// LXI H
-		case 0x31: c->sp = ARG16; PC2; break;             			// LXI SP
+		case 0x01:
+			C_SetBC (c, ARG16);
+			PC2;
+			break; // LXI B
+		case 0x11:
+			C_SetDE (c, ARG16);
+			PC2;
+			break; // LXI D
+		case 0x21:
+			C_SetHL (c, ARG16);
+			PC2;
+			break; // LXI H
+		case 0x31:
+			c->sp = ARG16;
+			PC2;
+			break; // LXI SP
 
+		case 0x06:
+			c->b = ARG8;
+			PC1;
+			break; // MVI B
+		case 0x0e:
+			c->c = ARG8;
+			PC1;
+			break; // MVI C
+		case 0x16:
+			c->d = ARG8;
+			PC1;
+			break; // MVI D
+		case 0x1e:
+			c->e = ARG8;
+			PC1;
+			break; // MVI E
+		case 0x26:
+			c->h = ARG8;
+			PC1;
+			break; // MVI H
+		case 0x2e:
+			c->l = ARG8;
+			PC1;
+			break; // MVI L
+		case 0x36:
+			C_SetByte (c, C_GetHL (c), ARG8);
+			PC1;
+			break; // MVI M
+		case 0x3e:
+			c->a = ARG8;
+			PC1;
+			break;
 
-		case 0x06: c->b = ARG8; PC1; break;							// MVI B
-		case 0x0e: c->c = ARG8; PC1; break;							// MVI C
-		case 0x16: c->d = ARG8; PC1; break;                			// MVI D
-		case 0x1e: c->e = ARG8; PC1; break;                			// MVI E
-		case 0x26: c->h = ARG8; PC1; break;                			// MVI H
-		case 0x2e: c->l = ARG8; PC1; break;                			// MVI L
-		case 0x36: C_SetByte (c, C_GetHL (c), ARG8); PC1; break;    // MVI M
-		case 0x3e: c->a = ARG8; PC1; break;
-		
 		case 0xc6: adi (c); break;
 		case 0xce: aci (c); break;
 		case 0xd6: sui (c); break;
@@ -318,87 +352,87 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xfe: cpi (c); break;
 
 		// DATA TRANSFER
-		case 0x0a: c->a = C_DerefBC(c); break;				// LDAX B
-		case 0x1a: c->a = C_DerefDE(c); break;  			// LDAX D
-		case 0x40: c->b = c->b; break;                      // MOV B, B
-		case 0x41: c->b = c->c; break;                      // MOV B, C
-		case 0x42: c->b = c->d; break;                      // MOV B, D
-		case 0x43: c->b = c->e; break;                      // MOV B, E
-		case 0x44: c->b = c->h; break;                      // MOV B, H
-		case 0x45: c->b = c->l; break;                      // MOV B, L
-		case 0x46: c->b = C_DerefHL (c); break;             // MOV B, M
-		case 0x47: c->b = c->a; break;                      // MOV B, A
-		case 0x48: c->c = c->b; break;                      // MOV C, B
-		case 0x49: c->c = c->c; break;                      // MOV C, C
-		case 0x4a: c->c = c->d; break;                      // MOV C, D
-		case 0x4b: c->c = c->e; break;                      // MOV C, E
-		case 0x4c: c->c = c->h; break;                      // MOV C, H
-		case 0x4d: c->c = c->l; break;                      // MOV C, L
-		case 0x4e: c->c = C_DerefHL (c); break;             // MOV C, M
-		case 0x4f: c->c = c->a; break;                      // MOV C, A
-		case 0x50: c->d = c->b; break;                      // MOV D, B
-		case 0x51: c->d = c->c; break;                      // MOV D, C
-		case 0x52: c->d = c->d; break;                      // MOV D, D
-		case 0x53: c->d = c->e; break;                      // MOV D, E
-		case 0x54: c->d = c->h; break;                      // MOV D, H
-		case 0x55: c->d = c->l; break;                      // MOV D, L
-		case 0x56: c->d = C_DerefHL (c); break;             // MOV D, M
-		case 0x57: c->d = c->a; break;                      // MOV D, A
-		case 0x58: c->e = c->b; break;                      // MOV E, B
-		case 0x59: c->e = c->c; break;                      // MOV E, C
-		case 0x5a: c->e = c->d; break;                      // MOV E, D
-		case 0x5b: c->e = c->e; break;                      // MOV E, E
-		case 0x5c: c->e = c->h; break;                      // MOV E, H
-		case 0x5d: c->e = c->l; break;                      // MOV E, L
-		case 0x5e: c->e = C_DerefHL (c); break;             // MOV E, M
-		case 0x5f: c->e = c->a; break;                      // MOV E, A
-		case 0x60: c->h = c->b; break;                      // MOV H, B
-		case 0x61: c->h = c->c; break;                      // MOV H, C
-		case 0x62: c->h = c->d; break;                      // MOV H, D
-		case 0x63: c->h = c->e; break;                      // MOV H, E
-		case 0x64: c->h = c->h; break;                      // MOV H, H
-		case 0x65: c->h = c->l; break;                      // MOV H, L
-		case 0x66: c->h = C_DerefHL (c); break;             // MOV H, M
-		case 0x67: c->h = c->a; break;                      // MOV H, A
-		case 0x68: c->l = c->b; break;                      // MOV L, B
-		case 0x69: c->l = c->c; break;                      // MOV L, C
-		case 0x6a: c->l = c->d; break;                      // MOV L, D
-		case 0x6b: c->l = c->e; break;                      // MOV L, E
-		case 0x6c: c->l = c->h; break;                      // MOV L, H
-		case 0x6d: c->l = c->l; break;                      // MOV L, L
-		case 0x6e: c->l = C_DerefHL (c); break;             // MOV L, M
-		case 0x6f: c->l = c->a; break;                      // MOV L, A
-		case 0x70: C_SetByte(c, C_GetHL(c), c->b); break;	// MOV M, B
-		case 0x71: C_SetByte(c, C_GetHL(c), c->c); break;	// MOV M, C
-		case 0x72: C_SetByte(c, C_GetHL(c), c->d); break;	// MOV M, D
-		case 0x73: C_SetByte(c, C_GetHL(c), c->e); break;	// MOV M, E
-		case 0x74: C_SetByte(c, C_GetHL(c), c->h); break;	// MOV M, H
-		case 0x75: C_SetByte(c, C_GetHL(c), c->l); break;	// MOV M, L
-		case 0x77: C_SetByte(c, C_GetHL(c), c->a); break;	// MOV M, A
+		case 0x0a: c->a = C_DerefBC (c); break;				// LDAX B
+		case 0x1a: c->a = C_DerefDE (c); break;				// LDAX D
+		case 0x40: c->b = c->b; break;						// MOV B, B
+		case 0x41: c->b = c->c; break;						// MOV B, C
+		case 0x42: c->b = c->d; break;						// MOV B, D
+		case 0x43: c->b = c->e; break;						// MOV B, E
+		case 0x44: c->b = c->h; break;						// MOV B, H
+		case 0x45: c->b = c->l; break;						// MOV B, L
+		case 0x46: c->b = C_DerefHL (c); break;				// MOV B, M
+		case 0x47: c->b = c->a; break;						// MOV B, A
+		case 0x48: c->c = c->b; break;						// MOV C, B
+		case 0x49: c->c = c->c; break;						// MOV C, C
+		case 0x4a: c->c = c->d; break;						// MOV C, D
+		case 0x4b: c->c = c->e; break;						// MOV C, E
+		case 0x4c: c->c = c->h; break;						// MOV C, H
+		case 0x4d: c->c = c->l; break;						// MOV C, L
+		case 0x4e: c->c = C_DerefHL (c); break;				// MOV C, M
+		case 0x4f: c->c = c->a; break;						// MOV C, A
+		case 0x50: c->d = c->b; break;						// MOV D, B
+		case 0x51: c->d = c->c; break;						// MOV D, C
+		case 0x52: c->d = c->d; break;						// MOV D, D
+		case 0x53: c->d = c->e; break;						// MOV D, E
+		case 0x54: c->d = c->h; break;						// MOV D, H
+		case 0x55: c->d = c->l; break;						// MOV D, L
+		case 0x56: c->d = C_DerefHL (c); break;				// MOV D, M
+		case 0x57: c->d = c->a; break;						// MOV D, A
+		case 0x58: c->e = c->b; break;						// MOV E, B
+		case 0x59: c->e = c->c; break;						// MOV E, C
+		case 0x5a: c->e = c->d; break;						// MOV E, D
+		case 0x5b: c->e = c->e; break;						// MOV E, E
+		case 0x5c: c->e = c->h; break;						// MOV E, H
+		case 0x5d: c->e = c->l; break;						// MOV E, L
+		case 0x5e: c->e = C_DerefHL (c); break;				// MOV E, M
+		case 0x5f: c->e = c->a; break;						// MOV E, A
+		case 0x60: c->h = c->b; break;						// MOV H, B
+		case 0x61: c->h = c->c; break;						// MOV H, C
+		case 0x62: c->h = c->d; break;						// MOV H, D
+		case 0x63: c->h = c->e; break;						// MOV H, E
+		case 0x64: c->h = c->h; break;						// MOV H, H
+		case 0x65: c->h = c->l; break;						// MOV H, L
+		case 0x66: c->h = C_DerefHL (c); break;				// MOV H, M
+		case 0x67: c->h = c->a; break;						// MOV H, A
+		case 0x68: c->l = c->b; break;						// MOV L, B
+		case 0x69: c->l = c->c; break;						// MOV L, C
+		case 0x6a: c->l = c->d; break;						// MOV L, D
+		case 0x6b: c->l = c->e; break;						// MOV L, E
+		case 0x6c: c->l = c->h; break;						// MOV L, H
+		case 0x6d: c->l = c->l; break;						// MOV L, L
+		case 0x6e: c->l = C_DerefHL (c); break;				// MOV L, M
+		case 0x6f: c->l = c->a; break;						// MOV L, A
+		case 0x70: C_SetByte (c, C_GetHL (c), c->b); break; // MOV M, B
+		case 0x71: C_SetByte (c, C_GetHL (c), c->c); break; // MOV M, C
+		case 0x72: C_SetByte (c, C_GetHL (c), c->d); break; // MOV M, D
+		case 0x73: C_SetByte (c, C_GetHL (c), c->e); break; // MOV M, E
+		case 0x74: C_SetByte (c, C_GetHL (c), c->h); break; // MOV M, H
+		case 0x75: C_SetByte (c, C_GetHL (c), c->l); break; // MOV M, L
+		case 0x77: C_SetByte (c, C_GetHL (c), c->a); break; // MOV M, A
 		case 0x78: c->a = c->b; break;						// MOV A, B
-		case 0x79: c->a = c->c; break;         				// MOV A, C
-		case 0x7a: c->a = c->d; break;                      // MOV A, D
-		case 0x7b: c->a = c->e; break;                      // MOV A, E
-		case 0x7c: c->a = c->h; break;                      // MOV A, H
-		case 0x7d: c->a = c->l; break;                      // MOV A, L
-		case 0x7e: c->a = C_DerefHL (c); break;             // MOV A, M
-		case 0x7f: c->a = c->a; break;                      // MOV A, A
+		case 0x79: c->a = c->c; break;						// MOV A, C
+		case 0x7a: c->a = c->d; break;						// MOV A, D
+		case 0x7b: c->a = c->e; break;						// MOV A, E
+		case 0x7c: c->a = c->h; break;						// MOV A, H
+		case 0x7d: c->a = c->l; break;						// MOV A, L
+		case 0x7e: c->a = C_DerefHL (c); break;				// MOV A, M
+		case 0x7f: c->a = c->a; break;						// MOV A, A
 
-
-
-		case 0x02: C_SetByte(c, C_GetBC(c), c->a); break;	// STAX B
-		case 0x12: C_SetByte(c, C_GetDE(c), c->a); break;	// STAX D
+		case 0x02: C_SetByte (c, C_GetBC (c), c->a); break; // STAX B
+		case 0x12:
+			C_SetByte (c, C_GetDE (c), c->a);
+			break; // STAX D
 
 		// REGISTER PAIR
-		case 0xc5: S_Push(c, C_GetBC(c)); break;			// PUSH B
-		case 0xd5: S_Push(c, C_GetDE(c)); break;			// PUSH D
-		case 0xe5: S_Push(c, C_GetHL(c)); break;			// PUSH H
-		case 0xf5: S_PushPSW(c); break;						// PUSH PSW
+		case 0xc5: S_Push (c, C_GetBC (c)); break; // PUSH B
+		case 0xd5: S_Push (c, C_GetDE (c)); break; // PUSH D
+		case 0xe5: S_Push (c, C_GetHL (c)); break; // PUSH H
+		case 0xf5: S_PushPSW (c); break;		   // PUSH PSW
 
-		case 0xc1: C_SetBC(c, S_Pop(c)); break;				// POP B
-		case 0xd1: C_SetDE(c, S_Pop(c)); break;				// POP D
-		case 0xe1: C_SetHL(c, S_Pop(c)); break;				// POP H
-		case 0xf1: S_PopPSW(c); break;						// POP PSW
+		case 0xc1: C_SetBC (c, S_Pop (c)); break; // POP B
+		case 0xd1: C_SetDE (c, S_Pop (c)); break; // POP D
+		case 0xe1: C_SetHL (c, S_Pop (c)); break; // POP H
+		case 0xf1: S_PopPSW (c); break;			  // POP PSW
 
 		case 0x09: dad_b (c); break;
 		case 0x19: dad_d (c); break;
@@ -517,14 +551,28 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		//
 
 		// DIRECT ADDRESSING
-		case 0x32: C_SetByte(c, ARG16, c->a); PC2; break;		// STA adr
-		case 0x3a: c->a = C_GetByte(c, ARG16); PC2; break;		// LDA adr
-		case 0x22: C_SetWord(c, ARG16, C_GetHL(c)); PC2; break;	// SHLD adr
-		case 0x2a: C_SetHL(c, C_GetWord(c, ARG16)); PC2; break;	// LHLD adr
+		case 0x32:
+			C_SetByte (c, ARG16, c->a);
+			PC2;
+			break; // STA adr
+		case 0x3a:
+			c->a = C_GetByte (c, ARG16);
+			PC2;
+			break; // LDA adr
+		case 0x22:
+			C_SetWord (c, ARG16, C_GetHL (c));
+			PC2;
+			break; // SHLD adr
+		case 0x2a:
+			C_SetHL (c, C_GetWord (c, ARG16));
+			PC2;
+			break; // LHLD adr
 
 		// INTERRUPT TOGGLE
-		case 0xfb: c->interrupts_enabled = true; break;			// EI
-		case 0xf3: c->interrupts_enabled = false; break;		// DI
+		case 0xfb: c->interrupts_enabled = true; break; // EI
+		case 0xf3:
+			c->interrupts_enabled = false;
+			break; // DI
 
 		// RST
 		case 0xc7: call_addr (c, 0x0); break;
@@ -539,4 +587,3 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		default: C_Unimplemented (c); break;
 	}
 }
-// clang-format on

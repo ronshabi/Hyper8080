@@ -19,12 +19,18 @@ void jmp_addr (cpu *c, uint16_t to)
 }
 
 /* CALL */
-void call (cpu *c)
+void call (cpu *c, bool condition, uint16_t addr)
 {
-	uint16_t to = ARG16;
+
+#ifdef DEBUG_MODE_REGULAR
+	printf (" $%04x", ARG16);
+#endif
 	PC2;
-	S_Push (c, c->pc);
-	jmp_addr (c, to);
+	if (condition)
+	{
+		S_Push (c, c->pc);
+		c->pc = addr;
+	}
 }
 
 void call_addr (cpu *c, uint16_t addr)
