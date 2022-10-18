@@ -75,7 +75,6 @@ int main (int argc, char *argv[])
 				C_GenerateInterrupt (&c, 0x08);
 			}
 			ms_Interrupt_Last = now;
-			cyclesLast		  = cyclesNow;
 		}
 
 		if ((double)(now - ms_Input_Last) > (double)(1000.0 / 30.0))
@@ -126,7 +125,7 @@ int main (int argc, char *argv[])
 
 		if (now - ms_DebugPrint_Last > 1000)
 		{
-			printf ("%lu cycles\n", (cyclesNow - cyclesLast));
+			printf ("%f mhz\n", (cyclesNow - cyclesLast) / 10E6);
 			cyclesLast		   = cyclesNow;
 			ms_DebugPrint_Last = now;
 		}

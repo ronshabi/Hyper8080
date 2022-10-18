@@ -180,16 +180,8 @@ uint8_t F_Parity (uint8_t n)
 	}
 	return 1 - parity;
 }
-uint8_t F_Zero (uint8_t n)
-{
-	if (n == 0) { return 1; }
-	else { return 0; }
-}
-uint8_t F_Sign (uint8_t n)
-{
-	if ((n & 0x80) == 0x80) { return 1; }
-	else { return 0; }
-}
+uint8_t F_Zero (uint8_t n) { return n == 0; }
+uint8_t F_Sign (uint8_t n) { return (n & 0x80) == 0x80; }
 uint8_t F_Carry (uint8_t a, uint8_t b, uint8_t carry)
 {
 	uint16_t sum = a + b + carry;
@@ -546,33 +538,17 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xbe: cmp_m (c); break;
 		case 0xbf: cmp (c, REG (a)); break;
 
-		//
-		// 3 opcodes
-		//
-
+		// clang-format off
 		// DIRECT ADDRESSING
-		case 0x32:
-			C_SetByte (c, ARG16, c->a);
-			PC2;
-			break; // STA adr
-		case 0x3a:
-			c->a = C_GetByte (c, ARG16);
-			PC2;
-			break; // LDA adr
-		case 0x22:
-			C_SetWord (c, ARG16, C_GetHL (c));
-			PC2;
-			break; // SHLD adr
-		case 0x2a:
-			C_SetHL (c, C_GetWord (c, ARG16));
-			PC2;
-			break; // LHLD adr
+		case 0x32: C_SetByte (c, ARG16, c->a); PC2; break; // STA adr
+		case 0x3a: c->a = C_GetByte (c, ARG16); PC2; break; // LDA adr
+		case 0x22: C_SetWord (c, ARG16, C_GetHL (c)); PC2; break; // SHLD adr
+		case 0x2a: C_SetHL (c, C_GetWord (c, ARG16)); PC2; break; // LHLD adr
+		// clang-format on
 
-		// INTERRUPT TOGGLE
-		case 0xfb: c->interrupts_enabled = true; break; // EI
-		case 0xf3:
-			c->interrupts_enabled = false;
-			break; // DI
+		// EI/DI
+		case 0xfb: c->interrupts_enabled = true; break;
+		case 0xf3: c->interrupts_enabled = false; break;
 
 		// RST
 		case 0xc7: call (c, true, 0x0); break;
