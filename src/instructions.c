@@ -286,9 +286,9 @@ void pop_h (cpu *c) { C_SetHL (c, S_Pop (c)); }
 void pop_psw (cpu *c) { S_PopPSW (c); }
 void dad_b (cpu *c)
 {
-	uint32_t result = C_GetBC (c) + C_GetHL (c);
-	C_Flags_SetCarryFromWord (c, result & 0xffff);
-	C_SetHL (c, result & 0xffff);
+	uint16_t result = C_GetBC (c) + C_GetHL (c);
+	C_Flags_SetCarryFromWord (c, result);
+	C_SetHL (c, result);
 }
 void dad_d (cpu *c)
 {
