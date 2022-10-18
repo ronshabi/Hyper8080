@@ -6,9 +6,6 @@
 // https://en.wikipedia.org/wiki/FLAGS_register
 
 /* CARRY */
-void stc (cpu *c); // STC		Set Carry
-void cma (cpu *c);
-void cmc (cpu *c); // CMC		Complement Carry
 
 /* JUMP */
 void pchl (cpu *c); // PCHL		Load program counter

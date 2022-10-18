@@ -1,16 +1,5 @@
 #include "defs.h"
 
-/* CARRY */
-void stc (cpu *c) { c->flag_c = 1; }
-
-void cma (cpu *c) { c->a = ~c->a; }
-
-void cmc (cpu *c)
-{
-	if (c->flag_c == 1) { c->flag_c = 0; }
-	else { c->flag_c = 1; }
-}
-
 /* JUMP */
 void pchl (cpu *c) { c->pc = C_GetHL (c); }
 void jmp (cpu *c)
@@ -206,16 +195,7 @@ void lxi_sp (cpu *c)
 	c->sp = ARG16;
 	PC2;
 }
-void mvi (cpu *c, uint8_t *reg)
-{
-	*reg = ARG8;
-	PC1;
-}
-void mvi_m (cpu *c)
-{
-	C_SetByte (c, C_GetHL (c), ARG8);
-	PC1;
-}
+
 void adi (cpu *c)
 {
 	uint16_t result = c->a + ARG8;

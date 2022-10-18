@@ -226,6 +226,8 @@ void C_Unimplemented (cpu *c)
 	printf ("Cycles: %lu\n", c->cycles);
 	exit (1);
 }
+
+// clang-format off
 void C_Emulate (cpu *c, uint8_t opcode)
 {
 	/* READ HEADER FILES FOR INSTRUCTION DOCUMENTATION */
@@ -256,7 +258,8 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x3f: c->flag_c ^= 1; break;
 
 		// JUMP
-		case 0xe9: pchl (c); break;
+		case 0xe9: c->pc = C_GetHL (c); break;
+
 		case 0xc3: jmp (c); break;
 		case 0xda: jc (c); break;
 		case 0xd2: jnc (c); break;
@@ -294,14 +297,16 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x11: lxi_d (c); break;
 		case 0x21: lxi_h (c); break;
 		case 0x31: lxi_sp (c); break;
-		case 0x3e: mvi (c, REG (a)); break;
-		case 0x06: mvi (c, REG (b)); break;
-		case 0x0e: mvi (c, REG (c)); break;
-		case 0x16: mvi (c, REG (d)); break;
-		case 0x1e: mvi (c, REG (e)); break;
-		case 0x26: mvi (c, REG (h)); break;
-		case 0x2e: mvi (c, REG (l)); break;
-		case 0x36: mvi_m (c); break;
+		
+		// MVI
+		case 0x06: c->b = ARG8; PC1; break;
+		case 0x0e: c->c = ARG8; PC1; break;
+		case 0x16: c->d = ARG8; PC1; break;
+		case 0x1e: c->e = ARG8; PC1; break;
+		case 0x26: c->h = ARG8; PC1; break;
+		case 0x2e: c->l = ARG8; PC1; break;
+		case 0x36: C_SetByte (c, C_GetHL (c), ARG8); PC1; break;
+		
 		case 0xc6: adi (c); break;
 		case 0xce: aci (c); break;
 		case 0xd6: sui (c); break;
@@ -539,3 +544,4 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		default: C_Unimplemented (c); break;
 	}
 }
+// clang-format on
