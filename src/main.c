@@ -111,7 +111,7 @@ int main (int argc, char *argv[])
 
 		if (now - ms_ClockSpeedMeasure_Last > 1000)
 		{
-			printf ("Running @ %.2f mhz\n", (cyclesNow - cyclesLast) / 10E6);
+			printf ("Running @ %.2f MHz\n", (cyclesNow - cyclesLast) / 10E6);
 			cyclesLast				  = cyclesNow;
 			ms_ClockSpeedMeasure_Last = now;
 		}
