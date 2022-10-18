@@ -9,6 +9,7 @@
 #define ARG8  C_GetByte (c, c->pc)
 #define ARG16 C_GetWord (c, c->pc)
 
+// Twos-compliment flip sign
 #define FLIP(n) (~(n) + 1)
 
 // Device numbers
@@ -76,7 +77,6 @@ uint8_t	 C_DerefSP (cpu *c, uint16_t offset);
 // Flags
 uint8_t C_Flags_Get (cpu *c);
 void	C_Flags_SetZSP (cpu *c, uint8_t val);
-void	C_Flags_SetCarryAdd (cpu *c, uint8_t a, uint8_t b, uint8_t carry);
 void	C_Flags_SetCarryFromWord (cpu *c, uint16_t num);
 
 // Stack
