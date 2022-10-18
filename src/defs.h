@@ -17,5 +17,5 @@
 #define ANSI_COLOR_RESET "\x1b[0m"
 #define WINDOW_WIDTH	 224
 #define WINDOW_HEIGHT	 256
-#define WINDOW_TITLE	 "8080 Emulator (unstable)"
+#define WINDOW_TITLE	 "8080 Emulator"
 #define WINDOW_SCALE	 2
