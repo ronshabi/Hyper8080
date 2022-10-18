@@ -1,9 +1,8 @@
 #include "defs.h"
 
 /* JUMP */
-void jmp (cpu *c, bool condition)
+void jmp (cpu *c, bool condition, uint16_t addr)
 {
-	uint16_t addr = ARG16;
 #ifdef DEBUG_MODE_REGULAR
 	printf (" $%04x", ARG16);
 #endif
