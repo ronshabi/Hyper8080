@@ -39,62 +39,6 @@ void call_addr (cpu *c, uint16_t addr)
 	jmp_addr (c, addr);
 }
 
-void cc (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-	if (c->flag_c) { call_addr (c, to); }
-}
-void cnc (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-
-	if (!c->flag_c) { call_addr (c, to); }
-}
-void cz (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-
-	if (c->flag_z) { call_addr (c, to); }
-}
-void cnz (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-
-	if (!c->flag_z) { call_addr (c, to); }
-}
-void cm (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-
-	if (c->flag_s) { call_addr (c, to); }
-}
-void cp (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-
-	if (!c->flag_s) { call_addr (c, to); }
-}
-void cpe (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-
-	if (c->flag_p) { call_addr (c, to); }
-}
-void cpo (cpu *c)
-{
-	uint16_t to = ARG16;
-	PC2;
-
-	if (!c->flag_p) { call_addr (c, to); }
-}
-
 /* RET */
 void ret (cpu *c) { c->pc = S_Pop (c); }
 

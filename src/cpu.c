@@ -575,14 +575,14 @@ void C_Emulate (cpu *c, uint8_t opcode)
 			break; // DI
 
 		// RST
-		case 0xc7: call_addr (c, 0x0); break;
-		case 0xcf: call_addr (c, 0x8); break;
-		case 0xd7: call_addr (c, 0x10); break;
-		case 0xdf: call_addr (c, 0x18); break;
-		case 0xe7: call_addr (c, 0x20); break;
-		case 0xef: call_addr (c, 0x28); break;
-		case 0xf7: call_addr (c, 0x30); break;
-		case 0xff: call_addr (c, 0x38); break;
+		case 0xc7: call (c, true, 0x0); break;
+		case 0xcf: call (c, true, 0x8); break;
+		case 0xd7: call (c, true, 0x10); break;
+		case 0xdf: call (c, true, 0x18); break;
+		case 0xe7: call (c, true, 0x20); break;
+		case 0xef: call (c, true, 0x28); break;
+		case 0xf7: call (c, true, 0x30); break;
+		case 0xff: call (c, true, 0x38); break;
 
 		default: C_Unimplemented (c); break;
 	}

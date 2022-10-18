@@ -59,7 +59,7 @@ int main (int argc, char *argv[])
 	while (!quit)
 	{
 
-		now		  = UnixMS ();
+		now = SDL_GetTicks ();
 
 		if ((double)(now - ms_Interrupt_Last) > (double)(1000.0 / 120.0))
 		{
@@ -126,7 +126,7 @@ int main (int argc, char *argv[])
 
 		if (now - ms_DebugPrint_Last > 1000)
 		{
-			printf ("%f mhz\n", (double)(cyclesNow - cyclesLast) / 10E6);
+			printf ("%lu cycles\n", (cyclesNow - cyclesLast));
 			cyclesLast		   = cyclesNow;
 			ms_DebugPrint_Last = now;
 		}

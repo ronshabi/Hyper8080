@@ -13,14 +13,6 @@ void jmp (cpu *c, bool condition, uint16_t addr); // JMP		Jump
 /* CALL */
 void call_addr (cpu *c, uint16_t addr);
 void call (cpu *c, bool condition, uint16_t addr); // CALL
-void cc (cpu *c);								   // CC       CALL carry
-void cnc (cpu *c);								   // CNC      CALL not carry
-void cz (cpu *c);								   // CZ       CALL zero
-void cnz (cpu *c);								   // CNZ      CALL not zero
-void cm (cpu *c);								   // CM       CALL minus
-void cp (cpu *c);								   // CP       CALL positive
-void cpe (cpu *c);								   // CPE      CALL parity even
-void cpo (cpu *c);								   // CPO      CALL parity odd
 
 /* RET */
 void ret (cpu *c); // RET
