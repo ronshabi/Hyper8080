@@ -28,7 +28,7 @@ It's an Intel 8080 Emulator!
 
 
 ## Build
-`cmake --build <SOURCE_PATH>`
+`cmake --build <SOURCE_PATH>` (then `make` or `ninja` in build directory)
 
 ### Dependencies
 - SDL2
