@@ -68,10 +68,10 @@ uint16_t C_GetHL (cpu *c);
 void	 C_SetBC (cpu *c, uint16_t val);
 void	 C_SetDE (cpu *c, uint16_t val);
 void	 C_SetHL (cpu *c, uint16_t val);
-uint16_t C_DerefBC (cpu *c);
-uint16_t C_DerefDE (cpu *c);
-uint16_t C_DerefHL (cpu *c);
-uint16_t C_DerefSP (cpu *c, uint16_t offset);
+uint8_t	 C_DerefBC (cpu *c);
+uint8_t	 C_DerefDE (cpu *c);
+uint8_t	 C_DerefHL (cpu *c);
+uint8_t	 C_DerefSP (cpu *c, uint16_t offset);
 
 // Flags
 uint8_t C_Flags_Get (cpu *c);

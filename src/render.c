@@ -79,6 +79,7 @@ void R_Render (cpu *c, int vramOffset, SDL_Renderer **ren)
 					R_SetColorWhite (ren);
 					R_PlacePixel (ren, x, WINDOW_HEIGHT - y - bit);
 				}
+				else { R_SetColorBlack (ren); }
 			}
 		}
 	}

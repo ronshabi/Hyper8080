@@ -136,10 +136,10 @@ void C_SetHL (cpu *c, uint16_t val)
 	c->h = val >> 8;
 	c->l = val & 0xff;
 }
-uint16_t C_DerefBC (cpu *c) { return C_GetByte (c, C_GetBC (c)); }
-uint16_t C_DerefDE (cpu *c) { return C_GetByte (c, C_GetDE (c)); }
-uint16_t C_DerefHL (cpu *c) { return C_GetByte (c, C_GetHL (c)); }
-uint16_t C_DerefSP (cpu *c, uint16_t offset) { return C_GetByte (c, c->sp + offset); }
+uint8_t C_DerefBC (cpu *c) { return C_GetByte (c, C_GetBC (c)); }
+uint8_t C_DerefDE (cpu *c) { return C_GetByte (c, C_GetDE (c)); }
+uint8_t C_DerefHL (cpu *c) { return C_GetByte (c, C_GetHL (c)); }
+uint8_t C_DerefSP (cpu *c, uint16_t offset) { return C_GetByte (c, c->sp + offset); }
 
 //
 // Stack
@@ -321,62 +321,77 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x73: mov_m (c, REG (e)); break;
 		case 0x74: mov_m (c, REG (h)); break;
 		case 0x75: mov_m (c, REG (l)); break;
-		case 0x47: mov (c, REG (b), REG (a)); break;
-		case 0x40: mov (c, REG (b), REG (b)); break;
-		case 0x41: mov (c, REG (b), REG (c)); break;
-		case 0x42: mov (c, REG (b), REG (d)); break;
-		case 0x43: mov (c, REG (b), REG (e)); break;
-		case 0x44: mov (c, REG (b), REG (h)); break;
-		case 0x45: mov (c, REG (b), REG (l)); break;
-		case 0x4f: mov (c, REG (c), REG (a)); break;
-		case 0x48: mov (c, REG (c), REG (b)); break;
-		case 0x49: mov (c, REG (c), REG (c)); break;
-		case 0x4a: mov (c, REG (c), REG (d)); break;
-		case 0x4b: mov (c, REG (c), REG (e)); break;
-		case 0x4c: mov (c, REG (c), REG (h)); break;
-		case 0x4d: mov (c, REG (c), REG (l)); break;
-		case 0x57: mov (c, REG (d), REG (a)); break;
-		case 0x50: mov (c, REG (d), REG (b)); break;
-		case 0x51: mov (c, REG (d), REG (c)); break;
-		case 0x52: mov (c, REG (d), REG (d)); break;
-		case 0x53: mov (c, REG (d), REG (e)); break;
-		case 0x54: mov (c, REG (d), REG (h)); break;
-		case 0x55: mov (c, REG (d), REG (l)); break;
-		case 0x5f: mov (c, REG (e), REG (a)); break;
-		case 0x58: mov (c, REG (e), REG (b)); break;
-		case 0x59: mov (c, REG (e), REG (c)); break;
-		case 0x5a: mov (c, REG (e), REG (d)); break;
-		case 0x5b: mov (c, REG (e), REG (e)); break;
-		case 0x5c: mov (c, REG (e), REG (h)); break;
-		case 0x5d: mov (c, REG (e), REG (l)); break;
-		case 0x67: mov (c, REG (h), REG (a)); break;
-		case 0x60: mov (c, REG (h), REG (b)); break;
-		case 0x61: mov (c, REG (h), REG (c)); break;
-		case 0x62: mov (c, REG (h), REG (d)); break;
-		case 0x63: mov (c, REG (h), REG (e)); break;
-		case 0x64: mov (c, REG (h), REG (h)); break;
-		case 0x65: mov (c, REG (h), REG (l)); break;
-		case 0x6f: mov (c, REG (l), REG (a)); break;
-		case 0x68: mov (c, REG (l), REG (b)); break;
-		case 0x69: mov (c, REG (l), REG (c)); break;
-		case 0x6a: mov (c, REG (l), REG (d)); break;
-		case 0x6b: mov (c, REG (l), REG (e)); break;
-		case 0x6c: mov (c, REG (l), REG (h)); break;
-		case 0x6d: mov (c, REG (l), REG (l)); break;
-		case 0x7f: mov (c, REG (a), REG (a)); break;
-		case 0x78: mov (c, REG (a), REG (b)); break;
-		case 0x79: mov (c, REG (a), REG (c)); break;
-		case 0x7a: mov (c, REG (a), REG (d)); break;
-		case 0x7b: mov (c, REG (a), REG (e)); break;
-		case 0x7c: mov (c, REG (a), REG (h)); break;
-		case 0x7d: mov (c, REG (a), REG (l)); break;
-		case 0x7e: mov_m_to_dest (c, REG (a)); break;
-		case 0x46: mov_m_to_dest (c, REG (b)); break;
-		case 0x4e: mov_m_to_dest (c, REG (c)); break;
-		case 0x56: mov_m_to_dest (c, REG (d)); break;
-		case 0x5e: mov_m_to_dest (c, REG (e)); break;
-		case 0x66: mov_m_to_dest (c, REG (h)); break;
-		case 0x6e: mov_m_to_dest (c, REG (l)); break;
+
+		// MOV: A
+		case 0x78: c->a = c->b; break;
+		case 0x79: c->a = c->c; break;
+		case 0x7a: c->a = c->d; break;
+		case 0x7b: c->a = c->e; break;
+		case 0x7c: c->a = c->h; break;
+		case 0x7d: c->a = c->l; break;
+		case 0x7e: c->a = C_DerefHL (c); break;
+		case 0x7f: c->a = c->a; break;
+
+		// MOV: B
+		case 0x40: c->b = c->b; break;
+		case 0x41: c->b = c->c; break;
+		case 0x42: c->b = c->d; break;
+		case 0x43: c->b = c->e; break;
+		case 0x44: c->b = c->h; break;
+		case 0x45: c->b = c->l; break;
+		case 0x46: c->b = C_DerefHL (c); break;
+		case 0x47: c->b = c->a; break;
+
+		// MOV: C
+		case 0x48: c->c = c->b; break;
+		case 0x49: c->c = c->c; break;
+		case 0x4a: c->c = c->d; break;
+		case 0x4b: c->c = c->e; break;
+		case 0x4c: c->c = c->h; break;
+		case 0x4d: c->c = c->l; break;
+		case 0x4e: c->c = C_DerefHL (c); break;
+		case 0x4f: c->c = c->a; break;
+
+		// MOV: D
+		case 0x50: c->d = c->b; break;
+		case 0x51: c->d = c->c; break;
+		case 0x52: c->d = c->d; break;
+		case 0x53: c->d = c->e; break;
+		case 0x54: c->d = c->h; break;
+		case 0x55: c->d = c->l; break;
+		case 0x56: c->d = C_DerefHL (c); break;
+		case 0x57: c->d = c->a; break;
+
+		// MOV: E
+		case 0x58: c->e = c->b; break;
+		case 0x59: c->e = c->c; break;
+		case 0x5a: c->e = c->d; break;
+		case 0x5b: c->e = c->e; break;
+		case 0x5c: c->e = c->h; break;
+		case 0x5d: c->e = c->l; break;
+		case 0x5e: c->e = C_DerefHL (c); break;
+		case 0x5f: c->e = c->a; break;
+
+		// MOV: H
+		case 0x60: c->h = c->b; break;
+		case 0x61: c->h = c->c; break;
+		case 0x62: c->h = c->d; break;
+		case 0x63: c->h = c->e; break;
+		case 0x64: c->h = c->h; break;
+		case 0x65: c->h = c->l; break;
+		case 0x66: c->h = C_DerefHL (c); break;
+		case 0x67: c->h = c->a; break;
+
+		// MOV: L
+		case 0x68: c->l = c->b; break;
+		case 0x69: c->l = c->c; break;
+		case 0x6a: c->l = c->d; break;
+		case 0x6b: c->l = c->e; break;
+		case 0x6c: c->l = c->h; break;
+		case 0x6d: c->l = c->l; break;
+		case 0x6e: c->l = C_DerefHL (c); break;
+		case 0x6f: c->l = c->a; break;
+
 		case 0x02: stax_b (c); break;
 		case 0x12: stax_d (c); break;
 
