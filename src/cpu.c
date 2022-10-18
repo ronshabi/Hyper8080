@@ -227,6 +227,13 @@ void C_Unimplemented (cpu *c)
 	exit (1);
 }
 
+void tempJump (cpu *c, bool condition)
+{
+	uint16_t addr = ARG16;
+	PC2;
+	if (condition) { c->pc = addr; }
+}
+
 // clang-format off
 void C_Emulate (cpu *c, uint8_t opcode)
 {
@@ -260,15 +267,15 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		// JUMP
 		case 0xe9: c->pc = C_GetHL (c); break;
 
-		case 0xc3: jmp (c); break;
-		case 0xda: jc (c); break;
-		case 0xd2: jnc (c); break;
-		case 0xca: jz (c); break;
-		case 0xc2: jnz (c); break;
-		case 0xfa: jm (c); break;
-		case 0xf2: jp (c); break;
-		case 0xea: jpe (c); break;
-		case 0xe2: jpo (c); break;
+		case 0xc3: tempJump(c, true); break;
+		case 0xda: tempJump(c, true); break;
+		case 0xd2: tempJump(c, true); break;
+		case 0xca: tempJump(c, true); break;
+		case 0xc2: tempJump(c, true); break;
+		case 0xfa: tempJump(c, true); break;
+		case 0xf2: tempJump(c, true); break;
+		case 0xea: tempJump(c, true); break;
+		case 0xe2: tempJump(c, true); break;
 
 		// CALL
 		case 0xcd: call (c); break;
@@ -293,19 +300,19 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0xe0: rpo (c); break;
 
 		// IMMEDIATE
-		case 0x01: C_SetBC(c, ARG16); PC2; break;       	// LXI B
-		case 0x11: C_SetDE(c, ARG16); PC2; break;           // LXI D
-		case 0x21: C_SetHL(c, ARG16); PC2; break;           // LXI H
-		case 0x31: c->sp = ARG16; PC2; break;               // LXI SP
-		
-		// MVI
-		case 0x06: c->b = ARG8; PC1; break;
-		case 0x0e: c->c = ARG8; PC1; break;
-		case 0x16: c->d = ARG8; PC1; break;
-		case 0x1e: c->e = ARG8; PC1; break;
-		case 0x26: c->h = ARG8; PC1; break;
-		case 0x2e: c->l = ARG8; PC1; break;
-		case 0x36: C_SetByte (c, C_GetHL (c), ARG8); PC1; break;
+		case 0x01: C_SetBC(c, ARG16); PC2; break;       			// LXI B
+		case 0x11: C_SetDE(c, ARG16); PC2; break;         			// LXI D
+		case 0x21: C_SetHL(c, ARG16); PC2; break;         			// LXI H
+		case 0x31: c->sp = ARG16; PC2; break;             			// LXI SP
+
+
+		case 0x06: c->b = ARG8; PC1; break;							// MVI B
+		case 0x0e: c->c = ARG8; PC1; break;							// MVI C
+		case 0x16: c->d = ARG8; PC1; break;                			// MVI D
+		case 0x1e: c->e = ARG8; PC1; break;                			// MVI E
+		case 0x26: c->h = ARG8; PC1; break;                			// MVI H
+		case 0x2e: c->l = ARG8; PC1; break;                			// MVI L
+		case 0x36: C_SetByte (c, C_GetHL (c), ARG8); PC1; break;    // MVI M
 		case 0x3e: c->a = ARG8; PC1; break;
 		
 		case 0xc6: adi (c); break;
@@ -320,23 +327,10 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		// DATA TRANSFER
 		case 0x0a: c->a = C_DerefBC(c); break;				// LDAX B
 		case 0x1a: c->a = C_DerefDE(c); break;  			// LDAX D
-		case 0x70: C_SetByte(c, C_GetHL(c), c->b); break;	// MOV M, B
-		case 0x71: C_SetByte(c, C_GetHL(c), c->c); break;	// MOV M, C
-		case 0x72: C_SetByte(c, C_GetHL(c), c->d); break;	// MOV M, D
-		case 0x73: C_SetByte(c, C_GetHL(c), c->e); break;	// MOV M, E
-		case 0x74: C_SetByte(c, C_GetHL(c), c->h); break;	// MOV M, H
-		case 0x75: C_SetByte(c, C_GetHL(c), c->l); break;	// MOV M, L
-		case 0x77: C_SetByte(c, C_GetHL(c), c->a); break;	// MOV M, A
+
 
 		
-		case 0x78: c->a = c->b; break;						// MOV A, B
-		case 0x79: c->a = c->c; break;         				// MOV A, C
-		case 0x7a: c->a = c->d; break;                      // MOV A, D
-		case 0x7b: c->a = c->e; break;                      // MOV A, E
-		case 0x7c: c->a = c->h; break;                      // MOV A, H
-		case 0x7d: c->a = c->l; break;                      // MOV A, L
-		case 0x7e: c->a = C_DerefHL (c); break;             // MOV A, M
-		case 0x7f: c->a = c->a; break;                      // MOV A, A
+
 
 		case 0x40: c->b = c->b; break;                      // MOV B, B
 		case 0x41: c->b = c->c; break;                      // MOV B, C
@@ -346,7 +340,6 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x45: c->b = c->l; break;                      // MOV B, L
 		case 0x46: c->b = C_DerefHL (c); break;             // MOV B, M
 		case 0x47: c->b = c->a; break;                      // MOV B, A
-
 		case 0x48: c->c = c->b; break;                      // MOV C, B
 		case 0x49: c->c = c->c; break;                      // MOV C, C
 		case 0x4a: c->c = c->d; break;                      // MOV C, D
@@ -355,7 +348,6 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x4d: c->c = c->l; break;                      // MOV C, L
 		case 0x4e: c->c = C_DerefHL (c); break;             // MOV C, M
 		case 0x4f: c->c = c->a; break;                      // MOV C, A
-
 		case 0x50: c->d = c->b; break;                      // MOV D, B
 		case 0x51: c->d = c->c; break;                      // MOV D, C
 		case 0x52: c->d = c->d; break;                      // MOV D, D
@@ -364,7 +356,6 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x55: c->d = c->l; break;                      // MOV D, L
 		case 0x56: c->d = C_DerefHL (c); break;             // MOV D, M
 		case 0x57: c->d = c->a; break;                      // MOV D, A
-
 		case 0x58: c->e = c->b; break;                      // MOV E, B
 		case 0x59: c->e = c->c; break;                      // MOV E, C
 		case 0x5a: c->e = c->d; break;                      // MOV E, D
@@ -373,7 +364,6 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x5d: c->e = c->l; break;                      // MOV E, L
 		case 0x5e: c->e = C_DerefHL (c); break;             // MOV E, M
 		case 0x5f: c->e = c->a; break;                      // MOV E, A
-
 		case 0x60: c->h = c->b; break;                      // MOV H, B
 		case 0x61: c->h = c->c; break;                      // MOV H, C
 		case 0x62: c->h = c->d; break;                      // MOV H, D
@@ -382,7 +372,6 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x65: c->h = c->l; break;                      // MOV H, L
 		case 0x66: c->h = C_DerefHL (c); break;             // MOV H, M
 		case 0x67: c->h = c->a; break;                      // MOV H, A
-
 		case 0x68: c->l = c->b; break;                      // MOV L, B
 		case 0x69: c->l = c->c; break;                      // MOV L, C
 		case 0x6a: c->l = c->d; break;                      // MOV L, D
@@ -391,6 +380,23 @@ void C_Emulate (cpu *c, uint8_t opcode)
 		case 0x6d: c->l = c->l; break;                      // MOV L, L
 		case 0x6e: c->l = C_DerefHL (c); break;             // MOV L, M
 		case 0x6f: c->l = c->a; break;                      // MOV L, A
+		case 0x70: C_SetByte(c, C_GetHL(c), c->b); break;	// MOV M, B
+		case 0x71: C_SetByte(c, C_GetHL(c), c->c); break;	// MOV M, C
+		case 0x72: C_SetByte(c, C_GetHL(c), c->d); break;	// MOV M, D
+		case 0x73: C_SetByte(c, C_GetHL(c), c->e); break;	// MOV M, E
+		case 0x74: C_SetByte(c, C_GetHL(c), c->h); break;	// MOV M, H
+		case 0x75: C_SetByte(c, C_GetHL(c), c->l); break;	// MOV M, L
+		case 0x77: C_SetByte(c, C_GetHL(c), c->a); break;	// MOV M, A
+		case 0x78: c->a = c->b; break;						// MOV A, B
+		case 0x79: c->a = c->c; break;         				// MOV A, C
+		case 0x7a: c->a = c->d; break;                      // MOV A, D
+		case 0x7b: c->a = c->e; break;                      // MOV A, E
+		case 0x7c: c->a = c->h; break;                      // MOV A, H
+		case 0x7d: c->a = c->l; break;                      // MOV A, L
+		case 0x7e: c->a = C_DerefHL (c); break;             // MOV A, M
+		case 0x7f: c->a = c->a; break;                      // MOV A, A
+
+
 
 		case 0x02: C_SetByte(c, C_GetBC(c), c->a); break;	// STAX B
 		case 0x12: C_SetByte(c, C_GetDE(c), c->a); break;	// STAX D
