@@ -28,7 +28,7 @@ It's an Intel 8080 Emulator!
 
 
 ## Build
-Create and `build` directory and run: `cmake -B. -S <SOURCE_PATH> && make`
+Create a `build` directory and run: `cmake -B. -S <SOURCE_PATH> && make`
 
 ### Dependencies
 - SDL2
@@ -49,7 +49,7 @@ In order to make the process of CPU testing a little bit easier, use `create_new
 
 `python3 create_new_test.py <TEST_NAME>`
 
-This will generate a `test_<TEST_NAME> .c` file in `tests/` with test_base.c as a template.
+This will generate a `test_<TEST_NAME>.c` file in `tests/` with test_base.c as the template.
 
 
 ## Author
