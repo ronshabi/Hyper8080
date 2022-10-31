@@ -1,230 +1,252 @@
 #include "defs.h"
 
 const uint8_t C_CYCLES[] = {
-	4, 10, 7, 5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5, 7,	 4,	 4,	 10, 16, 5,	 5,
-	5, 7,  4, 4,  10, 16, 5,  5,  5,  7,  4,  4,  10, 13, 5,  10, 10, 10, 4,  4,  10, 13, 5,  5,  5,  7,  4,  5,  5,  5, 5,	 5,	 5,	 7,	 5,	 5,	 5,
-	5, 5,  5, 5,  7,  5,  5,  5,  5,  5,  5,  5,  7,  5,  5,  5,  5,  5,  5,  5,  7,  5,  5,  5,  5,  5,  5,  5,  7,  5, 5,	 5,	 5,	 5,	 5,	 5,	 7,
-	5, 7,  7, 7,  7,  7,  7,  7,  7,  5,  5,  5,  5,  5,  5,  7,  5,  4,  4,  4,  4,  4,  4,  7,  4,  4,  4,  4,  4,  4, 4,	 7,	 4,	 4,	 4,	 4,	 4,
-	4, 4,  7, 4,  4,  4,  4,  4,  4,  4,  7,  4,  4,  4,  4,  4,  4,  4,  7,  4,  4,  4,  4,  4,  4,  4,  7,  4,  4,  4, 4,	 4,	 4,	 4,	 7,	 4,	 4,
-	4, 4,  4, 4,  4,  7,  4,  5,  10, 10, 10, 11, 11, 7,  11, 5,  10, 10, 10, 11, 11, 7,  11, 5,  10, 10, 10, 11, 11, 7, 11, 5,	 10, 10, 10, 11, 11,
-	7, 11, 5, 10, 10, 18, 11, 11, 7,  11, 5,  5,  10, 5,  11, 11, 7,  11, 5,  10, 10, 4,  11, 11, 7,  11, 5,  5,  10, 4, 11, 11, 7,	 11,
+    4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,
+    5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 16, 5,  5,  5,
+    7,  4,  4,  10, 16, 5,  5,  5,  7,  4,  4,  10, 13, 5,  10, 10, 10, 4,  4,
+    10, 13, 5,  5,  5,  7,  4,  5,  5,  5,  5,  5,  5,  7,  5,  5,  5,  5,  5,
+    5,  5,  7,  5,  5,  5,  5,  5,  5,  5,  7,  5,  5,  5,  5,  5,  5,  5,  7,
+    5,  5,  5,  5,  5,  5,  5,  7,  5,  5,  5,  5,  5,  5,  5,  7,  5,  7,  7,
+    7,  7,  7,  7,  7,  7,  5,  5,  5,  5,  5,  5,  7,  5,  4,  4,  4,  4,  4,
+    4,  7,  4,  4,  4,  4,  4,  4,  4,  7,  4,  4,  4,  4,  4,  4,  4,  7,  4,
+    4,  4,  4,  4,  4,  4,  7,  4,  4,  4,  4,  4,  4,  4,  7,  4,  4,  4,  4,
+    4,  4,  4,  7,  4,  4,  4,  4,  4,  4,  4,  7,  4,  4,  4,  4,  4,  4,  4,
+    7,  4,  5,  10, 10, 10, 11, 11, 7,  11, 5,  10, 10, 10, 11, 11, 7,  11, 5,
+    10, 10, 10, 11, 11, 7,  11, 5,  10, 10, 10, 11, 11, 7,  11, 5,  10, 10, 18,
+    11, 11, 7,  11, 5,  5,  10, 5,  11, 11, 7,  11, 5,  10, 10, 4,  11, 11, 7,
+    11, 5,  5,  10, 4,  11, 11, 7,  11,
 };
 
 const char *C_INSTRUCTIONS[] = {
-	"NOP",	   "LXI B",	  "STAX B",	 "INX B",	"INR B",   "DCR B",	  "MVI B",	 "RLC",		"NOP",	   "DAD B",	  "LDAX B",	 "DCX B",	 "INR C",
-	"DCR C",   "MVI C",	  "RRC",	 "NOP",		"LXI D",   "STAX D",  "INX D",	 "INR D",	"DCR D",   "MVI D",	  "RALC",	 "NOP",		 "DAD D",
-	"LDAX D",  "DCX D",	  "INR E",	 "DCR E",	"MVI E",   "RAR",	  "NOP",	 "LXI H",	"SHLD",	   "INX H",	  "INR H",	 "DCR H",	 "MVI H",
-	"DAA",	   "NOP",	  "DAD H",	 "LHLD",	"DCX H",   "INR L",	  "DCR L",	 "MVI L",	"CMA",	   "NOP",	  "LXI SP",	 "STA",		 "INX SP",
-	"INR M",   "DCR M",	  "MVI M",	 "STC",		"NOP",	   "DAD SP",  "LDA",	 "DCX SP",	"INR A",   "DCR A",	  "MVI A",	 "CMC",		 "MOV B,B",
-	"MOV B,C", "MOV B,D", "MOV B,E", "MOV B,H", "MOV B,L", "MOV B,M", "MOV B,A", "MOV C,B", "MOV C,C", "MOV C,D", "MOV C,E", "MOV C,H",	 "MOV C,L",
-	"MOV C,M", "MOV C,A", "MOV D,B", "MOV D,C", "MOV D,D", "MOV D,E", "MOV D,H", "MOV D,L", "MOV D,M", "MOV D,A", "MOV E,B", "MOV E,C",	 "MOV E,D",
-	"MOV E,E", "MOV E,H", "MOV E,L", "MOV E,M", "MOV E,A", "MOV H,B", "MOV H,C", "MOV H,D", "MOV H,E", "MOV H,H", "MOV H,L", "MOV H,M",	 "MOV H,A",
-	"MOV L,B", "MOV L,C", "MOV L,D", "MOV L,E", "MOV L,H", "MOV L,L", "MOV L,M", "MOV L,A", "MOV M,B", "MOV M,C", "MOV M,D", "MOV M,E",	 "MOV M,H",
-	"MOV M,L", "HLT",	  "MOV M,A", "MOV A,B", "MOV A,C", "MOV A,D", "MOV A,E", "MOV A,H", "MOV A,L", "MOV A,M", "MOV A,A", "ADD B",	 "ADD C",
-	"ADD D",   "ADD E",	  "ADD H",	 "ADD L",	"ADD M",   "ADD A",	  "ADC B",	 "ADC C",	"ADC D",   "ADC E",	  "ADC H",	 "ADC L",	 "ADC M",
-	"ADC A",   "SUB B",	  "SUB C",	 "SUB D",	"SUB E",   "SUB H",	  "SUB L",	 "SUB M",	"SUB A",   "SBB B",	  "SBB C",	 "SBB D",	 "SBB E",
-	"SBB H",   "SBB L",	  "SBB M",	 "SBB A",	"ANA B",   "ANA C",	  "ANA D",	 "ANA E",	"ANA H",   "ANA L",	  "ANA M",	 "ANA A",	 "XRA B",
-	"XRA C",   "XRA D",	  "XRA E",	 "XRA H",	"XRA L",   "XRA M",	  "XRA A",	 "ORA B",	"ORA C",   "ORA D",	  "ORA E",	 "ORA H",	 "ORA L",
-	"ORA M",   "ORA A",	  "CMP B",	 "CMP C",	"CMP D",   "CMP E",	  "CMP H",	 "CMP L",	"CMP M",   "CMP A",	  "RNZ",	 "POP B",	 "JNZ",
-	"JMP",	   "CNZ",	  "PUSH B",	 "ADI",		"RST 0",   "RZ",	  "RET",	 "JZ",		"NOP",	   "CZ",	  "CALL",	 "ACI",		 "RST 1",
-	"RNC",	   "POP D",	  "JNC",	 "OUT",		"CNC",	   "PUSH D",  "SUI",	 "RST 2",	"RC",	   "NOP",	  "JC",		 "IN",		 "CC",
-	"NOP",	   "SBI",	  "RST 3",	 "RPO",		"POP H",   "JPO",	  "XTHL",	 "CPO",		"PUSH H",  "ANI",	  "RST 4",	 "RPE",		 "PCHL",
-	"JPE",	   "XCHG",	  "CPE",	 "NOP",		"XRI",	   "RST 5",	  "RP",		 "POP PSW", "JP",	   "DI",	  "CP",		 "PUSH PSW", "ORI",
-	"RST 6",   "RM",	  "SPHL",	 "JM",		"EI",	   "CM",	  "NOP",	 "CPI",		"RST 7"};
+    "NOP",     "LXI B",   "STAX B",  "INX B",   "INR B",   "DCR B",
+    "MVI B",   "RLC",     "NOP",     "DAD B",   "LDAX B",  "DCX B",
+    "INR C",   "DCR C",   "MVI C",   "RRC",     "NOP",     "LXI D",
+    "STAX D",  "INX D",   "INR D",   "DCR D",   "MVI D",   "RALC",
+    "NOP",     "DAD D",   "LDAX D",  "DCX D",   "INR E",   "DCR E",
+    "MVI E",   "RAR",     "NOP",     "LXI H",   "SHLD",    "INX H",
+    "INR H",   "DCR H",   "MVI H",   "DAA",     "NOP",     "DAD H",
+    "LHLD",    "DCX H",   "INR L",   "DCR L",   "MVI L",   "CMA",
+    "NOP",     "LXI SP",  "STA",     "INX SP",  "INR M",   "DCR M",
+    "MVI M",   "STC",     "NOP",     "DAD SP",  "LDA",     "DCX SP",
+    "INR A",   "DCR A",   "MVI A",   "CMC",     "MOV B,B", "MOV B,C",
+    "MOV B,D", "MOV B,E", "MOV B,H", "MOV B,L", "MOV B,M", "MOV B,A",
+    "MOV C,B", "MOV C,C", "MOV C,D", "MOV C,E", "MOV C,H", "MOV C,L",
+    "MOV C,M", "MOV C,A", "MOV D,B", "MOV D,C", "MOV D,D", "MOV D,E",
+    "MOV D,H", "MOV D,L", "MOV D,M", "MOV D,A", "MOV E,B", "MOV E,C",
+    "MOV E,D", "MOV E,E", "MOV E,H", "MOV E,L", "MOV E,M", "MOV E,A",
+    "MOV H,B", "MOV H,C", "MOV H,D", "MOV H,E", "MOV H,H", "MOV H,L",
+    "MOV H,M", "MOV H,A", "MOV L,B", "MOV L,C", "MOV L,D", "MOV L,E",
+    "MOV L,H", "MOV L,L", "MOV L,M", "MOV L,A", "MOV M,B", "MOV M,C",
+    "MOV M,D", "MOV M,E", "MOV M,H", "MOV M,L", "HLT",     "MOV M,A",
+    "MOV A,B", "MOV A,C", "MOV A,D", "MOV A,E", "MOV A,H", "MOV A,L",
+    "MOV A,M", "MOV A,A", "ADD B",   "ADD C",   "ADD D",   "ADD E",
+    "ADD H",   "ADD L",   "ADD M",   "ADD A",   "ADC B",   "ADC C",
+    "ADC D",   "ADC E",   "ADC H",   "ADC L",   "ADC M",   "ADC A",
+    "SUB B",   "SUB C",   "SUB D",   "SUB E",   "SUB H",   "SUB L",
+    "SUB M",   "SUB A",   "SBB B",   "SBB C",   "SBB D",   "SBB E",
+    "SBB H",   "SBB L",   "SBB M",   "SBB A",   "ANA B",   "ANA C",
+    "ANA D",   "ANA E",   "ANA H",   "ANA L",   "ANA M",   "ANA A",
+    "XRA B",   "XRA C",   "XRA D",   "XRA E",   "XRA H",   "XRA L",
+    "XRA M",   "XRA A",   "ORA B",   "ORA C",   "ORA D",   "ORA E",
+    "ORA H",   "ORA L",   "ORA M",   "ORA A",   "CMP B",   "CMP C",
+    "CMP D",   "CMP E",   "CMP H",   "CMP L",   "CMP M",   "CMP A",
+    "RNZ",     "POP B",   "JNZ",     "JMP",     "CNZ",     "PUSH B",
+    "ADI",     "RST 0",   "RZ",      "RET",     "JZ",      "NOP",
+    "CZ",      "CALL",    "ACI",     "RST 1",   "RNC",     "POP D",
+    "JNC",     "OUT",     "CNC",     "PUSH D",  "SUI",     "RST 2",
+    "RC",      "NOP",     "JC",      "IN",      "CC",      "NOP",
+    "SBI",     "RST 3",   "RPO",     "POP H",   "JPO",     "XTHL",
+    "CPO",     "PUSH H",  "ANI",     "RST 4",   "RPE",     "PCHL",
+    "JPE",     "XCHG",    "CPE",     "NOP",     "XRI",     "RST 5",
+    "RP",      "POP PSW", "JP",      "DI",      "CP",      "PUSH PSW",
+    "ORI",     "RST 6",   "RM",      "SPHL",    "JM",      "EI",
+    "CM",      "NOP",     "CPI",     "RST 7"};
 
 //
 // Core
 //
-void C_Init (cpu *c)
-{
-	c->a = 0;
-	c->b = 0;
-	c->c = 0;
-	c->d = 0;
-	c->e = 0;
-	c->h = 0;
-	c->l = 0;
+void C_Init(cpu *c) {
+    c->a = 0;
+    c->b = 0;
+    c->c = 0;
+    c->d = 0;
+    c->e = 0;
+    c->h = 0;
+    c->l = 0;
 
-	c->flag_z  = 0;
-	c->flag_s  = 0;
-	c->flag_p  = 0;
-	c->flag_c  = 0;
-	c->flag_ac = 0;
+    c->flag_z  = 0;
+    c->flag_s  = 0;
+    c->flag_p  = 0;
+    c->flag_c  = 0;
+    c->flag_ac = 0;
 
-	c->pc = 0;
-	c->sp = 0;
+    c->pc = 0;
+    c->sp = 0;
 
-	c->cycles		= 0;
-	c->instructions = 0;
+    c->cycles       = 0;
+    c->instructions = 0;
 
-	c->memory			  = NULL;
-	c->halt				  = 0;
-	c->interrupts_enabled = 0;
+    c->memory             = NULL;
+    c->halt               = 0;
+    c->interrupts_enabled = 0;
 
-	c->i0 = 0;
-	c->i1 = 0;
-	c->i2 = 0;
-	c->i3 = 0;
-	c->o2 = 0;
-	c->o3 = 0;
-	c->o4 = 0;
-	c->o5 = 0;
-	c->o6 = 0;
+    c->i0 = 0;
+    c->i1 = 0;
+    c->i2 = 0;
+    c->i3 = 0;
+    c->o2 = 0;
+    c->o3 = 0;
+    c->o4 = 0;
+    c->o5 = 0;
+    c->o6 = 0;
 
-	c->shift	 = 0;
-	c->shift_amt = 0;
+    c->shift     = 0;
+    c->shift_amt = 0;
 
-	c->paused = 0;
+    c->paused = 0;
 }
-void C_DisAsm (cpu *c)
-{
-	printf ("0x%04x\t%02x\t\t%02x|%02x|%02x|%02x|%02x|%02x|%02x|%04x|%d%d%d%d%d|%04x\t%s", c->pc, C_GetByte (c, c->pc), c->a, c->b, c->c, c->d, c->e,
-			c->h, c->l, c->sp, c->flag_z, c->flag_s, c->flag_p, c->flag_c, c->flag_ac, c->shift, C_INSTRUCTIONS[C_GetByte (c, c->pc)]);
+void C_DisAsm(cpu *c) {
+    printf(
+        "0x%04x\t%02x\t\t%02x|%02x|%02x|%02x|%02x|%02x|%02x|%04x|%d%d%d%d%d|%"
+        "04x\t%s",
+        c->pc, C_GetByte(c, c->pc), c->a, c->b, c->c, c->d, c->e, c->h, c->l,
+        c->sp, c->flag_z, c->flag_s, c->flag_p, c->flag_c, c->flag_ac, c->shift,
+        C_INSTRUCTIONS[C_GetByte(c, c->pc)]);
 }
 
-void C_GenerateInterrupt (cpu *c, uint16_t addr)
-{
-	if (c->interrupts_enabled)
-	{
-		c->interrupts_enabled = 0;
-		S_Push (c, c->pc);
-		c->pc = addr;
-	}
+void C_GenerateInterrupt(cpu *c, uint16_t addr) {
+    if (c->interrupts_enabled) {
+        c->interrupts_enabled = 0;
+        S_Push(c, c->pc);
+        c->pc = addr;
+    }
 }
 
 //
 // Memory
 //
-void	C_SetMemory (cpu *c, uint8_t *memory_ptr) { c->memory = memory_ptr; }
-uint8_t C_GetByte (cpu *c, uint16_t address) { return (c->memory[address]); }
-void	C_SetByte (cpu *c, uint16_t address, uint8_t val)
-{
-	if (address >= 0x2000 && address <= 0x4000) { c->memory[address] = val; }
+void    C_SetMemory(cpu *c, uint8_t *memory_ptr) { c->memory = memory_ptr; }
+uint8_t C_GetByte(cpu *c, uint16_t address) { return (c->memory[address]); }
+void    C_SetByte(cpu *c, uint16_t address, uint8_t val) {
+    if (address >= 0x2000 && address <= 0x4000) {
+        c->memory[address] = val;
+    }
 }
-uint16_t C_GetWord (cpu *c, uint16_t address) { return c->memory[address + 1] << 8 | c->memory[address]; }
-void	 C_SetWord (cpu *c, uint16_t address, uint16_t val)
-{
-	C_SetByte (c, address, val & 0xff);
-	C_SetByte (c, address + 1, val >> 8);
+uint16_t C_GetWord(cpu *c, uint16_t address) {
+    return c->memory[address + 1] << 8 | c->memory[address];
+}
+void C_SetWord(cpu *c, uint16_t address, uint16_t val) {
+    C_SetByte(c, address, val & 0xff);
+    C_SetByte(c, address + 1, val >> 8);
 }
 
 //
 // Register pairs
 //
-uint16_t C_GetBC (cpu *c) { return c->b << 8 | c->c; }
-uint16_t C_GetDE (cpu *c) { return c->d << 8 | c->e; }
-uint16_t C_GetHL (cpu *c) { return c->h << 8 | c->l; }
-uint16_t C_GetPSW (cpu *c)
-{
-	uint16_t ret = 0;
-	ret |= c->a << 8;
-	ret |= C_Flags_Get (c) & 0xff;
-	return ret;
+uint16_t C_GetBC(cpu *c) { return c->b << 8 | c->c; }
+uint16_t C_GetDE(cpu *c) { return c->d << 8 | c->e; }
+uint16_t C_GetHL(cpu *c) { return c->h << 8 | c->l; }
+uint16_t C_GetPSW(cpu *c) {
+    uint16_t ret = 0;
+    ret |= c->a << 8;
+    ret |= C_Flags_Get(c) & 0xff;
+    return ret;
 }
-void C_SetBC (cpu *c, uint16_t val)
-{
-	c->b = val >> 8;
-	c->c = val & 0xff;
+void C_SetBC(cpu *c, uint16_t val) {
+    c->b = val >> 8;
+    c->c = val & 0xff;
 }
-void C_SetDE (cpu *c, uint16_t val)
-{
-	c->d = val >> 8;
-	c->e = val & 0xff;
+void C_SetDE(cpu *c, uint16_t val) {
+    c->d = val >> 8;
+    c->e = val & 0xff;
 }
-void C_SetHL (cpu *c, uint16_t val)
-{
-	c->h = val >> 8;
-	c->l = val & 0xff;
+void C_SetHL(cpu *c, uint16_t val) {
+    c->h = val >> 8;
+    c->l = val & 0xff;
 }
-uint8_t C_DerefBC (cpu *c) { return C_GetByte (c, C_GetBC (c)); }
-uint8_t C_DerefDE (cpu *c) { return C_GetByte (c, C_GetDE (c)); }
-uint8_t C_DerefHL (cpu *c) { return C_GetByte (c, C_GetHL (c)); }
-uint8_t C_DerefSP (cpu *c, uint16_t offset) { return C_GetByte (c, c->sp + offset); }
+uint8_t C_DerefBC(cpu *c) { return C_GetByte(c, C_GetBC(c)); }
+uint8_t C_DerefDE(cpu *c) { return C_GetByte(c, C_GetDE(c)); }
+uint8_t C_DerefHL(cpu *c) { return C_GetByte(c, C_GetHL(c)); }
+uint8_t C_DerefSP(cpu *c, uint16_t offset) {
+    return C_GetByte(c, c->sp + offset);
+}
 
 //
 // Stack
 //
-void S_Push (cpu *c, uint16_t word)
-{
-	c->sp -= 2;
-	C_SetWord (c, c->sp, word);
+void S_Push(cpu *c, uint16_t word) {
+    c->sp -= 2;
+    C_SetWord(c, c->sp, word);
 }
-uint16_t S_Pop (cpu *c)
-{
-	uint16_t ret = C_GetWord (c, c->sp);
-	c->sp += 2;
-	return ret;
+uint16_t S_Pop(cpu *c) {
+    uint16_t ret = C_GetWord(c, c->sp);
+    c->sp += 2;
+    return ret;
 }
-void S_PushPSW (cpu *c) { S_Push (c, C_GetPSW (c)); }
-void S_PopPSW (cpu *c)
-{
-	uint16_t psw = S_Pop (c);
-	c->a		 = psw >> 8;
-	c->flag_s	 = psw >> 7 & 0x1;
-	c->flag_z	 = psw >> 6 & 0x1;
-	c->flag_ac	 = psw >> 4 & 0x1;
-	c->flag_p	 = psw >> 2 & 0x1;
-	c->flag_c	 = psw & 0x1;
+void S_PushPSW(cpu *c) { S_Push(c, C_GetPSW(c)); }
+void S_PopPSW(cpu *c) {
+    uint16_t psw = S_Pop(c);
+    c->a         = psw >> 8;
+    c->flag_s    = psw >> 7 & 0x1;
+    c->flag_z    = psw >> 6 & 0x1;
+    c->flag_ac   = psw >> 4 & 0x1;
+    c->flag_p    = psw >> 2 & 0x1;
+    c->flag_c    = psw & 0x1;
 }
 
 //
 // Flags
 //
-uint8_t F_Parity (uint8_t n)
-{
-	uint8_t parity = 0;
-	while (n)
-	{
-		parity ^= (n & 1);
-		n >>= 1;
-	}
-	return 1 - parity;
+uint8_t F_Parity(uint8_t n) {
+    uint8_t parity = 0;
+    while (n) {
+        parity ^= (n & 1);
+        n >>= 1;
+    }
+    return 1 - parity;
 }
-uint8_t F_Zero (uint8_t n) { return n == 0; }
-uint8_t F_Sign (uint8_t n) { return (n & 0x80) == 0x80; }
-uint8_t F_Carry (uint8_t a, uint8_t b, uint8_t carry)
-{
-	uint16_t sum = a + b + carry;
-	return (sum > 0xff);
+uint8_t F_Zero(uint8_t n) { return n == 0; }
+uint8_t F_Sign(uint8_t n) { return (n & 0x80) == 0x80; }
+uint8_t F_Carry(uint8_t a, uint8_t b, uint8_t carry) {
+    uint16_t sum = a + b + carry;
+    return (sum > 0xff);
 }
-uint8_t C_Flags_Get (cpu *c)
-{
-	uint8_t ret = c->flag_s << 7;
-	ret |= c->flag_z << 6;
-	ret |= 0 << 5;
-	ret |= c->flag_ac << 4;
-	ret |= 0 << 3;
-	ret |= c->flag_p << 2;
-	ret |= 1 << 1;
-	ret |= c->flag_c & 0xff;
-	return ret;
+uint8_t C_Flags_Get(cpu *c) {
+    uint8_t ret = c->flag_s << 7;
+    ret |= c->flag_z << 6;
+    ret |= 0 << 5;
+    ret |= c->flag_ac << 4;
+    ret |= 0 << 3;
+    ret |= c->flag_p << 2;
+    ret |= 1 << 1;
+    ret |= c->flag_c & 0xff;
+    return ret;
 }
-void C_Flags_SetZSP (cpu *c, uint8_t val)
-{
-	c->flag_z = F_Zero (val);
-	c->flag_s = F_Sign (val);
-	c->flag_p = F_Parity (val);
+void C_Flags_SetZSP(cpu *c, uint8_t val) {
+    c->flag_z = F_Zero(val);
+    c->flag_s = F_Sign(val);
+    c->flag_p = F_Parity(val);
 }
-void C_Flags_SetCarryFromWord (cpu *c, uint16_t num) { c->flag_c = (num > 0xff); }
+void C_Flags_SetCarryFromWord(cpu *c, uint16_t num) {
+    c->flag_c = (num > 0xff);
+}
 
 //
 // Emulation
 //
-void C_Unimplemented (cpu *c)
-{
-	printf ("\nUNIMPLEMENTED INSTRUCTION %02x\n", C_GetByte (c, --c->pc));
-	printf ("Instructions executed: %lu\n", c->instructions);
-	printf ("Cycles: %lu\n", c->cycles);
-	exit (1);
+void C_Unimplemented(cpu *c) {
+    printf("\nUNIMPLEMENTED INSTRUCTION %02x\n", C_GetByte(c, --c->pc));
+    printf("Instructions executed: %lu\n", c->instructions);
+    printf("Cycles: %lu\n", c->cycles);
+    exit(1);
 }
 
-void C_Emulate (cpu *c, uint8_t opcode)
-{
-	/* READ HEADER FILES FOR INSTRUCTION DOCUMENTATION */
-	c->instructions++;
-	c->cycles += C_CYCLES[opcode];
+void C_Emulate(cpu *c, uint8_t opcode) {
+    /* READ HEADER FILES FOR INSTRUCTION DOCUMENTATION */
+    c->instructions++;
+    c->cycles += C_CYCLES[opcode];
 
-	// clang-format off
+    // clang-format off
 	switch (opcode)
 	{
 		// NOP
@@ -514,5 +536,5 @@ void C_Emulate (cpu *c, uint8_t opcode)
 
 		default: C_Unimplemented (c); break;
 	}
-	// clang-format on
+    // clang-format on
 }

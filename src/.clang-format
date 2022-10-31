@@ -1,0 +1,8 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+AllowShortCaseLabelsOnASingleLine: true
+AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AllowShortBlocksOnASingleLine: true
+AlignTrailingComments: true
+
