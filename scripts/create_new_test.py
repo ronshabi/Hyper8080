@@ -24,17 +24,20 @@ def add_test_to_cmakelists(new_test_name):
 
 
 def create_test_file(new_test_name):
-    original_path = f"{TESTS_FOLDER}/{BASE_C_FILE}.c"
-    target_path = f"{TESTS_FOLDER}/{PREFIX}_{new_test_name}.c"
-    shutil.copyfile(original_path, target_path)
-    add_test_to_cmakelists(new_test_name)
-    print(f"Test file created at {TESTS_FOLDER}/{PREFIX}_{new_test_name}.c")
-
+    try:
+        original_path = f"{TESTS_FOLDER}/{BASE_C_FILE}.c"
+        target_path = f"{TESTS_FOLDER}/{PREFIX}_{new_test_name}.c"
+        shutil.copyfile(original_path, target_path)
+        add_test_to_cmakelists(new_test_name)
+        print(f"Test file created at {TESTS_FOLDER}/{PREFIX}_{new_test_name}.c")
+    except:
+        print(f"Usage: run this script from the project's root directory.")
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print("Easily generate new CTests!")
+        print("Easily generate new CTests")
         print(f"Usage: python3 {str(sys.argv[0])} <test_name>")
+        print("Run this from the project's root directory");
         exit(1)
 
     test_name = str(sys.argv[1])

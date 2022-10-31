@@ -27,4 +27,3 @@ add_executable(test_ral tests/test_ral.c)
 add_test(Test-ral test_ral)
 add_executable(test_rar tests/test_rar.c)
 add_test(Test-rar test_rar)
-
