@@ -6,8 +6,8 @@ It's an Intel 8080 Emulator!
 - Built-in Disassembler & Debug macros (see *Debugging*)
 
 <p align="center">
-  <img src="https://github.com/ronshabi/8080C/blob/master/screenshots/8080c-screenshot-demo2.png?raw=true" width="300" alt="8080C emulating Space Invaders - main menu"/>
-  <img src="https://github.com/ronshabi/8080C/blob/master/screenshots/8080c-screenshot-demo1.png?raw=true" width="300" alt="8080C emulating Space Invaders - game view"/>
+  <img src="https://github.com/ronshabi/8080C/blob/master/doc/screenshots/8080c-screenshot-demo2.png?raw=true" width="300" alt="8080C emulating Space Invaders - main menu"/>
+  <img src="https://github.com/ronshabi/8080C/blob/master/doc/screenshots/8080c-screenshot-demo1.png?raw=true" width="300" alt="8080C emulating Space Invaders - game view"/>
   <p align="center">8080C emulating Space Invaders!</p>
 </p>
 
