@@ -1,7 +1,7 @@
 #pragma once
 
 #define DEBUG_MODE_REGULAR
-#define DEBUG_MODE_STOP
+// define DEBUG_MODE_STOP
 #define DEBUG_MODE_STOP_AT_INSTRUCTION 2000000
 
 #ifdef DEBUG_MODE_REGULAR
@@ -74,8 +74,7 @@ static const char *C_INSTRUCTIONS[] = {
 
 void D_Address(uint16_t addr);
 void D_Device(uint8_t dev);
-void D_GlobalMessage(const char* msg);
+void D_GlobalMessage(const char *msg);
 void D_Disasm(cpu *c);
-void D_StopHandler(cpu* c, bool *quit);
+void D_StopHandler(cpu *c, bool *quit);
 void D_Summary(cpu *c);
-

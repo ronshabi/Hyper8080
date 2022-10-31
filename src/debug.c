@@ -29,8 +29,7 @@ void D_Disasm(cpu *c) {
 #endif
 }
 
-void D_StopHandler(cpu* c, bool *quit)
-{
+void D_StopHandler(cpu *c, bool *quit) {
 #ifdef DEBUG_MODE_STOP
     if (c->instructions == DEBUG_MODE_STOP_AT_INSTRUCTION) {
         *quit = true;
@@ -38,8 +37,7 @@ void D_StopHandler(cpu* c, bool *quit)
 #endif
 }
 
-void D_Summary(cpu *c)
-{
+void D_Summary(cpu *c) {
 #ifdef DEBUG_MODE_STOP
     printf("Stopped at instruction %lu\n", c->instructions);
     printf("Cycles: %lu\n", c->cycles);
