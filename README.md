@@ -1,14 +1,11 @@
-# 8080C - Intel 8080 emulator written in C99
+# intel8080
 
-It's an Intel 8080 Emulator!
-- Written in C99
-- Uses SDL2
-- Built-in Disassembler & Debug macros (see *Debugging*)
+An Intel 8080 emulator written in c99.
 
 <p align="center">
   <img src="https://github.com/ronshabi/8080C/blob/master/doc/screenshots/8080c-screenshot-demo2.png?raw=true" width="300" alt="8080C emulating Space Invaders - main menu"/>
   <img src="https://github.com/ronshabi/8080C/blob/master/doc/screenshots/8080c-screenshot-demo1.png?raw=true" width="300" alt="8080C emulating Space Invaders - game view"/>
-  <p align="center">8080C emulating Space Invaders!</p>
+  <p align="center">Emulating Space Invaders</p>
 </p>
 
 ## Controls
@@ -43,14 +40,9 @@ Enable `DEBUG_MODE_STOP` in `debug.h`, edit `DEBUG_MODE_STOP_AT_INSTRUCTION` to 
 
 
 ## Creating tests
-8080C uses CTest for unit testing. 
+In order to make the process of CPU testing a little bit easier, use `create_new_test.py` in `scripts`: `python3 create_new_test.py <TEST_NAME>`
 
-In order to make the process of CPU testing a little bit easier, use `create_new_test.py`:
-
-`python3 create_new_test.py <TEST_NAME>`
-
-This will generate a `test_<TEST_NAME>.c` file in `tests/` with test_base.c as the template.
-
+This will generate a `test_<TEST_NAME>.c` file in `tests/` with `test_base.c` as the template.
 
 ## Author
 Ron Shabi
