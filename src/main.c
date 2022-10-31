@@ -119,31 +119,21 @@ int main(int argc, char *argv[]) {
         }
 
         if (!c.paused) {
-#ifdef DEBUG_MODE_REGULAR
-            C_DisAsm(&c);
-#endif
+            D_Disasm(&c);
             c_currentOpcode = C_GetByte(&c, c.pc);
             c.pc += 1;
 
-#ifdef DEBUG_MODE_STOP
-            if (c.instructions == DEBUG_MODE_STOP_AT_INSTRUCTION) {
-                quit = true;
-            }
-#endif
             C_Emulate(&c, c_currentOpcode);
 
-#ifdef DEBUG_MODE_REGULAR
-            printf("\n");
-#endif
+            D_StopHandler(&c, &quit);
+        
+            D_Newline;
         }
 
     } // End of Game loop
+    D_Summary(&c);
 
     R_Exit(&Window, &Renderer);
     free(buffer);
-#ifdef DEBUG_MODE_STOP
-    printf("Stopped at instruction %lu\n", c.instructions);
-    printf("Cycles: %lu\n", c.cycles);
-#endif
     return 0;
 }

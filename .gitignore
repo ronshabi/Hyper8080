@@ -1,3 +1,6 @@
+build.sh
+invaders*
+
 # vim
 *.swp
 
@@ -11,3 +14,4 @@ build/
 # ide configs
 .vscode/
 .idea/
+

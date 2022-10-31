@@ -53,7 +53,6 @@ typedef struct cpu {
 // Core
 void C_Init(cpu *c);
 void C_SetMemory(cpu *c, uint8_t *memory_ptr);
-void C_DisAsm(cpu *c);
 
 // Memory
 uint8_t  C_GetByte(cpu *c, uint16_t address);

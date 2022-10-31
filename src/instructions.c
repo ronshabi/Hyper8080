@@ -1,9 +1,7 @@
 #include "defs.h"
 
 void jmp(cpu *c, bool condition, uint16_t addr) {
-#ifdef DEBUG_MODE_REGULAR
-    printf(" $%04x", ARG16);
-#endif
+    D_Address(addr);
     PC2;
     if (condition) {
         c->pc = addr;
@@ -150,24 +148,12 @@ void dcr(cpu *c, uint8_t *reg) {
     C_Flags_SetZSP(c, result & 0xff);
     C_Flags_SetCarryFromWord(c, result & 0xff);
     *reg = result & 0xff;
-
-#ifdef DEBUG_MODE_REGULAR
-    if (*reg == 0) {
-        printf("\nREG HIT ZERO\n");
-    }
-#endif
 }
 void dcr_m(cpu *c) {
     uint16_t result = C_DerefHL(c) + FLIP(1);
     C_Flags_SetZSP(c, result & 0xff);
     C_Flags_SetCarryFromWord(c, result & 0xff);
     C_SetByte(c, C_GetHL(c), result & 0xff);
-
-#ifdef DEBUG_MODE_REGULAR
-    if (C_DerefHL(c) == 0) {
-        printf("\nM HIT ZERO\n");
-    }
-#endif
 }
 void daa(cpu *c) {
     uint16_t result = 0;
@@ -215,9 +201,7 @@ void in(cpu *c) {
     uint8_t device_number = ARG8;
     PC1;
 
-#ifdef DEBUG_MODE_REGULAR
-    printf(" <DEVICE = %d>", device_number);
-#endif
+    D_Device(device_number);
 
     if (device_number == DEVICE_INP0) {
         c->a = c->i0;
@@ -233,9 +217,8 @@ void out(cpu *c) {
     uint8_t device_number = ARG8;
     PC1;
 
-#ifdef DEBUG_MODE_REGULAR
-    printf(" <DEVICE = %d>", device_number);
-#endif
+    D_Device(device_number);
+
     if (device_number == DEVICE_SHIFT_AMT) {
         c->shift_amt = (c->a & 7);
     } else if (device_number == DEVICE_SOUND1) {
@@ -251,9 +234,7 @@ void out(cpu *c) {
 }
 
 void hlt(cpu *c) {
-#ifdef DEBUG_MODE_REGULAR
-    printf("\nHALTED!\n");
-#endif
+    D_GlobalMessage("CPU Halted");
     c->halt = 1;
 }
 
