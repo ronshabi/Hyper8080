@@ -11,9 +11,7 @@ void jmp(cpu *c, bool condition, uint16_t addr) {
 }
 
 void call(cpu *c, bool condition, uint16_t addr) {
-#ifdef DEBUG_MODE_REGULAR
-    printf(" $%04x", ARG16);
-#endif
+    D_Address(addr);
     PC2;
     if (condition) {
         S_Push(c, c->pc);

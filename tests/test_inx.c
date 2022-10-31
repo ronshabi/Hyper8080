@@ -2,6 +2,8 @@
 #include "../src/instructions.h"
 #include "../src/instructions.c"
 #include "../src/cpu.c"
+#include "../src/debug.h"
+#include "../src/debug.c"
 
 int main (void)
 {

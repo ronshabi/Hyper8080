@@ -8,3 +8,6 @@ build/
 *.obj
 *.o
 
+# ide configs
+.vscode/
+.idea/

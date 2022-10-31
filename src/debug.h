@@ -10,3 +10,5 @@
 #define PrintTime(time) printf("Time: %lu\n", time)
 #define println(msg) printf("%s\n", msg)
 #define printLong(l) printf("%lu\n", l)
+
+void D_Address(uint16_t addr);
