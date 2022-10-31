@@ -4,7 +4,11 @@
 #define DEBUG_MODE_STOP
 #define DEBUG_MODE_STOP_AT_INSTRUCTION 2000000
 
+#ifdef DEBUG_MODE_REGULAR
 #define D_Newline printf("\n")
+#else
+#define D_Newline
+#endif
 
 static const uint8_t C_CYCLES[] = {
     4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,
