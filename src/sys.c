@@ -3,7 +3,7 @@
 void
 Sys_LoadROM(FILE *fptr, char *filename, unsigned char *memptr)
 {
-	fptr = fopen(filename, "rb") /* (try to) open file */
+	fptr = fopen(filename, "rb"); /* (try to) open file */
 
 	/* Check if file exists, if not -> exit and print error (with nice */
 	/* colors) */
@@ -21,7 +21,7 @@ Sys_LoadROM(FILE *fptr, char *filename, unsigned char *memptr)
 	long fsize = ftell(fptr);
 	fseek(fptr, 0L, SEEK_SET);
 
-	fread(memptr, fsize, 1, fptr) /* Read to memory buffer */
+	fread(memptr, fsize, 1, fptr); /* Read to memory buffer */
 	fclose(fptr) /* File handle not needed anymore */
 }
 
