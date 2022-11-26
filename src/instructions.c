@@ -94,7 +94,7 @@ ori(cpu *c)
 void
 cpi(cpu *c)
 {
-	// A is not changed by this operation, only the FLAGS
+	/* A is not changed by this operation, only the FLAGS */
 	uint16_t result = c->a + FLIP(ARG8);
 	C_Flags_SetCarryFromWord(c, result);
 	C_Flags_SetZSP(c, result & 0xff);

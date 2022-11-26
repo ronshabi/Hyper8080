@@ -1,8 +1,8 @@
 #include "render.h"
 
-// ====================================
-//  WINDOW
-// ====================================
+/* ==================================== */
+/*  WINDOW */
+/* ==================================== */
 void
 R_Init(void)
 {
@@ -10,7 +10,7 @@ R_Init(void)
 		R_SDLError("Failed to init SDL");
 	}
 
-	//	 Set texture filtering to linear
+	/*  Set texture filtering to linear */
 	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) {
 		R_SDLError("Failed to set linear texture filtering");
 	}
@@ -32,7 +32,7 @@ R_CreateWindow(SDL_Window **win, SDL_Renderer **ren, const char *title, int w,
 		R_SDLError("Failed to create renderer");
 	}
 
-	// Set scale
+	/* Set scale */
 	if (SDL_RenderSetScale(*ren, scale, scale) < 0) {
 		R_SDLError("Failed to set scale");
 	}
@@ -51,9 +51,9 @@ R_Exit(SDL_Window **win, SDL_Renderer **ren)
 	SDL_Quit();
 }
 
-// ====================================
-//  GRAPHICS
-// ====================================
+/* ==================================== */
+/*  GRAPHICS */
+/* ==================================== */
 void
 R_Update(SDL_Renderer **ren)
 {
@@ -63,7 +63,7 @@ R_Update(SDL_Renderer **ren)
 void
 R_ClearScreen(SDL_Renderer **ren)
 {
-	SDL_SetRenderDrawColor(*ren, 0, 0, 0, 0xff); // set to black
+	SDL_SetRenderDrawColor(*ren, 0, 0, 0, 0xff); /* set to black */
 	SDL_RenderClear(*ren);
 }
 
@@ -94,9 +94,9 @@ R_PlacePixel(SDL_Renderer **ren, int x, int y)
 	SDL_RenderDrawPoint(*ren, x, y);
 }
 
-// ====================================
-//  RENDERING
-// ====================================
+/* ==================================== */
+/*  RENDERING */
+/* ==================================== */
 void
 R_Render(cpu *c, int vramOffset, SDL_Renderer **ren)
 {

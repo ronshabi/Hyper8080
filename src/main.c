@@ -4,7 +4,7 @@ int
 main(int argc, char *argv[])
 {
 	//
-	// Check arguments
+	/* Check arguments */
 	//
 	if (argc != 2) {
 		fprintf(stderr, "Usage: %s <file...>\n", argv[0]);
@@ -36,7 +36,7 @@ main(int argc, char *argv[])
 	c.memory = buffer;
 
 	//
-	// Create window
+	/* Create window */
 	//
 	R_Init();
 	R_CreateWindow(&Window, &Renderer, WINDOW_TITLE, WINDOW_WIDTH,
@@ -45,7 +45,7 @@ main(int argc, char *argv[])
 	R_Update(&Renderer);
 
 	//
-	// Event loop
+	/* Event loop */
 	//
 	while (!quit) {
 
@@ -54,10 +54,10 @@ main(int argc, char *argv[])
 		if ((double)(now - ms_Interrupt_Last) > HZ(120)) {
 			if (interrupt ^= 1) {
 				R_Render(&c, 0x2400, &Renderer);
-				// Send RST 2
+				/* Send RST 2 */
 				C_GenerateInterrupt(&c, 0x10);
 			} else {
-				// Send RST 1
+				/* Send RST 1 */
 				C_GenerateInterrupt(&c, 0x08);
 			}
 			ms_Interrupt_Last = now;

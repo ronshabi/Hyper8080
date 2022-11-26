@@ -1,7 +1,7 @@
 #pragma once
 
 #define DEBUG_MODE_REGULAR
-// define DEBUG_MODE_STOP
+/* define DEBUG_MODE_STOP */
 #define DEBUG_MODE_STOP_AT_INSTRUCTION 2000000
 
 #ifdef DEBUG_MODE_REGULAR
