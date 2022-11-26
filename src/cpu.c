@@ -3,180 +3,264 @@
 //
 // Core
 //
-void C_Init(cpu *c) {
-    c->a = 0;
-    c->b = 0;
-    c->c = 0;
-    c->d = 0;
-    c->e = 0;
-    c->h = 0;
-    c->l = 0;
+void
+C_Init(cpu *c)
+{
+	c->a = 0;
+	c->b = 0;
+	c->c = 0;
+	c->d = 0;
+	c->e = 0;
+	c->h = 0;
+	c->l = 0;
 
-    c->flag_z  = 0;
-    c->flag_s  = 0;
-    c->flag_p  = 0;
-    c->flag_c  = 0;
-    c->flag_ac = 0;
+	c->flag_z = 0;
+	c->flag_s = 0;
+	c->flag_p = 0;
+	c->flag_c = 0;
+	c->flag_ac = 0;
 
-    c->pc = 0;
-    c->sp = 0;
+	c->pc = 0;
+	c->sp = 0;
 
-    c->cycles       = 0;
-    c->instructions = 0;
+	c->cycles = 0;
+	c->instructions = 0;
 
-    c->memory             = NULL;
-    c->halt               = 0;
-    c->interrupts_enabled = 0;
+	c->memory = NULL;
+	c->halt = 0;
+	c->interrupts_enabled = 0;
 
-    c->i0 = 0;
-    c->i1 = 0;
-    c->i2 = 0;
-    c->i3 = 0;
-    c->o2 = 0;
-    c->o3 = 0;
-    c->o4 = 0;
-    c->o5 = 0;
-    c->o6 = 0;
+	c->i0 = 0;
+	c->i1 = 0;
+	c->i2 = 0;
+	c->i3 = 0;
+	c->o2 = 0;
+	c->o3 = 0;
+	c->o4 = 0;
+	c->o5 = 0;
+	c->o6 = 0;
 
-    c->shift     = 0;
-    c->shift_amt = 0;
+	c->shift = 0;
+	c->shift_amt = 0;
 
-    c->paused = 0;
+	c->paused = 0;
 }
 
-void C_GenerateInterrupt(cpu *c, uint16_t addr) {
-    if (c->interrupts_enabled) {
-        c->interrupts_enabled = 0;
-        S_Push(c, c->pc);
-        c->pc = addr;
-    }
+void
+C_GenerateInterrupt(cpu *c, uint16_t addr)
+{
+	if (c->interrupts_enabled) {
+		c->interrupts_enabled = 0;
+		S_Push(c, c->pc);
+		c->pc = addr;
+	}
 }
 
 //
 // Memory
 //
-void    C_SetMemory(cpu *c, uint8_t *memory_ptr) { c->memory = memory_ptr; }
-uint8_t C_GetByte(cpu *c, uint16_t address) { return (c->memory[address]); }
-void    C_SetByte(cpu *c, uint16_t address, uint8_t val) {
-    if (address >= 0x2000 && address <= 0x4000) {
-        c->memory[address] = val;
-    }
+void
+C_SetMemory(cpu *c, uint8_t *memory_ptr)
+{
+	c->memory = memory_ptr;
 }
-uint16_t C_GetWord(cpu *c, uint16_t address) {
-    return c->memory[address + 1] << 8 | c->memory[address];
+uint8_t
+C_GetByte(cpu *c, uint16_t address)
+{
+	return (c->memory[address]);
 }
-void C_SetWord(cpu *c, uint16_t address, uint16_t val) {
-    C_SetByte(c, address, val & 0xff);
-    C_SetByte(c, address + 1, val >> 8);
+void
+C_SetByte(cpu *c, uint16_t address, uint8_t val)
+{
+	if (address >= 0x2000 && address <= 0x4000) {
+		c->memory[address] = val;
+	}
+}
+uint16_t
+C_GetWord(cpu *c, uint16_t address)
+{
+	return c->memory[address + 1] << 8 | c->memory[address];
+}
+void
+C_SetWord(cpu *c, uint16_t address, uint16_t val)
+{
+	C_SetByte(c, address, val & 0xff);
+	C_SetByte(c, address + 1, val >> 8);
 }
 
 //
 // Register pairs
 //
-uint16_t C_GetBC(cpu *c) { return c->b << 8 | c->c; }
-uint16_t C_GetDE(cpu *c) { return c->d << 8 | c->e; }
-uint16_t C_GetHL(cpu *c) { return c->h << 8 | c->l; }
-uint16_t C_GetPSW(cpu *c) {
-    uint16_t ret = 0;
-    ret |= c->a << 8;
-    ret |= C_Flags_Get(c) & 0xff;
-    return ret;
+uint16_t
+C_GetBC(cpu *c)
+{
+	return c->b << 8 | c->c;
 }
-void C_SetBC(cpu *c, uint16_t val) {
-    c->b = val >> 8;
-    c->c = val & 0xff;
+uint16_t
+C_GetDE(cpu *c)
+{
+	return c->d << 8 | c->e;
 }
-void C_SetDE(cpu *c, uint16_t val) {
-    c->d = val >> 8;
-    c->e = val & 0xff;
+uint16_t
+C_GetHL(cpu *c)
+{
+	return c->h << 8 | c->l;
 }
-void C_SetHL(cpu *c, uint16_t val) {
-    c->h = val >> 8;
-    c->l = val & 0xff;
+uint16_t
+C_GetPSW(cpu *c)
+{
+	uint16_t ret = 0;
+	ret |= c->a << 8;
+	ret |= C_Flags_Get(c) & 0xff;
+	return ret;
 }
-uint8_t C_DerefBC(cpu *c) { return C_GetByte(c, C_GetBC(c)); }
-uint8_t C_DerefDE(cpu *c) { return C_GetByte(c, C_GetDE(c)); }
-uint8_t C_DerefHL(cpu *c) { return C_GetByte(c, C_GetHL(c)); }
-uint8_t C_DerefSP(cpu *c, uint16_t offset) {
-    return C_GetByte(c, c->sp + offset);
+void
+C_SetBC(cpu *c, uint16_t val)
+{
+	c->b = val >> 8;
+	c->c = val & 0xff;
+}
+void
+C_SetDE(cpu *c, uint16_t val)
+{
+	c->d = val >> 8;
+	c->e = val & 0xff;
+}
+void
+C_SetHL(cpu *c, uint16_t val)
+{
+	c->h = val >> 8;
+	c->l = val & 0xff;
+}
+uint8_t
+C_DerefBC(cpu *c)
+{
+	return C_GetByte(c, C_GetBC(c));
+}
+uint8_t
+C_DerefDE(cpu *c)
+{
+	return C_GetByte(c, C_GetDE(c));
+}
+uint8_t
+C_DerefHL(cpu *c)
+{
+	return C_GetByte(c, C_GetHL(c));
+}
+uint8_t
+C_DerefSP(cpu *c, uint16_t offset)
+{
+	return C_GetByte(c, c->sp + offset);
 }
 
 //
 // Stack
 //
-void S_Push(cpu *c, uint16_t word) {
-    c->sp -= 2;
-    C_SetWord(c, c->sp, word);
+void
+S_Push(cpu *c, uint16_t word)
+{
+	c->sp -= 2;
+	C_SetWord(c, c->sp, word);
 }
-uint16_t S_Pop(cpu *c) {
-    uint16_t ret = C_GetWord(c, c->sp);
-    c->sp += 2;
-    return ret;
+uint16_t
+S_Pop(cpu *c)
+{
+	uint16_t ret = C_GetWord(c, c->sp);
+	c->sp += 2;
+	return ret;
 }
-void S_PushPSW(cpu *c) { S_Push(c, C_GetPSW(c)); }
-void S_PopPSW(cpu *c) {
-    uint16_t psw = S_Pop(c);
-    c->a         = psw >> 8;
-    c->flag_s    = psw >> 7 & 0x1;
-    c->flag_z    = psw >> 6 & 0x1;
-    c->flag_ac   = psw >> 4 & 0x1;
-    c->flag_p    = psw >> 2 & 0x1;
-    c->flag_c    = psw & 0x1;
+void
+S_PushPSW(cpu *c)
+{
+	S_Push(c, C_GetPSW(c));
+}
+void
+S_PopPSW(cpu *c)
+{
+	uint16_t psw = S_Pop(c);
+	c->a = psw >> 8;
+	c->flag_s = psw >> 7 & 0x1;
+	c->flag_z = psw >> 6 & 0x1;
+	c->flag_ac = psw >> 4 & 0x1;
+	c->flag_p = psw >> 2 & 0x1;
+	c->flag_c = psw & 0x1;
 }
 
 //
 // Flags
 //
-uint8_t F_Parity(uint8_t n) {
-    uint8_t parity = 0;
-    while (n) {
-        parity ^= (n & 1);
-        n >>= 1;
-    }
-    return 1 - parity;
+uint8_t
+F_Parity(uint8_t n)
+{
+	uint8_t parity = 0;
+	while (n) {
+		parity ^= (n & 1);
+		n >>= 1;
+	}
+	return 1 - parity;
 }
-uint8_t F_Zero(uint8_t n) { return n == 0; }
-uint8_t F_Sign(uint8_t n) { return (n & 0x80) == 0x80; }
-uint8_t F_Carry(uint8_t a, uint8_t b, uint8_t carry) {
-    uint16_t sum = a + b + carry;
-    return (sum > 0xff);
+uint8_t
+F_Zero(uint8_t n)
+{
+	return n == 0;
 }
-uint8_t C_Flags_Get(cpu *c) {
-    uint8_t ret = c->flag_s << 7;
-    ret |= c->flag_z << 6;
-    ret |= 0 << 5;
-    ret |= c->flag_ac << 4;
-    ret |= 0 << 3;
-    ret |= c->flag_p << 2;
-    ret |= 1 << 1;
-    ret |= c->flag_c & 0xff;
-    return ret;
+uint8_t
+F_Sign(uint8_t n)
+{
+	return (n & 0x80) == 0x80;
 }
-void C_Flags_SetZSP(cpu *c, uint8_t val) {
-    c->flag_z = F_Zero(val);
-    c->flag_s = F_Sign(val);
-    c->flag_p = F_Parity(val);
+uint8_t
+F_Carry(uint8_t a, uint8_t b, uint8_t carry)
+{
+	uint16_t sum = a + b + carry;
+	return (sum > 0xff);
 }
-void C_Flags_SetCarryFromWord(cpu *c, uint16_t num) {
-    c->flag_c = (num > 0xff);
+uint8_t
+C_Flags_Get(cpu *c)
+{
+	uint8_t ret = c->flag_s << 7;
+	ret |= c->flag_z << 6;
+	ret |= 0 << 5;
+	ret |= c->flag_ac << 4;
+	ret |= 0 << 3;
+	ret |= c->flag_p << 2;
+	ret |= 1 << 1;
+	ret |= c->flag_c & 0xff;
+	return ret;
+}
+void
+C_Flags_SetZSP(cpu *c, uint8_t val)
+{
+	c->flag_z = F_Zero(val);
+	c->flag_s = F_Sign(val);
+	c->flag_p = F_Parity(val);
+}
+void
+C_Flags_SetCarryFromWord(cpu *c, uint16_t num)
+{
+	c->flag_c = (num > 0xff);
 }
 
 //
 // Emulation
 //
-void C_Unimplemented(cpu *c) {
-    printf("\nUNIMPLEMENTED INSTRUCTION %02x\n", C_GetByte(c, --c->pc));
-    printf("Instructions executed: %lu\n", c->instructions);
-    printf("Cycles: %lu\n", c->cycles);
-    exit(1);
+void
+C_Unimplemented(cpu *c)
+{
+	printf("\nUNIMPLEMENTED INSTRUCTION %02x\n", C_GetByte(c, --c->pc));
+	printf("Instructions executed: %lu\n", c->instructions);
+	printf("Cycles: %lu\n", c->cycles);
+	exit(1);
 }
 
-void C_Emulate(cpu *c, uint8_t opcode) {
-    /* READ HEADER FILES FOR INSTRUCTION DOCUMENTATION */
-    c->instructions++;
-    c->cycles += C_CYCLES[opcode];
+void
+C_Emulate(cpu *c, uint8_t opcode)
+{
+	/* READ HEADER FILES FOR INSTRUCTION DOCUMENTATION */
+	c->instructions++;
+	c->cycles += C_CYCLES[opcode];
 
-    // clang-format off
+	// clang-format off
 	switch (opcode)
 	{
 		// NOP
@@ -466,5 +550,5 @@ void C_Emulate(cpu *c, uint8_t opcode) {
 
 		default: C_Unimplemented (c); break;
 	}
-    // clang-format on
+	// clang-format on
 }
