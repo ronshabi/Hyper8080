@@ -1,31 +1,31 @@
 #include "defs.h"
 
 void
-D_Address(uint16_t addr)
+debug_address(uint16_t addr)
 {
 #ifdef DEBUG_MODE_REGULAR
 	printf(" $%04x", addr);
 #endif
-};
+}
 
 void
-D_Device(uint8_t dev)
+debug_device(uint8_t dev)
 {
 #ifdef DEBUG_MODE_REGULAR
 	printf(" <Device: %d>", dev);
 #endif
-};
+}
 
 void
-D_GlobalMessage(const char *msg)
+debug_msg(const char *msg)
 {
 #ifdef DEBUG_MODE_REGULAR
 	printf("\n%s\n", msg);
 #endif
-};
+}
 
 void
-D_Disasm(cpu *c)
+debug_disassemble(cpu *c)
 {
 #ifdef DEBUG_MODE_REGULAR
 	printf(
@@ -35,23 +35,23 @@ D_Disasm(cpu *c)
 	    c->l, c->sp, c->flag_z, c->flag_s, c->flag_p, c->flag_c, c->flag_ac,
 	    c->shift, C_INSTRUCTIONS[cpu_get_byte(c, c->pc)]);
 #endif
-};
+}
 
 void
-D_StopHandler(cpu *c, bool *quit)
+debug_stop(cpu *c, bool *quit)
 {
 #ifdef DEBUG_MODE_STOP
 	if (c->instructions == DEBUG_MODE_STOP_AT_INSTRUCTION) {
 		*quit = true;
 	}
 #endif
-};
+}
 
 void
-D_Summary(cpu *c)
+debug_summary(cpu *c)
 {
 #ifdef DEBUG_MODE_STOP
 	printf("Stopped at instruction %lu\n", c->instructions);
 	printf("Cycles: %lu\n", c->cycles);
 #endif
-};
+}

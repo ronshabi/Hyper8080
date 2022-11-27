@@ -3,7 +3,7 @@
 void
 jmp(cpu *c, bool condition, uint16_t addr)
 {
-	D_Address(addr);
+	debug_address(addr);
 	PC2;
 	if (condition) {
 		c->pc = addr;
@@ -13,7 +13,7 @@ jmp(cpu *c, bool condition, uint16_t addr)
 void
 call(cpu *c, bool condition, uint16_t addr)
 {
-	D_Address(addr);
+	debug_address(addr);
 	PC2;
 	if (condition) {
 		cpu_stack_push(c, c->pc);
@@ -291,7 +291,7 @@ in(cpu *c)
 	uint8_t device_number = ARG8;
 	PC1;
 
-	D_Device(device_number);
+	debug_device(device_number);
 
 	if (device_number == DEVICE_INP0) {
 		c->a = c->i0;
@@ -309,7 +309,7 @@ out(cpu *c)
 	uint8_t device_number = ARG8;
 	PC1;
 
-	D_Device(device_number);
+	debug_device(device_number);
 
 	if (device_number == DEVICE_SHIFT_AMT) {
 		c->shift_amt = (c->a & 7);
@@ -328,7 +328,7 @@ out(cpu *c)
 void
 hlt(cpu *c)
 {
-	D_GlobalMessage("CPU Halted");
+	debug_msg("CPU Halted");
 	c->halt = 1;
 }
 

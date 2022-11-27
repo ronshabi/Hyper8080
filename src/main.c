@@ -3,9 +3,9 @@
 int
 main(int argc, char *argv[])
 {
-	//
+
 	/* Check arguments */
-	//
+
 	if (argc != 2) {
 		fprintf(stderr, "Usage: %s <file...>\n", argv[0]);
 		exit(1);
@@ -35,18 +35,18 @@ main(int argc, char *argv[])
 	cpu_init(&c);
 	c.memory = buffer;
 
-	//
+
 	/* Create window */
-	//
+
 	R_Init();
 	R_CreateWindow(&Window, &Renderer, WINDOW_TITLE, WINDOW_WIDTH,
 	    WINDOW_HEIGHT, WINDOW_SCALE);
 	R_ClearScreen(&Renderer);
 	R_Update(&Renderer);
 
-	//
+
 	/* Event loop */
-	//
+
 	while (!quit) {
 
 		now = SDL_GetTicks();
@@ -77,20 +77,20 @@ main(int argc, char *argv[])
 		}
 
 		if (!c.paused) {
-			D_Disasm(&c);
+			debug_disassemble(&c);
 
 			c_currentOpcode = cpu_get_byte(&c, c.pc);
 			c.pc += 1;
 			cpu_execute(&c, c_currentOpcode);
 
-			D_StopHandler(&c, &quit);
+			debug_stop(&c, &quit);
 			D_Newline;
 		}
 	}
 
-	D_Summary(&c);
+	debug_summary(&c);
 
 	R_Exit(&Window, &Renderer);
 	free(buffer);
 	return 0;
-};
+}

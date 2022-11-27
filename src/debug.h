@@ -304,9 +304,9 @@ static const char *C_INSTRUCTIONS[] = { "NOP", "LXI B", "STAX B", "INX B",
 	"RST 5", "RP", "POP PSW", "JP", "DI", "CP", "PUSH PSW", "ORI", "RST 6",
 	"RM", "SPHL", "JM", "EI", "CM", "NOP", "CPI", "RST 7" };
 
-void D_Address(uint16_t addr);
-void D_Device(uint8_t dev);
-void D_GlobalMessage(const char *msg);
-void D_Disasm(cpu *c);
-void D_StopHandler(cpu *c, bool *quit);
-void D_Summary(cpu *c);
+void debug_address(uint16_t addr);
+void debug_device(uint8_t dev);
+void debug_msg(const char *msg);
+void debug_disassemble(cpu *c);
+void debug_stop(cpu *c, bool *quit);
+void debug_summary(cpu *c);
