@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HYPER8080_DEBUG_H
+#define HYPER8080_DEBUG_H
 
 #define DEBUG_MODE_REGULAR
 /* define DEBUG_MODE_STOP */
@@ -310,3 +311,5 @@ void debug_msg(const char *msg);
 void debug_disassemble(cpu *c);
 void debug_stop(cpu *c, bool *quit);
 void debug_summary(cpu *c);
+
+#endif /* HYPER8080_DEBUG_H */

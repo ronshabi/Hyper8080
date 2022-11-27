@@ -1,4 +1,6 @@
-#pragma once
+#ifndef HYPER8080_INSTRUCTIONS_H
+#define HYPER8080_INSTRUCTIONS_H
+
 #include "defs.h"
 
 void jmp(cpu *c, bool condition, uint16_t addr);
@@ -68,3 +70,5 @@ void ora(cpu *c, const uint8_t *reg);/* ORA A		Logical or w/ */
 void ora_m(cpu *c);/* ORA M */
 void cmp(cpu *c, const uint8_t *reg); /* CMP A */
 void cmp_m(cpu *c);/* CMP M */
+
+#endif /* HYPER8080_INSTRUCTIONS_H */

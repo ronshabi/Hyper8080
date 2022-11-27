@@ -1,4 +1,6 @@
-#pragma once
+#ifndef HYPER8080_CPU_H
+#define HYPER8080_CPU_H
+
 #define PC1 c->pc += 1
 #define PC2 c->pc += 2
 
@@ -86,3 +88,5 @@ void cpu_stack_pop_psw(cpu *c);
 void cpu_execute(cpu *c, uint8_t opcode);
 void cpu_unimplemented(cpu *c);
 void cpu_interrupt(cpu *c, uint16_t addr);
+
+#endif /* HYPER8080_CPU_H */

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HYPER8080_DEFINES_H
+#define HYPER8080_DEFINES_H
 
 #include <SDL2/SDL.h>
 #include <stdbool.h>
@@ -19,3 +20,5 @@
 #define WINDOW_HEIGHT 256
 #define WINDOW_TITLE "intel8080 (stable-0.3)"
 #define WINDOW_SCALE 2
+
+#endif /* HYPER8080_DEFINES_H */
