@@ -25,7 +25,7 @@ debug_msg(const char *msg)
 }
 
 void
-debug_disassemble(cpu *c)
+debug_disassemble(struct cpu *c)
 {
 #ifdef DEBUG_MODE_REGULAR
 	printf(
@@ -38,7 +38,7 @@ debug_disassemble(cpu *c)
 }
 
 void
-debug_stop(cpu *c, bool *quit)
+debug_stop(struct cpu *c, bool *quit)
 {
 #ifdef DEBUG_MODE_STOP
 	if (c->instructions == DEBUG_MODE_STOP_AT_INSTRUCTION) {
@@ -48,7 +48,7 @@ debug_stop(cpu *c, bool *quit)
 }
 
 void
-debug_summary(cpu *c)
+debug_summary(struct cpu *c)
 {
 #ifdef DEBUG_MODE_STOP
 	printf("Stopped at instruction %lu\n", c->instructions);

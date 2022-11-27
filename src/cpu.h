@@ -28,7 +28,7 @@
 #define DEVICE_INP2 2
 #define DEVICE_SHIFT_IN 3
 
-typedef struct cpu {
+struct cpu {
 	uint8_t a, b, c, d, e, h, l;
 	uint16_t pc, sp;
 	uint8_t *memory;
@@ -50,43 +50,34 @@ typedef struct cpu {
 	/* debugging tools */
 	uint8_t paused;
 
-} cpu;
+};
 
-/* Core */
-void cpu_init(cpu *c);
-void cpu_set_memory(cpu *c, uint8_t *memory_ptr);
+void 		cpu_init(struct cpu *);
+void 		cpu_set_memory(struct cpu *, uint8_t *);
+uint8_t 	cpu_get_byte(struct cpu *, uint16_t);
+uint16_t 	cpu_get_word(struct cpu *, uint16_t);
+void 		cpu_set_byte(struct cpu *, uint16_t, uint8_t);
+void 		cpu_set_word(struct cpu *, uint16_t, uint16_t);
+uint16_t 	cpu_get_bc(struct cpu *);
+uint16_t 	cpu_get_de(struct cpu *);
+uint16_t 	cpu_get_hl(struct cpu *);
+void 		cpu_set_bc(struct cpu *, uint16_t);
+void 		cpu_set_de(struct cpu *, uint16_t);
+void 		cpu_set_hl(struct cpu *, uint16_t);
+uint8_t 	cpu_deref_bc(struct cpu *);
+uint8_t 	cpu_deref_de(struct cpu *);
+uint8_t 	cpu_deref_hl(struct cpu *);
+uint8_t 	cpu_deref_sp(struct cpu *, uint16_t);
+void 		cpu_flags_set_zsp(struct cpu *, uint8_t);
+void 		cpu_flags_set_carry_from_word(struct cpu *, uint16_t);
 
-/* Memory */
-uint8_t cpu_get_byte(cpu *c, uint16_t address);
-uint16_t cpu_get_word(cpu *c, uint16_t address);
-void cpu_set_byte(cpu *c, uint16_t address, uint8_t val);
-void cpu_set_word(cpu *c, uint16_t address, uint16_t val);
+void 		cpu_stack_push(struct cpu *, uint16_t);
+uint16_t 	cpu_stack_pop(struct cpu *);
+void 		cpu_stack_push_psw(struct cpu *);
+void 		cpu_stack_pop_psw(struct cpu *);
 
-/* Register pairs */
-uint16_t cpu_get_bc(cpu *c);
-uint16_t cpu_get_de(cpu *c);
-uint16_t cpu_get_hl(cpu *c);
-void cpu_set_bc(cpu *c, uint16_t val);
-void cpu_set_de(cpu *c, uint16_t val);
-void cpu_set_hl(cpu *c, uint16_t val);
-uint8_t cpu_deref_bc(cpu *c);
-uint8_t cpu_deref_de(cpu *c);
-uint8_t cpu_deref_hl(cpu *c);
-uint8_t cpu_deref_sp(cpu *c, uint16_t offset);
-
-/* Flags */
-void cpu_flags_set_zsp(cpu *c, uint8_t val);
-void cpu_flags_set_carry_from_word(cpu *c, uint16_t num);
-
-/* Stack */
-void cpu_stack_push(cpu *c, uint16_t word);
-uint16_t cpu_stack_pop(cpu *c);
-void cpu_stack_push_psw(cpu *c);
-void cpu_stack_pop_psw(cpu *c);
-
-/* Emulation */
-void cpu_execute(cpu *c, uint8_t opcode);
-void cpu_unimplemented(cpu *c);
-void cpu_interrupt(cpu *c, uint16_t addr);
+void cpu_execute(struct cpu *, uint8_t);
+void cpu_unimplemented(struct cpu *);
+void cpu_interrupt(struct cpu *, uint8_t);
 
 #endif /* HYPER8080_CPU_H */

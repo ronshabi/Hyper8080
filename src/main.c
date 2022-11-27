@@ -55,10 +55,10 @@ main(int argc, char *argv[])
 			if (interrupt ^= 1) {
 				render(&c, 0x2400, &Renderer);
 				/* Send RST 2 */
-				cpu_interrupt(&c, 0x10);
+				cpu_interrupt(&c, 2);
 			} else {
 				/* Send RST 1 */
-				cpu_interrupt(&c, 0x08);
+				cpu_interrupt(&c, 1);
 			}
 			ms_Interrupt_Last = now;
 		}

@@ -308,8 +308,8 @@ static const char *C_INSTRUCTIONS[] = { "NOP", "LXI B", "STAX B", "INX B",
 void debug_address(uint16_t addr);
 void debug_device(uint8_t dev);
 void debug_msg(const char *msg);
-void debug_disassemble(cpu *c);
-void debug_stop(cpu *c, bool *quit);
-void debug_summary(cpu *c);
+void debug_disassemble(struct cpu *c);
+void debug_stop(struct cpu *c, bool *quit);
+void debug_summary(struct cpu *c);
 
 #endif /* HYPER8080_DEBUG_H */

@@ -7,6 +7,6 @@
 
 void sys_load_rom(FILE *fptr, char *filename, unsigned char *memptr);
 void sys_allocate(unsigned char **ptr, int howmuch);
-void sys_keyboard(cpu *c, const uint8_t **keyboard, bool *quitcond);
+void sys_keyboard(struct cpu *c, const uint8_t **keyboard, bool *quitcond);
 
 #endif /* HYPER8080_SYS_H */

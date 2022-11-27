@@ -1,7 +1,7 @@
 #include "defs.h"
 
 void
-cpu_init(cpu *c)
+cpu_init(struct cpu *c)
 {
 	c->a = 0;
 	c->b = 0;
@@ -42,14 +42,16 @@ cpu_init(cpu *c)
 
 	c->paused = 0;
 }
-
+/*
+ * Generate CPU interrupt (asm INT)
+ */
 void
-cpu_interrupt(cpu *c, uint16_t addr)
+cpu_interrupt(struct cpu *c, uint8_t intnum)
 {
 	if (c->interrupts_enabled) {
 		c->interrupts_enabled = 0;
 		cpu_stack_push(c, c->pc);
-		c->pc = addr;
+		c->pc = intnum*8;
 	}
 }
 
@@ -57,51 +59,51 @@ cpu_interrupt(cpu *c, uint16_t addr)
 /* Memory */
 
 void
-cpu_set_memory(cpu *c, uint8_t *memory_ptr)
+cpu_set_memory(struct cpu *c, uint8_t *memory_ptr)
 {
 	c->memory = memory_ptr;
 }
 uint8_t
-cpu_get_byte(cpu *c, uint16_t address)
+cpu_get_byte(struct cpu *c, uint16_t address)
 {
 	return (c->memory[address]);
 }
 void
-cpu_set_byte(cpu *c, uint16_t address, uint8_t val)
+cpu_set_byte(struct cpu *c, uint16_t address, uint8_t val)
 {
 	if (address >= 0x2000 && address <= 0x4000) {
 		c->memory[address] = val;
 	}
 }
 uint16_t
-cpu_get_word(cpu *c, uint16_t address)
+cpu_get_word(struct cpu *c, uint16_t address)
 {
 	return c->memory[address + 1] << 8 | c->memory[address];
 }
 void
-cpu_set_word(cpu *c, uint16_t address, uint16_t val)
+cpu_set_word(struct cpu *c, uint16_t address, uint16_t val)
 {
 	cpu_set_byte(c, address, val & 0xff);
 	cpu_set_byte(c, address + 1, val >> 8);
 }
 
 uint16_t
-cpu_get_bc(cpu *c)
+cpu_get_bc(struct cpu *c)
 {
 	return c->b << 8 | c->c;
 }
 uint16_t
-cpu_get_de(cpu *c)
+cpu_get_de(struct cpu *c)
 {
 	return c->d << 8 | c->e;
 }
 uint16_t
-cpu_get_hl(cpu *c)
+cpu_get_hl(struct cpu *c)
 {
 	return c->h << 8 | c->l;
 }
 uint16_t
-cpu_get_psw(cpu *c)
+cpu_get_psw(struct cpu *c)
 {
 	uint16_t ret;
 	ret = 0;
@@ -122,64 +124,64 @@ cpu_get_psw(cpu *c)
 	return ret;
 }
 void
-cpu_set_bc(cpu *c, uint16_t val)
+cpu_set_bc(struct cpu *c, uint16_t val)
 {
 	c->b = val >> 8;
 	c->c = val & 0xff;
 }
 void
-cpu_set_de(cpu *c, uint16_t val)
+cpu_set_de(struct cpu *c, uint16_t val)
 {
 	c->d = val >> 8;
 	c->e = val & 0xff;
 }
 void
-cpu_set_hl(cpu *c, uint16_t val)
+cpu_set_hl(struct cpu *c, uint16_t val)
 {
 	c->h = val >> 8;
 	c->l = val & 0xff;
 }
 uint8_t
-cpu_deref_bc(cpu *c)
+cpu_deref_bc(struct cpu *c)
 {
 	return cpu_get_byte(c, cpu_get_bc(c));
 }
 uint8_t
-cpu_deref_de(cpu *c)
+cpu_deref_de(struct cpu *c)
 {
 	return cpu_get_byte(c, cpu_get_de(c));
 }
 uint8_t
-cpu_deref_hl(cpu *c)
+cpu_deref_hl(struct cpu *c)
 {
 	return cpu_get_byte(c, cpu_get_hl(c));
 }
 uint8_t
-cpu_deref_sp(cpu *c, uint16_t offset)
+cpu_deref_sp(struct cpu *c, uint16_t offset)
 {
 	return cpu_get_byte(c, c->sp + offset);
 }
 
 void
-cpu_stack_push(cpu *c, uint16_t word)
+cpu_stack_push(struct cpu *c, uint16_t word)
 {
 	c->sp -= 2;
 	cpu_set_word(c, c->sp, word);
 }
 uint16_t
-cpu_stack_pop(cpu *c)
+cpu_stack_pop(struct cpu *c)
 {
 	uint16_t ret = cpu_get_word(c, c->sp);
 	c->sp += 2;
 	return ret;
 }
 void
-cpu_stack_push_psw(cpu *c)
+cpu_stack_push_psw(struct cpu *c)
 {
 	cpu_stack_push(c, cpu_get_psw(c));
 }
 void
-cpu_stack_pop_psw(cpu *c)
+cpu_stack_pop_psw(struct cpu *c)
 {
 	uint16_t psw = cpu_stack_pop(c);
 	c->a = psw >> 8;
@@ -218,7 +220,7 @@ F_Carry(uint8_t a, uint8_t b, uint8_t carry)
 }
 
 void
-cpu_flags_set_zsp(cpu *c, uint8_t val)
+cpu_flags_set_zsp(struct cpu *c, uint8_t val)
 {
 	c->flag_z = F_Zero(val);
 	c->flag_s = F_Sign(val);
@@ -226,14 +228,14 @@ cpu_flags_set_zsp(cpu *c, uint8_t val)
 }
 
 void
-cpu_flags_set_carry_from_word(cpu *c, uint16_t num)
+cpu_flags_set_carry_from_word(struct cpu *c, uint16_t num)
 {
 	c->flag_c = (num > 0xff);
 }
 
 
 void
-cpu_unimplemented(cpu *c)
+cpu_unimplemented(struct cpu *c)
 {
 	printf("\nUNIMPLEMENTED INSTRUCTION %02x\n", cpu_get_byte(c, --c->pc));
 	printf("Instructions executed: %lu\n", c->instructions);
@@ -242,7 +244,7 @@ cpu_unimplemented(cpu *c)
 }
 
 void
-cpu_execute(cpu *c, uint8_t opcode)
+cpu_execute(struct cpu *c, uint8_t opcode)
 {
 	c->instructions++;
 	c->cycles += C_CYCLES[opcode];

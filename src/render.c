@@ -84,7 +84,7 @@ render_set_pixel(SDL_Renderer **ren, int x, int y)
 }
 
 void
-render(cpu *c, int vramOffset, SDL_Renderer **ren)
+render(struct cpu *c, int vramOffset, SDL_Renderer **ren)
 {
 	render_clear(ren);
 

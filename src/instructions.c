@@ -1,7 +1,7 @@
 #include "defs.h"
 
 void
-jmp(cpu *c, bool condition, uint16_t addr)
+jmp(struct cpu *c, bool condition, uint16_t addr)
 {
 	debug_address(addr);
 	PC2;
@@ -11,7 +11,7 @@ jmp(cpu *c, bool condition, uint16_t addr)
 }
 
 void
-call(cpu *c, bool condition, uint16_t addr)
+call(struct cpu *c, bool condition, uint16_t addr)
 {
 	debug_address(addr);
 	PC2;
@@ -22,14 +22,14 @@ call(cpu *c, bool condition, uint16_t addr)
 }
 
 void
-ret(cpu *c, bool condition)
+ret(struct cpu *c, bool condition)
 {
 	if (condition)
 		c->pc = cpu_stack_pop(c);
 }
 
 void
-adi(cpu *c)
+adi(struct cpu *c)
 {
 	uint16_t result = c->a + ARG8;
 	c->a = result & 0xff;
@@ -38,7 +38,7 @@ adi(cpu *c)
 	PC1;
 }
 void
-aci(cpu *c)
+aci(struct cpu *c)
 {
 	uint16_t result = c->a + ARG8 + c->flag_c;
 	c->a = result & 0xff;
@@ -47,7 +47,7 @@ aci(cpu *c)
 	PC1;
 }
 void
-sui(cpu *c)
+sui(struct cpu *c)
 {
 	uint16_t result = c->a + FLIP(ARG8);
 	c->a = result & 0xff;
@@ -56,7 +56,7 @@ sui(cpu *c)
 	PC1;
 }
 void
-sbi(cpu *c)
+sbi(struct cpu *c)
 {
 	uint16_t result = c->a + FLIP(ARG8) + FLIP(c->flag_c);
 	c->a = result & 0xff;
@@ -65,7 +65,7 @@ sbi(cpu *c)
 	PC1;
 }
 void
-ani(cpu *c)
+ani(struct cpu *c)
 {
 	uint16_t result = c->a & ARG8;
 	c->a = result & 0xff;
@@ -74,7 +74,7 @@ ani(cpu *c)
 	PC1;
 }
 void
-xri(cpu *c)
+xri(struct cpu *c)
 {
 	uint16_t result = c->a ^ ARG8;
 	c->a = result & 0xff;
@@ -83,7 +83,7 @@ xri(cpu *c)
 	PC1;
 }
 void
-ori(cpu *c)
+ori(struct cpu *c)
 {
 	uint16_t result = c->a | ARG8;
 	c->a = result & 0xff;
@@ -92,7 +92,7 @@ ori(cpu *c)
 	PC1;
 }
 void
-cpi(cpu *c)
+cpi(struct cpu *c)
 {
 	/* A is not changed by this operation, only the FLAGS */
 	uint16_t result = c->a + FLIP(ARG8);
@@ -103,75 +103,75 @@ cpi(cpu *c)
 
 /* DATA TRANSFER */
 void
-dad_b(cpu *c)
+dad_b(struct cpu *c)
 {
 	uint16_t result = cpu_get_bc(c) + cpu_get_hl(c);
 	cpu_flags_set_carry_from_word(c, result);
 	cpu_set_hl(c, result);
 }
 void
-dad_d(cpu *c)
+dad_d(struct cpu *c)
 {
 	uint32_t result = cpu_get_de(c) + cpu_get_hl(c);
 	cpu_flags_set_carry_from_word(c, result & 0xffff);
 	cpu_set_hl(c, result & 0xffff);
 }
 void
-dad_h(cpu *c)
+dad_h(struct cpu *c)
 {
 	uint32_t result = cpu_get_hl(c) + cpu_get_hl(c);
 	cpu_flags_set_carry_from_word(c, result & 0xffff);
 	cpu_set_hl(c, result & 0xffff);
 }
 void
-dad_sp(cpu *c)
+dad_sp(struct cpu *c)
 {
 	uint32_t result = c->sp + cpu_get_hl(c);
 	cpu_flags_set_carry_from_word(c, result & 0xffff);
 	cpu_set_hl(c, result & 0xffff);
 }
 void
-inx_b(cpu *c)
+inx_b(struct cpu *c)
 {
 	cpu_set_bc(c, cpu_get_bc(c) + 1);
 }
 void
-inx_d(cpu *c)
+inx_d(struct cpu *c)
 {
 	cpu_set_de(c, cpu_get_de(c) + 1);
 }
 void
-inx_h(cpu *c)
+inx_h(struct cpu *c)
 {
 	cpu_set_hl(c, cpu_get_hl(c) + 1);
 }
 void
-inx_sp(cpu *c)
+inx_sp(struct cpu *c)
 {
 	c->sp++;
 }
 void
-dcx_b(cpu *c)
+dcx_b(struct cpu *c)
 {
 	cpu_set_bc(c, cpu_get_bc(c) - 1);
 }
 void
-dcx_d(cpu *c)
+dcx_d(struct cpu *c)
 {
 	cpu_set_de(c, cpu_get_de(c) - 1);
 }
 void
-dcx_h(cpu *c)
+dcx_h(struct cpu *c)
 {
 	cpu_set_hl(c, cpu_get_hl(c) - 1);
 }
 void
-dcx_sp(cpu *c)
+dcx_sp(struct cpu *c)
 {
 	c->sp--;
 }
 void
-xchg(cpu *c)
+xchg(struct cpu *c)
 {
 	uint8_t temp;
 	temp = c->h;
@@ -183,7 +183,7 @@ xchg(cpu *c)
 	c->e = temp;
 }
 void
-xthl(cpu *c)
+xthl(struct cpu *c)
 {
 	uint8_t l = c->l;
 	uint8_t h = c->h;
@@ -195,14 +195,14 @@ xthl(cpu *c)
 	cpu_set_byte(c, c->sp + 1, h);
 }
 void
-sphl(cpu *c)
+sphl(struct cpu *c)
 {
 	c->sp = cpu_get_hl(c);
 }
 
 /* SINGLE REGISTER INSTRUCTIONS */
 void
-inr(cpu *c, uint8_t *reg)
+inr(struct cpu *c, uint8_t *reg)
 {
 	uint16_t result = ++*reg;
 	cpu_flags_set_zsp(c, *reg);
@@ -210,7 +210,7 @@ inr(cpu *c, uint8_t *reg)
 	*reg = result & 0xff;
 }
 void
-inr_m(cpu *c)
+inr_m(struct cpu *c)
 {
 	uint16_t result = cpu_deref_hl(c) + 1;
 	cpu_set_byte(c, cpu_get_hl(c), result & 0xff);
@@ -218,7 +218,7 @@ inr_m(cpu *c)
 	cpu_flags_set_carry_from_word(c, result);
 }
 void
-dcr(cpu *c, uint8_t *reg)
+dcr(struct cpu *c, uint8_t *reg)
 {
 	uint16_t result = *reg + FLIP(1);
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -226,7 +226,7 @@ dcr(cpu *c, uint8_t *reg)
 	*reg = result & 0xff;
 }
 void
-dcr_m(cpu *c)
+dcr_m(struct cpu *c)
 {
 	uint16_t result = cpu_deref_hl(c) + FLIP(1);
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -234,7 +234,7 @@ dcr_m(cpu *c)
 	cpu_set_byte(c, cpu_get_hl(c), result & 0xff);
 }
 void
-daa(cpu *c)
+daa(struct cpu *c)
 {
 	uint16_t result = 0;
 	if ((c->a & 0x0f) > 9 || c->flag_ac) {
@@ -252,7 +252,7 @@ daa(cpu *c)
 
 /* ROTATE ACCUMULATOR */
 void
-rlc(cpu *c)
+rlc(struct cpu *c)
 {
 	uint8_t bit7 = (c->a & 0x80) >> 7;
 	c->a <<= 1;
@@ -260,7 +260,7 @@ rlc(cpu *c)
 	c->flag_c = bit7;
 }
 void
-rrc(cpu *c)
+rrc(struct cpu *c)
 {
 	uint8_t bit0 = (c->a & 0x1);
 	c->a >>= 1;
@@ -268,7 +268,7 @@ rrc(cpu *c)
 	c->flag_c = (bit0 != 0);
 }
 void
-ral(cpu *c)
+ral(struct cpu *c)
 {
 	uint8_t bit7 = (c->a & 0x80) >> 7;
 	c->a <<= 1;
@@ -276,7 +276,7 @@ ral(cpu *c)
 	c->flag_c = bit7;
 }
 void
-rar(cpu *c)
+rar(struct cpu *c)
 {
 	uint8_t bit0 = c->a & 0x1;
 	c->a = c->a >> 1;
@@ -286,7 +286,7 @@ rar(cpu *c)
 
 /* I/O */
 void
-in(cpu *c)
+in(struct cpu *c)
 {
 	uint8_t device_number = ARG8;
 	PC1;
@@ -304,7 +304,7 @@ in(cpu *c)
 	}
 }
 void
-out(cpu *c)
+out(struct cpu *c)
 {
 	uint8_t device_number = ARG8;
 	PC1;
@@ -326,7 +326,7 @@ out(cpu *c)
 }
 
 void
-hlt(cpu *c)
+hlt(struct cpu *c)
 {
 	debug_msg("CPU Halted");
 	c->halt = 1;
@@ -334,7 +334,7 @@ hlt(cpu *c)
 
 /* REGISTER OR MEMORY TO ACCUMULATOR */
 void
-add(cpu *c, const uint8_t *reg)
+add(struct cpu *c, const uint8_t *reg)
 {
 	uint16_t result = c->a + *reg;
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -342,7 +342,7 @@ add(cpu *c, const uint8_t *reg)
 	c->a = result & 0xff;
 }
 void
-add_m(cpu *c)
+add_m(struct cpu *c)
 {
 	uint16_t result = c->a + cpu_deref_hl(c);
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -350,7 +350,7 @@ add_m(cpu *c)
 	c->a = result & 0xff;
 }
 void
-adc(cpu *c, const uint8_t *reg)
+adc(struct cpu *c, const uint8_t *reg)
 {
 	uint16_t result = c->a + *reg + c->flag_c;
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -358,7 +358,7 @@ adc(cpu *c, const uint8_t *reg)
 	c->a = result & 0xff;
 }
 void
-adc_m(cpu *c)
+adc_m(struct cpu *c)
 {
 	uint16_t result = c->a + cpu_deref_hl(c) + c->flag_c;
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -366,7 +366,7 @@ adc_m(cpu *c)
 	c->a = result & 0xff;
 }
 void
-sub(cpu *c, const uint8_t *reg)
+sub(struct cpu *c, const uint8_t *reg)
 {
 	uint16_t result = c->a + FLIP(*reg);
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -374,7 +374,7 @@ sub(cpu *c, const uint8_t *reg)
 	c->a = result & 0xff;
 }
 void
-sub_m(cpu *c)
+sub_m(struct cpu *c)
 {
 	uint16_t result = c->a + FLIP(cpu_deref_hl(c));
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -382,7 +382,7 @@ sub_m(cpu *c)
 	c->a = result & 0xff;
 }
 void
-sbb(cpu *c, const uint8_t *reg)
+sbb(struct cpu *c, const uint8_t *reg)
 {
 	uint16_t result = c->a + FLIP(*reg) + FLIP(c->flag_c);
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -390,7 +390,7 @@ sbb(cpu *c, const uint8_t *reg)
 	c->a = result & 0xff;
 }
 void
-sbb_m(cpu *c)
+sbb_m(struct cpu *c)
 {
 	uint16_t result = c->a + FLIP(cpu_deref_hl(c)) + FLIP(c->flag_c);
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -398,7 +398,7 @@ sbb_m(cpu *c)
 	c->a = result & 0xff;
 }
 void
-ana(cpu *c, const uint8_t *reg)
+ana(struct cpu *c, const uint8_t *reg)
 {
 	uint16_t result = (c->a & (*reg));
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -406,7 +406,7 @@ ana(cpu *c, const uint8_t *reg)
 	c->a = result & 0xff;
 }
 void
-ana_m(cpu *c)
+ana_m(struct cpu *c)
 {
 	uint16_t result = c->a & (cpu_deref_hl(c));
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -414,7 +414,7 @@ ana_m(cpu *c)
 	c->a = result & 0xff;
 }
 void
-xra(cpu *c, const uint8_t *reg)
+xra(struct cpu *c, const uint8_t *reg)
 {
 	uint16_t result = (c->a ^ (*reg));
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -422,7 +422,7 @@ xra(cpu *c, const uint8_t *reg)
 	c->a = result & 0xff;
 }
 void
-xra_m(cpu *c)
+xra_m(struct cpu *c)
 {
 	uint16_t result = c->a ^ (cpu_deref_hl(c));
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -430,7 +430,7 @@ xra_m(cpu *c)
 	c->a = result & 0xff;
 }
 void
-ora(cpu *c, const uint8_t *reg)
+ora(struct cpu *c, const uint8_t *reg)
 {
 	uint16_t result = c->a | *reg;
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -438,7 +438,7 @@ ora(cpu *c, const uint8_t *reg)
 	c->a = result & 0xff;
 }
 void
-ora_m(cpu *c)
+ora_m(struct cpu *c)
 {
 	uint16_t result = c->a | (cpu_deref_hl(c));
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -446,7 +446,7 @@ ora_m(cpu *c)
 	c->a = result & 0xff;
 }
 void
-cmp(cpu *c, const uint8_t *reg)
+cmp(struct cpu *c, const uint8_t *reg)
 {
 	uint16_t result = c->a + FLIP(*reg);
 	cpu_flags_set_zsp(c, result & 0xff);
@@ -454,7 +454,7 @@ cmp(cpu *c, const uint8_t *reg)
 }
 
 void
-cmp_m(cpu *c)
+cmp_m(struct cpu *c)
 {
 	uint16_t result = c->a + FLIP(cpu_deref_hl(c));
 	cpu_flags_set_zsp(c, result & 0xff);

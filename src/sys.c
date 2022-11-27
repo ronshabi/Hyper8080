@@ -32,7 +32,7 @@ sys_allocate(unsigned char **ptr, int howmuch)
 }
 
 void
-sys_keyboard(cpu *c, const uint8_t **keyboard, bool *quitcond)
+sys_keyboard(struct cpu *c, const uint8_t **keyboard, bool *quitcond)
 {
 	/* Reset inputs instead of handling keyup events */
 	c->i0 &= 0b10001111;
