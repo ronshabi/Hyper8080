@@ -29,8 +29,8 @@ main(int argc, char *argv[])
 	uint64_t cyclesLast = 0;
 	uint64_t cyclesNow = 0;
 
-	Sys_AllocateMemory(&buffer, 65535);
-	Sys_LoadROM(f, argv[1], buffer);
+	sys_allocate(&buffer, 65535);
+	sys_load_rom(f, argv[1], buffer);
 
 	cpu_init(&c);
 	c.memory = buffer;
@@ -38,11 +38,11 @@ main(int argc, char *argv[])
 
 	/* Create window */
 
-	R_Init();
-	R_CreateWindow(&Window, &Renderer, WINDOW_TITLE, WINDOW_WIDTH,
+	render_init();
+	render_create_window(&Window, &Renderer, WINDOW_TITLE, WINDOW_WIDTH,
 	    WINDOW_HEIGHT, WINDOW_SCALE);
-	R_ClearScreen(&Renderer);
-	R_Update(&Renderer);
+	render_clear(&Renderer);
+	render_update(&Renderer);
 
 
 	/* Event loop */
@@ -53,7 +53,7 @@ main(int argc, char *argv[])
 
 		if ((double)(now - ms_Interrupt_Last) > HZ(120)) {
 			if (interrupt ^= 1) {
-				R_Render(&c, 0x2400, &Renderer);
+				render(&c, 0x2400, &Renderer);
 				/* Send RST 2 */
 				cpu_interrupt(&c, 0x10);
 			} else {
@@ -64,7 +64,7 @@ main(int argc, char *argv[])
 		}
 
 		if ((double)(now - ms_Input_Last) > HZ(30)) {
-			Sys_HandleInputs(&c, &keyboard, &quit);
+			sys_keyboard(&c, &keyboard, &quit);
 			ms_Input_Last = now;
 		}
 
@@ -90,7 +90,7 @@ main(int argc, char *argv[])
 
 	debug_summary(&c);
 
-	R_Exit(&Window, &Renderer);
+	render_destroy(&Window, &Renderer);
 	free(buffer);
 	return 0;
 }

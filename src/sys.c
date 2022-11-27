@@ -1,7 +1,7 @@
 #include "sys.h"
 
 void
-Sys_LoadROM(FILE *fptr, char *filename, unsigned char *memptr)
+sys_load_rom(FILE *fptr, char *filename, unsigned char *memptr)
 {
 	fptr = fopen(filename, "rb"); /* (try to) open file */
 
@@ -26,13 +26,13 @@ Sys_LoadROM(FILE *fptr, char *filename, unsigned char *memptr)
 }
 
 void
-Sys_AllocateMemory(unsigned char **ptr, int howmuch)
+sys_allocate(unsigned char **ptr, int howmuch)
 {
 	*ptr = calloc(howmuch, 1);
 }
 
 void
-Sys_HandleInputs(cpu *c, const uint8_t **keyboard, bool *quitcond)
+sys_keyboard(cpu *c, const uint8_t **keyboard, bool *quitcond)
 {
 	/* Reset inputs instead of handling keyup events */
 	c->i0 &= 0b10001111;
