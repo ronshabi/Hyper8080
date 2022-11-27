@@ -1,7 +1,7 @@
 #ifndef HYPER8080_RENDER_H
 #define HYPER8080_RENDER_H
 
-#include "defs.h"
+#include "defines.h"
 
 void render_init(void);
 void render_create_window(SDL_Window **,

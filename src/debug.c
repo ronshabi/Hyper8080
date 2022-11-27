@@ -1,4 +1,4 @@
-#include "defs.h"
+#include "defines.h"
 
 void
 debug_address(uint16_t addr)

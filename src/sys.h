@@ -1,7 +1,7 @@
 #ifndef HYPER8080_SYS_H
 #define HYPER8080_SYS_H
 
-#include "defs.h"
+#include "defines.h"
 
 #define HZ(n) (double)(1000.0 / n)
 

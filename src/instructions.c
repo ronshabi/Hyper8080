@@ -1,4 +1,4 @@
-#include "defs.h"
+#include "defines.h"
 
 void
 jmp(struct cpu *c, bool condition, uint16_t addr)

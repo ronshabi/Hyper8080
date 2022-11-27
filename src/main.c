@@ -1,4 +1,4 @@
-#include "defs.h"
+#include "defines.h"
 
 int
 main(int argc, char *argv[])
@@ -12,7 +12,7 @@ main(int argc, char *argv[])
 	}
 
 	FILE *f;
-	cpu c;
+	struct cpu c;
 	unsigned char *buffer;
 	uint8_t c_currentOpcode;
 	bool quit = false;

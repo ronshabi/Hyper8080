@@ -18,7 +18,7 @@
 #define ANSI_COLOR_RESET "\x1b[0m"
 #define WINDOW_WIDTH 224
 #define WINDOW_HEIGHT 256
-#define WINDOW_TITLE "intel8080 (stable-0.3)"
+#define WINDOW_TITLE "Hyper8080 - an Intel 8080 emulator (stable-0.3)"
 #define WINDOW_SCALE 2
 
 #endif /* HYPER8080_DEFINES_H */

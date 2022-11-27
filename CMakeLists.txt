@@ -6,7 +6,7 @@ set(CMAKE_C_FLAGS "-O3")
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
-add_executable(intel8080 src/main.c src/cpu.c src/cpu.h src/instructions.c src/instructions.h src/debug.c src/debug.h src/render.c src/render.h src/sys.c src/sys.h src/defs.h)
+add_executable(intel8080 src/main.c src/cpu.c src/cpu.h src/instructions.c src/instructions.h src/debug.c src/debug.h src/render.c src/render.h src/sys.c src/sys.h src/defines.h)
 target_link_libraries(intel8080 ${SDL2_LIBRARIES})
 target_link_libraries(intel8080 m)
 

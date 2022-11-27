@@ -70,14 +70,12 @@ uint8_t 	cpu_deref_hl(struct cpu *);
 uint8_t 	cpu_deref_sp(struct cpu *, uint16_t);
 void 		cpu_flags_set_zsp(struct cpu *, uint8_t);
 void 		cpu_flags_set_carry_from_word(struct cpu *, uint16_t);
-
 void 		cpu_stack_push(struct cpu *, uint16_t);
 uint16_t 	cpu_stack_pop(struct cpu *);
 void 		cpu_stack_push_psw(struct cpu *);
 void 		cpu_stack_pop_psw(struct cpu *);
-
-void cpu_execute(struct cpu *, uint8_t);
-void cpu_unimplemented(struct cpu *);
-void cpu_interrupt(struct cpu *, uint8_t);
+void		cpu_execute(struct cpu *, uint8_t);
+void		cpu_unimplemented(struct cpu *);
+void		cpu_interrupt(struct cpu *, uint8_t);
 
 #endif /* HYPER8080_CPU_H */

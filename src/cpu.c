@@ -1,5 +1,51 @@
-#include "defs.h"
+/*
+ * Hyper8080 / CPU.c
+ *
+ * Copyright (c) 2022 Ron Shabi.  All rights reserved.
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 
+#include "defines.h"
+
+/*
+ * Returns true if number of ones in byte is even.
+ */
+bool
+parity(uint8_t n)
+{
+	uint8_t parity = 0;
+
+	while (n) {
+		parity ^= n & 1;
+		n >>= 1;
+	}
+
+	return 1 - parity;
+}
+
+/*
+ * Initialise CPU state.
+ * 
+ * Note: this function sets the memory pointer to NULL, therefore it shouldn't
+ * be called before freeing unused allocated memory.
+ */
 void
 cpu_init(struct cpu *c)
 {
@@ -42,44 +88,53 @@ cpu_init(struct cpu *c)
 
 	c->paused = 0;
 }
+
 /*
- * Generate CPU interrupt (asm INT)
+ * Point memory to address at ptr
  */
 void
-cpu_interrupt(struct cpu *c, uint8_t intnum)
+cpu_set_memory(struct cpu *c, uint8_t *ptr)
 {
-	if (c->interrupts_enabled) {
-		c->interrupts_enabled = 0;
-		cpu_stack_push(c, c->pc);
-		c->pc = intnum*8;
-	}
+	c->memory = ptr;
 }
 
-
-/* Memory */
-
-void
-cpu_set_memory(struct cpu *c, uint8_t *memory_ptr)
-{
-	c->memory = memory_ptr;
-}
+/*
+ * Get byte at offset from memory
+ */
 uint8_t
-cpu_get_byte(struct cpu *c, uint16_t address)
+cpu_get_byte(struct cpu *c, uint16_t offset)
 {
-	return (c->memory[address]);
+	return c->memory[offset];
 }
+
+/*
+ * Set byte at offset in memory.
+ *
+ * Note: this function applys ROM write protection, currently set to be
+ * in memory addresses between 0x2000 - 0x4000, in order to prevent memory
+ * corruptions which should not happen in real hardware.
+ */
 void
-cpu_set_byte(struct cpu *c, uint16_t address, uint8_t val)
+cpu_set_byte(struct cpu *c, uint16_t offset, uint8_t val)
 {
-	if (address >= 0x2000 && address <= 0x4000) {
-		c->memory[address] = val;
-	}
+	if (offset >= 0x2000 && offset <= 0x4000)
+		c->memory[offset] = val;
 }
+
+/*
+ * Get word at offset from memory as a 16-bit LE uint.
+ */
 uint16_t
-cpu_get_word(struct cpu *c, uint16_t address)
+cpu_get_word(struct cpu *c, uint16_t offset)
 {
-	return c->memory[address + 1] << 8 | c->memory[address];
+	return c->memory[offset + 1] << 8 | c->memory[offset];
 }
+
+/*
+ * Set word at offset in memory in LE format.
+ *
+ * Note: as with cpu_set_byte, this function implements ROM write protection.
+ */
 void
 cpu_set_word(struct cpu *c, uint16_t address, uint16_t val)
 {
@@ -87,31 +142,40 @@ cpu_set_word(struct cpu *c, uint16_t address, uint16_t val)
 	cpu_set_byte(c, address + 1, val >> 8);
 }
 
+/*
+ * Get 16-bit uint assembled from register pairs BC, DE, HL.
+ */
 uint16_t
 cpu_get_bc(struct cpu *c)
 {
 	return c->b << 8 | c->c;
 }
+
 uint16_t
 cpu_get_de(struct cpu *c)
 {
 	return c->d << 8 | c->e;
 }
+
 uint16_t
 cpu_get_hl(struct cpu *c)
 {
 	return c->h << 8 | c->l;
 }
+
+/*
+ * Get 16-bit PSW register as defined in the manual:
+ * register A occupies most significant 8-bits, while the FLAGS register
+ * occupies the least significant 8-bits.
+ */
 uint16_t
 cpu_get_psw(struct cpu *c)
 {
 	uint16_t ret;
 	ret = 0;
 
-	/* Set A register to be at upper 8 bits*/
 	ret |= c->a << 8;
 
-	/* Set FLAGS register to be at lower 8 bits*/
 	ret |= c->flag_s << 7;
 	ret |= c->flag_z << 6;
 	ret |= 0 << 5;
@@ -123,51 +187,73 @@ cpu_get_psw(struct cpu *c)
 
 	return ret;
 }
+
+/*
+ * Set register pairs BC, DE, HL to immediate word given as argument.
+ */
 void
-cpu_set_bc(struct cpu *c, uint16_t val)
+cpu_set_bc(struct cpu *c, uint16_t word)
 {
-	c->b = val >> 8;
-	c->c = val & 0xff;
+	c->b = word >> 8;
+	c->c = word & 0xff;
 }
 void
-cpu_set_de(struct cpu *c, uint16_t val)
+cpu_set_de(struct cpu *c, uint16_t word)
 {
-	c->d = val >> 8;
-	c->e = val & 0xff;
+	c->d = word >> 8;
+	c->e = word & 0xff;
 }
 void
-cpu_set_hl(struct cpu *c, uint16_t val)
+cpu_set_hl(struct cpu *c, uint16_t word)
 {
-	c->h = val >> 8;
-	c->l = val & 0xff;
+	c->h = word >> 8;
+	c->l = word & 0xff;
 }
+
+/*
+ * Get byte at memory offset assembled by register pairs BC, DE, HL.
+ */
 uint8_t
 cpu_deref_bc(struct cpu *c)
 {
 	return cpu_get_byte(c, cpu_get_bc(c));
 }
+
 uint8_t
 cpu_deref_de(struct cpu *c)
 {
 	return cpu_get_byte(c, cpu_get_de(c));
 }
+
 uint8_t
 cpu_deref_hl(struct cpu *c)
 {
 	return cpu_get_byte(c, cpu_get_hl(c));
 }
+
+/*
+ * Get byte at memory offset denoted in register SP with an offset given as
+ * an additional argument.
+ */
 uint8_t
 cpu_deref_sp(struct cpu *c, uint16_t offset)
 {
 	return cpu_get_byte(c, c->sp + offset);
 }
 
+/*
+ * Push 16-bit uint (word) to stack.
+ */
 void
 cpu_stack_push(struct cpu *c, uint16_t word)
 {
 	c->sp -= 2;
 	cpu_set_word(c, c->sp, word);
 }
+
+/*
+ * Pop word from stack, return it to user as 16-bit uint.
+ */
 uint16_t
 cpu_stack_pop(struct cpu *c)
 {
@@ -175,15 +261,27 @@ cpu_stack_pop(struct cpu *c)
 	c->sp += 2;
 	return ret;
 }
+
+/* 
+ * Push value of PSW register to the stack.
+ */
 void
 cpu_stack_push_psw(struct cpu *c)
 {
 	cpu_stack_push(c, cpu_get_psw(c));
 }
+
+/* 
+ * Pop value of PSW register from the stack, set A and FLAGS registers to
+ * values denoted in it.
+ */
 void
 cpu_stack_pop_psw(struct cpu *c)
 {
-	uint16_t psw = cpu_stack_pop(c);
+	uint16_t psw;
+
+	psw = cpu_stack_pop(c);
+
 	c->a = psw >> 8;
 	c->flag_s = psw >> 7 & 0x1;
 	c->flag_z = psw >> 6 & 0x1;
@@ -192,57 +290,69 @@ cpu_stack_pop_psw(struct cpu *c)
 	c->flag_c = psw & 0x1;
 }
 
-uint8_t
-F_Parity(uint8_t n)
-{
-	uint8_t parity = 0;
-	while (n) {
-		parity ^= (n & 1);
-		n >>= 1;
-	}
-	return 1 - parity;
-}
-uint8_t
-F_Zero(uint8_t n)
-{
-	return n == 0;
-}
-uint8_t
-F_Sign(uint8_t n)
-{
-	return (n & 0x80) == 0x80;
-}
-uint8_t
-F_Carry(uint8_t a, uint8_t b, uint8_t carry)
-{
-	uint16_t sum = a + b + carry;
-	return (sum > 0xff);
-}
 
+/* 
+ * Set flags Zero, Sign and Parity based on provided number.
+ */
 void
-cpu_flags_set_zsp(struct cpu *c, uint8_t val)
+cpu_flags_set_zsp(struct cpu *c, uint8_t n)
 {
-	c->flag_z = F_Zero(val);
-	c->flag_s = F_Sign(val);
-	c->flag_p = F_Parity(val);
+	c->flag_z = n == 0;
+	c->flag_s = (n & 0x80) == 0x80;
+	c->flag_p = parity(n);
 }
 
+/* 
+ * Set Carry flag based on provided 16-bit uint.
+ */
 void
-cpu_flags_set_carry_from_word(struct cpu *c, uint16_t num)
+cpu_flags_set_carry_from_word(struct cpu *c, uint16_t word)
 {
-	c->flag_c = (num > 0xff);
+	c->flag_c = word > 0xff;
 }
 
-
+/* 
+ * Prints error about an unimplemented instruction to stderr with the
+ * instruction's opcode, then exit. 
+ */
 void
 cpu_unimplemented(struct cpu *c)
 {
-	printf("\nUNIMPLEMENTED INSTRUCTION %02x\n", cpu_get_byte(c, --c->pc));
-	printf("Instructions executed: %lu\n", c->instructions);
-	printf("Cycles: %lu\n", c->cycles);
+	fprintf(stderr, 
+		"Error: unimplemented instruction %02x\n",
+		cpu_get_byte(c, --c->pc));
+
 	exit(1);
 }
 
+/*
+ * Generate interrupt (asm INT)
+ */
+void
+cpu_interrupt(struct cpu *c, uint8_t intnum)
+{
+	if (c->interrupts_enabled) {
+		c->interrupts_enabled = 0;
+		cpu_stack_push(c, c->pc);
+		c->pc = intnum*8;
+	}
+}
+
+/*
+ * Execute an instruction based on opcode provided in argument.
+ *
+ * While most instruction opcodes are based on the manual, some undocumented
+ * instructions are necessary to implement to ensure correct emulation (for
+ * reference, see https://pastraiser.com/cpu/i8080/i8080_opcodes.html)
+ * 
+ * 
+ * For each instruction, increment the CPU instructions counter and add the
+ * cycles required by the executed instruction to the CPU cycle counter.
+ * 
+ * If the opcode provided isn't associated with any 8080 function, this
+ * function will call the _unimplemented function_ handler (in this case:
+ * cpu_unimplemented).
+ */
 void
 cpu_execute(struct cpu *c, uint8_t opcode)
 {
@@ -265,7 +375,7 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0xfd:
 		case 0x38: break;
 
-		/* RET alternative, see: https://pastraiser.com/cpu/i8080/i8080_opcodes.html */
+		/* RET alternative, */
 		case 0xd9: ret (c, true); break;
 
 		/* CARRY */

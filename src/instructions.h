@@ -1,7 +1,7 @@
 #ifndef HYPER8080_INSTRUCTIONS_H
 #define HYPER8080_INSTRUCTIONS_H
 
-#include "defs.h"
+#include "defines.h"
 
 void jmp(struct cpu *c, bool condition, uint16_t addr);
 void call(struct cpu *c, bool condition, uint16_t addr);
