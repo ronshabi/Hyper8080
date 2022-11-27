@@ -6,8 +6,8 @@
 #define REG(reg) &(c->reg)
 
 /* Quickly get immediate */
-#define ARG8 C_GetByte(c, c->pc)
-#define ARG16 C_GetWord(c, c->pc)
+#define ARG8 cpu_get_byte(c, c->pc)
+#define ARG16 cpu_get_word(c, c->pc)
 
 /* Twos-compliment flip sign */
 #define FLIP(n) (~(n) + 1)
@@ -51,39 +51,38 @@ typedef struct cpu {
 } cpu;
 
 /* Core */
-void C_Init(cpu *c);
-void C_SetMemory(cpu *c, uint8_t *memory_ptr);
+void cpu_init(cpu *c);
+void cpu_set_memory(cpu *c, uint8_t *memory_ptr);
 
 /* Memory */
-uint8_t C_GetByte(cpu *c, uint16_t address);
-uint16_t C_GetWord(cpu *c, uint16_t address);
-void C_SetByte(cpu *c, uint16_t address, uint8_t val);
-void C_SetWord(cpu *c, uint16_t address, uint16_t val);
+uint8_t cpu_get_byte(cpu *c, uint16_t address);
+uint16_t cpu_get_word(cpu *c, uint16_t address);
+void cpu_set_byte(cpu *c, uint16_t address, uint8_t val);
+void cpu_set_word(cpu *c, uint16_t address, uint16_t val);
 
 /* Register pairs */
-uint16_t C_GetBC(cpu *c);
-uint16_t C_GetDE(cpu *c);
-uint16_t C_GetHL(cpu *c);
-void C_SetBC(cpu *c, uint16_t val);
-void C_SetDE(cpu *c, uint16_t val);
-void C_SetHL(cpu *c, uint16_t val);
-uint8_t C_DerefBC(cpu *c);
-uint8_t C_DerefDE(cpu *c);
-uint8_t C_DerefHL(cpu *c);
-uint8_t C_DerefSP(cpu *c, uint16_t offset);
+uint16_t cpu_get_bc(cpu *c);
+uint16_t cpu_get_de(cpu *c);
+uint16_t cpu_get_hl(cpu *c);
+void cpu_set_bc(cpu *c, uint16_t val);
+void cpu_set_de(cpu *c, uint16_t val);
+void cpu_set_hl(cpu *c, uint16_t val);
+uint8_t cpu_deref_bc(cpu *c);
+uint8_t cpu_deref_de(cpu *c);
+uint8_t cpu_deref_hl(cpu *c);
+uint8_t cpu_deref_sp(cpu *c, uint16_t offset);
 
 /* Flags */
-uint8_t C_Flags_Get(cpu *c);
-void C_Flags_SetZSP(cpu *c, uint8_t val);
-void C_Flags_SetCarryFromWord(cpu *c, uint16_t num);
+void cpu_flags_set_zsp(cpu *c, uint8_t val);
+void cpu_flags_set_carry_from_word(cpu *c, uint16_t num);
 
 /* Stack */
-void S_Push(cpu *c, uint16_t word);
-uint16_t S_Pop(cpu *c);
-void S_PushPSW(cpu *c);
-void S_PopPSW(cpu *c);
+void cpu_stack_push(cpu *c, uint16_t word);
+uint16_t cpu_stack_pop(cpu *c);
+void cpu_stack_push_psw(cpu *c);
+void cpu_stack_pop_psw(cpu *c);
 
 /* Emulation */
-void C_Emulate(cpu *c, uint8_t opcode);
-void C_Unimplemented(cpu *c);
-void C_GenerateInterrupt(cpu *c, uint16_t addr);
+void cpu_execute(cpu *c, uint8_t opcode);
+void cpu_unimplemented(cpu *c);
+void cpu_interrupt(cpu *c, uint16_t addr);

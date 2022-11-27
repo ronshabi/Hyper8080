@@ -22,7 +22,7 @@ Sys_LoadROM(FILE *fptr, char *filename, unsigned char *memptr)
 	fseek(fptr, 0L, SEEK_SET);
 
 	fread(memptr, fsize, 1, fptr); /* Read to memory buffer */
-	fclose(fptr) /* File handle not needed anymore */
+	fclose(fptr); /* File handle not needed anymore */
 }
 
 void

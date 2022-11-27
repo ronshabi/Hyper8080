@@ -7,7 +7,7 @@
 int main (void)
 {
 	cpu c;
-	C_Init (&c);
+	cpu_init (&c);
 
 	c.h = 0x97;
 	c.l = 0x00;

@@ -32,7 +32,7 @@ main(int argc, char *argv[])
 	Sys_AllocateMemory(&buffer, 65535);
 	Sys_LoadROM(f, argv[1], buffer);
 
-	C_Init(&c);
+	cpu_init(&c);
 	c.memory = buffer;
 
 	//
@@ -55,10 +55,10 @@ main(int argc, char *argv[])
 			if (interrupt ^= 1) {
 				R_Render(&c, 0x2400, &Renderer);
 				/* Send RST 2 */
-				C_GenerateInterrupt(&c, 0x10);
+				cpu_interrupt(&c, 0x10);
 			} else {
 				/* Send RST 1 */
-				C_GenerateInterrupt(&c, 0x08);
+				cpu_interrupt(&c, 0x08);
 			}
 			ms_Interrupt_Last = now;
 		}
@@ -79,9 +79,9 @@ main(int argc, char *argv[])
 		if (!c.paused) {
 			D_Disasm(&c);
 
-			c_currentOpcode = C_GetByte(&c, c.pc);
+			c_currentOpcode = cpu_get_byte(&c, c.pc);
 			c.pc += 1;
-			C_Emulate(&c, c_currentOpcode);
+			cpu_execute(&c, c_currentOpcode);
 
 			D_StopHandler(&c, &quit);
 			D_Newline;
@@ -93,4 +93,4 @@ main(int argc, char *argv[])
 	R_Exit(&Window, &Renderer);
 	free(buffer);
 	return 0;
-}
+};

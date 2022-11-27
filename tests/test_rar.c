@@ -7,7 +7,7 @@
 int main (void)
 {
 	cpu c;
-	C_Init (&c);
+	cpu_init (&c);
 
 	c.a		 = 0x6a;
 	c.flag_c = 1;

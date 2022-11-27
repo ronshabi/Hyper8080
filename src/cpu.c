@@ -1,7 +1,7 @@
 #include "defs.h"
 
 void
-C_Init(cpu *c)
+cpu_init(cpu *c)
 {
 	c->a = 0;
 	c->b = 0;
@@ -44,11 +44,11 @@ C_Init(cpu *c)
 }
 
 void
-C_GenerateInterrupt(cpu *c, uint16_t addr)
+cpu_interrupt(cpu *c, uint16_t addr)
 {
 	if (c->interrupts_enabled) {
 		c->interrupts_enabled = 0;
-		S_Push(c, c->pc);
+		cpu_stack_push(c, c->pc);
 		c->pc = addr;
 	}
 }
@@ -57,118 +57,131 @@ C_GenerateInterrupt(cpu *c, uint16_t addr)
 /* Memory */
 
 void
-C_SetMemory(cpu *c, uint8_t *memory_ptr)
+cpu_set_memory(cpu *c, uint8_t *memory_ptr)
 {
 	c->memory = memory_ptr;
 }
 uint8_t
-C_GetByte(cpu *c, uint16_t address)
+cpu_get_byte(cpu *c, uint16_t address)
 {
 	return (c->memory[address]);
 }
 void
-C_SetByte(cpu *c, uint16_t address, uint8_t val)
+cpu_set_byte(cpu *c, uint16_t address, uint8_t val)
 {
 	if (address >= 0x2000 && address <= 0x4000) {
 		c->memory[address] = val;
 	}
 }
 uint16_t
-C_GetWord(cpu *c, uint16_t address)
+cpu_get_word(cpu *c, uint16_t address)
 {
 	return c->memory[address + 1] << 8 | c->memory[address];
 }
 void
-C_SetWord(cpu *c, uint16_t address, uint16_t val)
+cpu_set_word(cpu *c, uint16_t address, uint16_t val)
 {
-	C_SetByte(c, address, val & 0xff);
-	C_SetByte(c, address + 1, val >> 8);
+	cpu_set_byte(c, address, val & 0xff);
+	cpu_set_byte(c, address + 1, val >> 8);
 }
 
 uint16_t
-C_GetBC(cpu *c)
+cpu_get_bc(cpu *c)
 {
 	return c->b << 8 | c->c;
 }
 uint16_t
-C_GetDE(cpu *c)
+cpu_get_de(cpu *c)
 {
 	return c->d << 8 | c->e;
 }
 uint16_t
-C_GetHL(cpu *c)
+cpu_get_hl(cpu *c)
 {
 	return c->h << 8 | c->l;
 }
 uint16_t
-C_GetPSW(cpu *c)
+cpu_get_psw(cpu *c)
 {
-	uint16_t ret = 0;
+	uint16_t ret;
+	ret = 0;
+
+	/* Set A register to be at upper 8 bits*/
 	ret |= c->a << 8;
-	ret |= C_Flags_Get(c) & 0xff;
+
+	/* Set FLAGS register to be at lower 8 bits*/
+	ret |= c->flag_s << 7;
+	ret |= c->flag_z << 6;
+	ret |= 0 << 5;
+	ret |= c->flag_ac << 4;
+	ret |= 0 << 3;
+	ret |= c->flag_p << 2;
+	ret |= 1 << 1;
+	ret |= c->flag_c;
+
 	return ret;
 }
 void
-C_SetBC(cpu *c, uint16_t val)
+cpu_set_bc(cpu *c, uint16_t val)
 {
 	c->b = val >> 8;
 	c->c = val & 0xff;
 }
 void
-C_SetDE(cpu *c, uint16_t val)
+cpu_set_de(cpu *c, uint16_t val)
 {
 	c->d = val >> 8;
 	c->e = val & 0xff;
 }
 void
-C_SetHL(cpu *c, uint16_t val)
+cpu_set_hl(cpu *c, uint16_t val)
 {
 	c->h = val >> 8;
 	c->l = val & 0xff;
 }
 uint8_t
-C_DerefBC(cpu *c)
+cpu_deref_bc(cpu *c)
 {
-	return C_GetByte(c, C_GetBC(c));
+	return cpu_get_byte(c, cpu_get_bc(c));
 }
 uint8_t
-C_DerefDE(cpu *c)
+cpu_deref_de(cpu *c)
 {
-	return C_GetByte(c, C_GetDE(c));
+	return cpu_get_byte(c, cpu_get_de(c));
 }
 uint8_t
-C_DerefHL(cpu *c)
+cpu_deref_hl(cpu *c)
 {
-	return C_GetByte(c, C_GetHL(c));
+	return cpu_get_byte(c, cpu_get_hl(c));
 }
 uint8_t
-C_DerefSP(cpu *c, uint16_t offset)
+cpu_deref_sp(cpu *c, uint16_t offset)
 {
-	return C_GetByte(c, c->sp + offset);
+	return cpu_get_byte(c, c->sp + offset);
 }
 
 void
-S_Push(cpu *c, uint16_t word)
+cpu_stack_push(cpu *c, uint16_t word)
 {
 	c->sp -= 2;
-	C_SetWord(c, c->sp, word);
+	cpu_set_word(c, c->sp, word);
 }
 uint16_t
-S_Pop(cpu *c)
+cpu_stack_pop(cpu *c)
 {
-	uint16_t ret = C_GetWord(c, c->sp);
+	uint16_t ret = cpu_get_word(c, c->sp);
 	c->sp += 2;
 	return ret;
 }
 void
-S_PushPSW(cpu *c)
+cpu_stack_push_psw(cpu *c)
 {
-	S_Push(c, C_GetPSW(c));
+	cpu_stack_push(c, cpu_get_psw(c));
 }
 void
-S_PopPSW(cpu *c)
+cpu_stack_pop_psw(cpu *c)
 {
-	uint16_t psw = S_Pop(c);
+	uint16_t psw = cpu_stack_pop(c);
 	c->a = psw >> 8;
 	c->flag_s = psw >> 7 & 0x1;
 	c->flag_z = psw >> 6 & 0x1;
@@ -203,44 +216,33 @@ F_Carry(uint8_t a, uint8_t b, uint8_t carry)
 	uint16_t sum = a + b + carry;
 	return (sum > 0xff);
 }
-uint8_t
-C_Flags_Get(cpu *c)
-{
-	uint8_t ret = c->flag_s << 7;
-	ret |= c->flag_z << 6;
-	ret |= 0 << 5;
-	ret |= c->flag_ac << 4;
-	ret |= 0 << 3;
-	ret |= c->flag_p << 2;
-	ret |= 1 << 1;
-	ret |= c->flag_c & 0xff;
-	return ret;
-}
+
 void
-C_Flags_SetZSP(cpu *c, uint8_t val)
+cpu_flags_set_zsp(cpu *c, uint8_t val)
 {
 	c->flag_z = F_Zero(val);
 	c->flag_s = F_Sign(val);
 	c->flag_p = F_Parity(val);
 }
+
 void
-C_Flags_SetCarryFromWord(cpu *c, uint16_t num)
+cpu_flags_set_carry_from_word(cpu *c, uint16_t num)
 {
 	c->flag_c = (num > 0xff);
 }
 
 
 void
-C_Unimplemented(cpu *c)
+cpu_unimplemented(cpu *c)
 {
-	printf("\nUNIMPLEMENTED INSTRUCTION %02x\n", C_GetByte(c, --c->pc));
+	printf("\nUNIMPLEMENTED INSTRUCTION %02x\n", cpu_get_byte(c, --c->pc));
 	printf("Instructions executed: %lu\n", c->instructions);
 	printf("Cycles: %lu\n", c->cycles);
 	exit(1);
 }
 
 void
-C_Emulate(cpu *c, uint8_t opcode)
+cpu_execute(cpu *c, uint8_t opcode)
 {
 	c->instructions++;
 	c->cycles += C_CYCLES[opcode];
@@ -300,9 +302,9 @@ C_Emulate(cpu *c, uint8_t opcode)
 		case 0xe8: ret (c, c->flag_p); break; /* rpe */
 		case 0xe0: ret (c, !c->flag_p); break; /* rpo */
 
-		case 0x01: C_SetBC (c, ARG16); PC2; break; /* LXI B */
-		case 0x11: C_SetDE (c, ARG16); PC2; break; /* LXI D */
-		case 0x21: C_SetHL (c, ARG16); PC2; break; /* LXI H */
+		case 0x01: cpu_set_bc (c, ARG16); PC2; break; /* LXI B */
+		case 0x11: cpu_set_de (c, ARG16); PC2; break; /* LXI D */
+		case 0x21: cpu_set_hl (c, ARG16); PC2; break; /* LXI H */
 		case 0x31: c->sp = ARG16; PC2; break; /* LXI SP */
 
 		case 0x06: c->b = ARG8; PC1; break; /* MVI B */
@@ -311,7 +313,7 @@ C_Emulate(cpu *c, uint8_t opcode)
 		case 0x1e: c->e = ARG8; PC1; break; /* MVI E */
 		case 0x26: c->h = ARG8;	PC1; break; /* MVI H */
 		case 0x2e: c->l = ARG8; PC1; break; /* MVI L */
-		case 0x36: C_SetByte (c, C_GetHL (c), ARG8); PC1; break; /* MVI M */
+		case 0x36: cpu_set_byte (c, cpu_get_hl (c), ARG8); PC1; break; /* MVI M */
 		case 0x3e: c->a = ARG8; PC1; break; /* MVI A */
 
 		case 0xc6: adi (c); break;
@@ -324,15 +326,15 @@ C_Emulate(cpu *c, uint8_t opcode)
 		case 0xfe: cpi (c); break;
 
 		/* DATA TRANSFER */
-		case 0x0a: c->a = C_DerefBC (c); break; /* LDAX B */
-		case 0x1a: c->a = C_DerefDE (c); break; /* LDAX D */
+		case 0x0a: c->a = cpu_deref_bc (c); break; /* LDAX B */
+		case 0x1a: c->a = cpu_deref_de (c); break; /* LDAX D */
 		case 0x40: c->b = c->b; break; /* MOV B, B */
 		case 0x41: c->b = c->c; break; /* MOV B, C */
 		case 0x42: c->b = c->d; break; /* MOV B, D */
 		case 0x43: c->b = c->e; break; /* MOV B, E */
 		case 0x44: c->b = c->h; break; /* MOV B, H */
 		case 0x45: c->b = c->l; break; /* MOV B, L */
-		case 0x46: c->b = C_DerefHL (c); break; /* MOV B, M */
+		case 0x46: c->b = cpu_deref_hl (c); break; /* MOV B, M */
 		case 0x47: c->b = c->a; break; /* MOV B, A */
 		case 0x48: c->c = c->b; break; /* MOV C, B */
 		case 0x49: c->c = c->c; break; /* MOV C, C */
@@ -340,7 +342,7 @@ C_Emulate(cpu *c, uint8_t opcode)
 		case 0x4b: c->c = c->e; break; /* MOV C, E */
 		case 0x4c: c->c = c->h; break; /* MOV C, H */
 		case 0x4d: c->c = c->l; break; /* MOV C, L */
-		case 0x4e: c->c = C_DerefHL (c); break; /* MOV C, M */
+		case 0x4e: c->c = cpu_deref_hl (c); break; /* MOV C, M */
 		case 0x4f: c->c = c->a; break; /* MOV C, A */
 		case 0x50: c->d = c->b; break; /* MOV D, B */
 		case 0x51: c->d = c->c; break; /* MOV D, C */
@@ -348,7 +350,7 @@ C_Emulate(cpu *c, uint8_t opcode)
 		case 0x53: c->d = c->e; break; /* MOV D, E */
 		case 0x54: c->d = c->h; break; /* MOV D, H */
 		case 0x55: c->d = c->l; break; /* MOV D, L */
-		case 0x56: c->d = C_DerefHL (c); break; /* MOV D, M */
+		case 0x56: c->d = cpu_deref_hl (c); break; /* MOV D, M */
 		case 0x57: c->d = c->a; break; /* MOV D, A */
 		case 0x58: c->e = c->b; break; /* MOV E, B */
 		case 0x59: c->e = c->c; break; /* MOV E, C */
@@ -356,7 +358,7 @@ C_Emulate(cpu *c, uint8_t opcode)
 		case 0x5b: c->e = c->e; break; /* MOV E, E */
 		case 0x5c: c->e = c->h; break; /* MOV E, H */
 		case 0x5d: c->e = c->l; break; /* MOV E, L */
-		case 0x5e: c->e = C_DerefHL (c); break; /* MOV E, M */
+		case 0x5e: c->e = cpu_deref_hl (c); break; /* MOV E, M */
 		case 0x5f: c->e = c->a; break; /* MOV E, A */
 		case 0x60: c->h = c->b; break; /* MOV H, B */
 		case 0x61: c->h = c->c; break; /* MOV H, C */
@@ -364,7 +366,7 @@ C_Emulate(cpu *c, uint8_t opcode)
 		case 0x63: c->h = c->e; break; /* MOV H, E */
 		case 0x64: c->h = c->h; break; /* MOV H, H */
 		case 0x65: c->h = c->l; break; /* MOV H, L */
-		case 0x66: c->h = C_DerefHL (c); break; /* MOV H, M */
+		case 0x66: c->h = cpu_deref_hl (c); break; /* MOV H, M */
 		case 0x67: c->h = c->a; break; /* MOV H, A */
 		case 0x68: c->l = c->b; break; /* MOV L, B */
 		case 0x69: c->l = c->c; break; /* MOV L, C */
@@ -372,35 +374,35 @@ C_Emulate(cpu *c, uint8_t opcode)
 		case 0x6b: c->l = c->e; break; /* MOV L, E */
 		case 0x6c: c->l = c->h; break; /* MOV L, H */
 		case 0x6d: c->l = c->l; break; /* MOV L, L */
-		case 0x6e: c->l = C_DerefHL (c); break; /* MOV L, M */
+		case 0x6e: c->l = cpu_deref_hl (c); break; /* MOV L, M */
 		case 0x6f: c->l = c->a; break; /* MOV L, A */
-		case 0x70: C_SetByte (c, C_GetHL (c), c->b); break; /* MOV M, B */
-		case 0x71: C_SetByte (c, C_GetHL (c), c->c); break; /* MOV M, C */
-		case 0x72: C_SetByte (c, C_GetHL (c), c->d); break; /* MOV M, D */
-		case 0x73: C_SetByte (c, C_GetHL (c), c->e); break; /* MOV M, E */
-		case 0x74: C_SetByte (c, C_GetHL (c), c->h); break; /* MOV M, H */
-		case 0x75: C_SetByte (c, C_GetHL (c), c->l); break; /* MOV M, L */
-		case 0x77: C_SetByte (c, C_GetHL (c), c->a); break; /* MOV M, A */
+		case 0x70: cpu_set_byte (c, cpu_get_hl (c), c->b); break; /* MOV M, B */
+		case 0x71: cpu_set_byte (c, cpu_get_hl (c), c->c); break; /* MOV M, C */
+		case 0x72: cpu_set_byte (c, cpu_get_hl (c), c->d); break; /* MOV M, D */
+		case 0x73: cpu_set_byte (c, cpu_get_hl (c), c->e); break; /* MOV M, E */
+		case 0x74: cpu_set_byte (c, cpu_get_hl (c), c->h); break; /* MOV M, H */
+		case 0x75: cpu_set_byte (c, cpu_get_hl (c), c->l); break; /* MOV M, L */
+		case 0x77: cpu_set_byte (c, cpu_get_hl (c), c->a); break; /* MOV M, A */
 		case 0x78: c->a = c->b; break; /* MOV A, B */
 		case 0x79: c->a = c->c; break; /* MOV A, C */
 		case 0x7a: c->a = c->d; break; /* MOV A, D */
 		case 0x7b: c->a = c->e; break; /* MOV A, E */
 		case 0x7c: c->a = c->h; break; /* MOV A, H */
 		case 0x7d: c->a = c->l; break; /* MOV A, L */
-		case 0x7e: c->a = C_DerefHL (c); break; /* MOV A, M */
+		case 0x7e: c->a = cpu_deref_hl (c); break; /* MOV A, M */
 		case 0x7f: c->a = c->a; break; /* MOV A, A */
 
-		case 0x02: C_SetByte (c, C_GetBC (c), c->a); break; /* STAX B */
-		case 0x12: C_SetByte (c, C_GetDE (c), c->a); break; /* STAX D */
+		case 0x02: cpu_set_byte (c, cpu_get_bc (c), c->a); break; /* STAX B */
+		case 0x12: cpu_set_byte (c, cpu_get_de (c), c->a); break; /* STAX D */
 
-		case 0xc5: S_Push (c, C_GetBC (c)); break; /* PUSH B */
-		case 0xd5: S_Push (c, C_GetDE (c)); break; /* PUSH D */
-		case 0xe5: S_Push (c, C_GetHL (c)); break; /* PUSH H */
-		case 0xf5: S_PushPSW (c); break; /* PUSH PSW */
-		case 0xc1: C_SetBC (c, S_Pop (c)); break; /* POP B */
-		case 0xd1: C_SetDE (c, S_Pop (c)); break; /* POP D */
-		case 0xe1: C_SetHL (c, S_Pop (c)); break; /* POP H */
-		case 0xf1: S_PopPSW (c); break; /* POP PSW */
+		case 0xc5: cpu_stack_push (c, cpu_get_bc (c)); break; /* PUSH B */
+		case 0xd5: cpu_stack_push (c, cpu_get_de (c)); break; /* PUSH D */
+		case 0xe5: cpu_stack_push (c, cpu_get_hl (c)); break; /* PUSH H */
+		case 0xf5: cpu_stack_push_psw (c); break; /* PUSH PSW */
+		case 0xc1: cpu_set_bc (c, cpu_stack_pop (c)); break; /* POP B */
+		case 0xd1: cpu_set_de (c, cpu_stack_pop (c)); break; /* POP D */
+		case 0xe1: cpu_set_hl (c, cpu_stack_pop (c)); break; /* POP H */
+		case 0xf1: cpu_stack_pop_psw (c); break; /* POP PSW */
 
 		case 0x09: dad_b (c); break;
 		case 0x19: dad_d (c); break;
@@ -514,11 +516,11 @@ C_Emulate(cpu *c, uint8_t opcode)
 		case 0xbe: cmp_m (c); break;
 		case 0xbf: cmp (c, REG (a)); break;
 
-		case 0x32: C_SetByte (c, ARG16, c->a); PC2; break; /* STA adr */
-		case 0x3a: c->a = C_GetByte (c, ARG16); PC2; break; /* LDA adr */
-		case 0x22: C_SetWord (c, ARG16, C_GetHL (c)); PC2; break; /* SHLD adr */
-		case 0x2a: C_SetHL (c, C_GetWord (c, ARG16)); PC2; break; /* LHLD adr */
-		case 0xe9: c->pc = C_GetHL (c); break; /* PCHL */
+		case 0x32: cpu_set_byte (c, ARG16, c->a); PC2; break; /* STA adr */
+		case 0x3a: c->a = cpu_get_byte (c, ARG16); PC2; break; /* LDA adr */
+		case 0x22: cpu_set_word (c, ARG16, cpu_get_hl (c)); PC2; break; /* SHLD adr */
+		case 0x2a: cpu_set_hl (c, cpu_get_word (c, ARG16)); PC2; break; /* LHLD adr */
+		case 0xe9: c->pc = cpu_get_hl (c); break; /* PCHL */
 
 		/* INTERRUPTS */
 		case 0xfb: c->interrupts_enabled = true; break;
@@ -532,6 +534,6 @@ C_Emulate(cpu *c, uint8_t opcode)
 		case 0xf7: call (c, true, 0x30); break;
 		case 0xff: call (c, true, 0x38); break;
 
-		default: C_Unimplemented (c); break;
+		default: cpu_unimplemented (c); break;
 	}
 }

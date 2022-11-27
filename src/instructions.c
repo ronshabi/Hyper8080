@@ -16,7 +16,7 @@ call(cpu *c, bool condition, uint16_t addr)
 	D_Address(addr);
 	PC2;
 	if (condition) {
-		S_Push(c, c->pc);
+		cpu_stack_push(c, c->pc);
 		c->pc = addr;
 	}
 }
@@ -25,7 +25,7 @@ void
 ret(cpu *c, bool condition)
 {
 	if (condition)
-		c->pc = S_Pop(c);
+		c->pc = cpu_stack_pop(c);
 }
 
 void
@@ -33,8 +33,8 @@ adi(cpu *c)
 {
 	uint16_t result = c->a + ARG8;
 	c->a = result & 0xff;
-	C_Flags_SetCarryFromWord(c, result);
-	C_Flags_SetZSP(c, result);
+	cpu_flags_set_carry_from_word(c, result);
+	cpu_flags_set_zsp(c, result);
 	PC1;
 }
 void
@@ -42,8 +42,8 @@ aci(cpu *c)
 {
 	uint16_t result = c->a + ARG8 + c->flag_c;
 	c->a = result & 0xff;
-	C_Flags_SetCarryFromWord(c, result);
-	C_Flags_SetZSP(c, c->a);
+	cpu_flags_set_carry_from_word(c, result);
+	cpu_flags_set_zsp(c, c->a);
 	PC1;
 }
 void
@@ -51,8 +51,8 @@ sui(cpu *c)
 {
 	uint16_t result = c->a + FLIP(ARG8);
 	c->a = result & 0xff;
-	C_Flags_SetCarryFromWord(c, result);
-	C_Flags_SetZSP(c, c->a);
+	cpu_flags_set_carry_from_word(c, result);
+	cpu_flags_set_zsp(c, c->a);
 	PC1;
 }
 void
@@ -60,8 +60,8 @@ sbi(cpu *c)
 {
 	uint16_t result = c->a + FLIP(ARG8) + FLIP(c->flag_c);
 	c->a = result & 0xff;
-	C_Flags_SetCarryFromWord(c, result);
-	C_Flags_SetZSP(c, c->a);
+	cpu_flags_set_carry_from_word(c, result);
+	cpu_flags_set_zsp(c, c->a);
 	PC1;
 }
 void
@@ -69,8 +69,8 @@ ani(cpu *c)
 {
 	uint16_t result = c->a & ARG8;
 	c->a = result & 0xff;
-	C_Flags_SetCarryFromWord(c, result);
-	C_Flags_SetZSP(c, c->a);
+	cpu_flags_set_carry_from_word(c, result);
+	cpu_flags_set_zsp(c, c->a);
 	PC1;
 }
 void
@@ -78,8 +78,8 @@ xri(cpu *c)
 {
 	uint16_t result = c->a ^ ARG8;
 	c->a = result & 0xff;
-	C_Flags_SetCarryFromWord(c, result);
-	C_Flags_SetZSP(c, c->a);
+	cpu_flags_set_carry_from_word(c, result);
+	cpu_flags_set_zsp(c, c->a);
 	PC1;
 }
 void
@@ -87,8 +87,8 @@ ori(cpu *c)
 {
 	uint16_t result = c->a | ARG8;
 	c->a = result & 0xff;
-	C_Flags_SetCarryFromWord(c, result);
-	C_Flags_SetZSP(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
+	cpu_flags_set_zsp(c, result & 0xff);
 	PC1;
 }
 void
@@ -96,8 +96,8 @@ cpi(cpu *c)
 {
 	/* A is not changed by this operation, only the FLAGS */
 	uint16_t result = c->a + FLIP(ARG8);
-	C_Flags_SetCarryFromWord(c, result);
-	C_Flags_SetZSP(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
+	cpu_flags_set_zsp(c, result & 0xff);
 	PC1;
 }
 
@@ -105,45 +105,45 @@ cpi(cpu *c)
 void
 dad_b(cpu *c)
 {
-	uint16_t result = C_GetBC(c) + C_GetHL(c);
-	C_Flags_SetCarryFromWord(c, result);
-	C_SetHL(c, result);
+	uint16_t result = cpu_get_bc(c) + cpu_get_hl(c);
+	cpu_flags_set_carry_from_word(c, result);
+	cpu_set_hl(c, result);
 }
 void
 dad_d(cpu *c)
 {
-	uint32_t result = C_GetDE(c) + C_GetHL(c);
-	C_Flags_SetCarryFromWord(c, result & 0xffff);
-	C_SetHL(c, result & 0xffff);
+	uint32_t result = cpu_get_de(c) + cpu_get_hl(c);
+	cpu_flags_set_carry_from_word(c, result & 0xffff);
+	cpu_set_hl(c, result & 0xffff);
 }
 void
 dad_h(cpu *c)
 {
-	uint32_t result = C_GetHL(c) + C_GetHL(c);
-	C_Flags_SetCarryFromWord(c, result & 0xffff);
-	C_SetHL(c, result & 0xffff);
+	uint32_t result = cpu_get_hl(c) + cpu_get_hl(c);
+	cpu_flags_set_carry_from_word(c, result & 0xffff);
+	cpu_set_hl(c, result & 0xffff);
 }
 void
 dad_sp(cpu *c)
 {
-	uint32_t result = c->sp + C_GetHL(c);
-	C_Flags_SetCarryFromWord(c, result & 0xffff);
-	C_SetHL(c, result & 0xffff);
+	uint32_t result = c->sp + cpu_get_hl(c);
+	cpu_flags_set_carry_from_word(c, result & 0xffff);
+	cpu_set_hl(c, result & 0xffff);
 }
 void
 inx_b(cpu *c)
 {
-	C_SetBC(c, C_GetBC(c) + 1);
+	cpu_set_bc(c, cpu_get_bc(c) + 1);
 }
 void
 inx_d(cpu *c)
 {
-	C_SetDE(c, C_GetDE(c) + 1);
+	cpu_set_de(c, cpu_get_de(c) + 1);
 }
 void
 inx_h(cpu *c)
 {
-	C_SetHL(c, C_GetHL(c) + 1);
+	cpu_set_hl(c, cpu_get_hl(c) + 1);
 }
 void
 inx_sp(cpu *c)
@@ -153,17 +153,17 @@ inx_sp(cpu *c)
 void
 dcx_b(cpu *c)
 {
-	C_SetBC(c, C_GetBC(c) - 1);
+	cpu_set_bc(c, cpu_get_bc(c) - 1);
 }
 void
 dcx_d(cpu *c)
 {
-	C_SetDE(c, C_GetDE(c) - 1);
+	cpu_set_de(c, cpu_get_de(c) - 1);
 }
 void
 dcx_h(cpu *c)
 {
-	C_SetHL(c, C_GetHL(c) - 1);
+	cpu_set_hl(c, cpu_get_hl(c) - 1);
 }
 void
 dcx_sp(cpu *c)
@@ -188,16 +188,16 @@ xthl(cpu *c)
 	uint8_t l = c->l;
 	uint8_t h = c->h;
 
-	c->l = C_DerefSP(c, 0);
-	c->h = C_DerefSP(c, 1);
+	c->l = cpu_deref_sp(c, 0);
+	c->h = cpu_deref_sp(c, 1);
 
-	C_SetByte(c, c->sp, l);
-	C_SetByte(c, c->sp + 1, h);
+	cpu_set_byte(c, c->sp, l);
+	cpu_set_byte(c, c->sp + 1, h);
 }
 void
 sphl(cpu *c)
 {
-	c->sp = C_GetHL(c);
+	c->sp = cpu_get_hl(c);
 }
 
 /* SINGLE REGISTER INSTRUCTIONS */
@@ -205,33 +205,33 @@ void
 inr(cpu *c, uint8_t *reg)
 {
 	uint16_t result = ++*reg;
-	C_Flags_SetZSP(c, *reg);
-	C_Flags_SetCarryFromWord(c, result);
+	cpu_flags_set_zsp(c, *reg);
+	cpu_flags_set_carry_from_word(c, result);
 	*reg = result & 0xff;
 }
 void
 inr_m(cpu *c)
 {
-	uint16_t result = C_DerefHL(c) + 1;
-	C_SetByte(c, C_GetHL(c), result & 0xff);
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	uint16_t result = cpu_deref_hl(c) + 1;
+	cpu_set_byte(c, cpu_get_hl(c), result & 0xff);
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 }
 void
 dcr(cpu *c, uint8_t *reg)
 {
 	uint16_t result = *reg + FLIP(1);
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result & 0xff);
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result & 0xff);
 	*reg = result & 0xff;
 }
 void
 dcr_m(cpu *c)
 {
-	uint16_t result = C_DerefHL(c) + FLIP(1);
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result & 0xff);
-	C_SetByte(c, C_GetHL(c), result & 0xff);
+	uint16_t result = cpu_deref_hl(c) + FLIP(1);
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result & 0xff);
+	cpu_set_byte(c, cpu_get_hl(c), result & 0xff);
 }
 void
 daa(cpu *c)
@@ -245,8 +245,8 @@ daa(cpu *c)
 		result += 0x60;
 		c->flag_c = 1;
 		result += c->a;
-		C_Flags_SetZSP(c, result & 0xff);
-		C_Flags_SetCarryFromWord(c, result);
+		cpu_flags_set_zsp(c, result & 0xff);
+		cpu_flags_set_carry_from_word(c, result);
 	}
 }
 
@@ -337,126 +337,126 @@ void
 add(cpu *c, const uint8_t *reg)
 {
 	uint16_t result = c->a + *reg;
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
 void
 add_m(cpu *c)
 {
-	uint16_t result = c->a + C_DerefHL(c);
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	uint16_t result = c->a + cpu_deref_hl(c);
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
 void
 adc(cpu *c, const uint8_t *reg)
 {
 	uint16_t result = c->a + *reg + c->flag_c;
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
 void
 adc_m(cpu *c)
 {
-	uint16_t result = c->a + C_DerefHL(c) + c->flag_c;
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	uint16_t result = c->a + cpu_deref_hl(c) + c->flag_c;
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
 void
 sub(cpu *c, const uint8_t *reg)
 {
 	uint16_t result = c->a + FLIP(*reg);
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
 void
 sub_m(cpu *c)
 {
-	uint16_t result = c->a + FLIP(C_DerefHL(c));
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	uint16_t result = c->a + FLIP(cpu_deref_hl(c));
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
 void
 sbb(cpu *c, const uint8_t *reg)
 {
 	uint16_t result = c->a + FLIP(*reg) + FLIP(c->flag_c);
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
 void
 sbb_m(cpu *c)
 {
-	uint16_t result = c->a + FLIP(C_DerefHL(c)) + FLIP(c->flag_c);
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	uint16_t result = c->a + FLIP(cpu_deref_hl(c)) + FLIP(c->flag_c);
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
 void
 ana(cpu *c, const uint8_t *reg)
 {
 	uint16_t result = (c->a & (*reg));
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
 void
 ana_m(cpu *c)
 {
-	uint16_t result = c->a & (C_DerefHL(c));
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	uint16_t result = c->a & (cpu_deref_hl(c));
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
 void
 xra(cpu *c, const uint8_t *reg)
 {
 	uint16_t result = (c->a ^ (*reg));
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
 void
 xra_m(cpu *c)
 {
-	uint16_t result = c->a ^ (C_DerefHL(c));
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	uint16_t result = c->a ^ (cpu_deref_hl(c));
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
 void
 ora(cpu *c, const uint8_t *reg)
 {
 	uint16_t result = c->a | *reg;
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
 void
 ora_m(cpu *c)
 {
-	uint16_t result = c->a | (C_DerefHL(c));
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	uint16_t result = c->a | (cpu_deref_hl(c));
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
 void
 cmp(cpu *c, const uint8_t *reg)
 {
 	uint16_t result = c->a + FLIP(*reg);
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 }
 
 void
 cmp_m(cpu *c)
 {
-	uint16_t result = c->a + FLIP(C_DerefHL(c));
-	C_Flags_SetZSP(c, result & 0xff);
-	C_Flags_SetCarryFromWord(c, result);
+	uint16_t result = c->a + FLIP(cpu_deref_hl(c));
+	cpu_flags_set_zsp(c, result & 0xff);
+	cpu_flags_set_carry_from_word(c, result);
 }

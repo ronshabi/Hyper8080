@@ -1,2 +1,15 @@
 [x] Move input handling from main to sys (done :: stable-0.3)
 
+bsd-formatting:
+---------------
+o Change 'pragma once' -> include guards.
+o rename functions to better fit style(9).
+o remove typedef from struct cpu.
+o favour functions over macros.
+o remove macros that rely on arbitrary variable names.
+o remove "inline", completely
+
+Overall goals:
+---------------
+o Windows compilation
+o running CP/M with accuracy

@@ -1,5 +1,9 @@
 build.sh
+roms/
 invaders*
+*.COM
+*.EXE
+*.bin
 
 # vim
 *.swp

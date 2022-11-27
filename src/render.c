@@ -63,7 +63,7 @@ R_Update(SDL_Renderer **ren)
 void
 R_ClearScreen(SDL_Renderer **ren)
 {
-	SDL_SetRenderDrawColor(*ren, 0, 0, 0, 0xff) /* set to black */
+	SDL_SetRenderDrawColor(*ren, 0, 0, 0, 0xff); /* set to black */
 	SDL_RenderClear(*ren);
 }
 
