@@ -8,16 +8,6 @@ void inst_call(struct cpu *c, bool condition, uint16_t addr);
 void inst_ret(struct cpu *c, bool condition);
 
 /* REGISTER PAIR */
-void dad_sp(struct cpu *c);/* DAD SP */
-void inx_b(struct cpu *c);/* INX B		Increment register pair */
-void inx_d(struct cpu *c);/* INX D */
-void inx_h(struct cpu *c);/* INX H */
-void inx_sp(struct cpu *c);/* INX SP */
-void dcx_b(struct cpu *c);/* DCX B		Decrement register pair */
-void dcx_d(struct cpu *c);/* DCX D */
-void dcx_h(struct cpu *c);/* DCX H */
-void dcx_sp(struct cpu *c);/* DCX SP */
-void xchg(struct cpu *c);/* XCHG		Exchange Registers */
 void xthl(struct cpu *c);/* XTHL		Exchange Stack */
 void sphl(struct cpu *c);/* SPHL		Load SP from H and L */
 

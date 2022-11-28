@@ -29,65 +29,6 @@ inst_ret(struct cpu *c, bool condition)
 }
 
 void
-dad_sp(struct cpu *c)
-{
-	uint32_t result = c->sp + cpu_get_hl(c);
-	cpu_flags_set_carry_from_word(c, result & 0xffff);
-	cpu_set_hl(c, result & 0xffff);
-}
-void
-inx_b(struct cpu *c)
-{
-	cpu_set_bc(c, cpu_get_bc(c) + 1);
-}
-void
-inx_d(struct cpu *c)
-{
-	cpu_set_de(c, cpu_get_de(c) + 1);
-}
-void
-inx_h(struct cpu *c)
-{
-	cpu_set_hl(c, cpu_get_hl(c) + 1);
-}
-void
-inx_sp(struct cpu *c)
-{
-	c->sp++;
-}
-void
-dcx_b(struct cpu *c)
-{
-	cpu_set_bc(c, cpu_get_bc(c) - 1);
-}
-void
-dcx_d(struct cpu *c)
-{
-	cpu_set_de(c, cpu_get_de(c) - 1);
-}
-void
-dcx_h(struct cpu *c)
-{
-	cpu_set_hl(c, cpu_get_hl(c) - 1);
-}
-void
-dcx_sp(struct cpu *c)
-{
-	c->sp--;
-}
-void
-xchg(struct cpu *c)
-{
-	uint8_t temp;
-	temp = c->h;
-	c->h = c->d;
-	c->d = temp;
-
-	temp = c->l;
-	c->l = c->e;
-	c->e = temp;
-}
-void
 xthl(struct cpu *c)
 {
 	uint8_t l = c->l;

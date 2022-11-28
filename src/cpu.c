@@ -465,7 +465,7 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 			tmp32 = c->a | ARG8;
 			c->a = tmp32 & 0xff;
 			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_flags_set_zsp(c, tmp32 & 0xff);
+			cpu_flags_set_zsp(c, tmp32);
 			c->pc++;
 			break;
 		case 0xfe:
@@ -559,34 +559,77 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0x09:
 			/* DAD B */
 			tmp32 = cpu_get_bc(c) + cpu_get_hl(c);
-			cpu_flags_set_carry_from_word(c, tmp32 & 0xffff);
-			cpu_set_hl(c, tmp32 & 0xffff);
+			cpu_flags_set_carry_from_word(c, tmp32);
+			cpu_set_hl(c, tmp32);
 			break;
 		case 0x19:
 			/* DAD D */
 			tmp32 = cpu_get_de(c) + cpu_get_hl(c);
-			cpu_flags_set_carry_from_word(c, tmp32 & 0xffff);
-			cpu_set_hl(c, tmp32 & 0xffff);
+			cpu_flags_set_carry_from_word(c, tmp32);
+			cpu_set_hl(c, tmp32);
 			break;
 		case 0x29: 
 			/* DAD H */
 			tmp32 = cpu_get_hl(c) + cpu_get_hl(c);
-			cpu_flags_set_carry_from_word(c, tmp32 & 0xffff);
-			cpu_set_hl(c, tmp32 & 0xffff);
+			cpu_flags_set_carry_from_word(c, tmp32);
+			cpu_set_hl(c, tmp32);
 			break;
 
-		case 0x39: dad_sp (c); break;
-		case 0x03: inx_b (c); break;
-		case 0x13: inx_d (c); break;
-		case 0x23: inx_h (c); break;
-		case 0x33: inx_sp (c); break;
-		case 0x0b: dcx_b (c); break;
-		case 0x1b: dcx_d (c); break;
-		case 0x2b: dcx_h (c); break;
-		case 0x3b: dcx_sp (c); break;
-		case 0xeb: xchg (c); break;
-		case 0xe3: xthl (c); break;
-		case 0xf9: sphl (c); break;
+		case 0x39:
+			/* DAD SP */
+			tmp32 = c->sp + cpu_get_hl(c);
+			cpu_flags_set_carry_from_word(c, tmp32);
+			cpu_set_hl(c, tmp32);
+			break;
+		case 0x03:
+			/* INX B */
+			cpu_set_bc(c, cpu_get_bc(c) + 1);
+			break;
+		case 0x13: 
+			/* INX D */
+			cpu_set_de(c, cpu_get_de(c) + 1);
+			break;
+		case 0x23:
+			/* INX H */
+			cpu_set_hl(c, cpu_get_hl(c) + 1);
+			break;
+		case 0x33:
+			/* INX SP */
+			c->sp++;
+			break;
+		case 0x0b: 
+			/* DCX B */
+			cpu_set_bc(c, cpu_get_bc(c) - 1);
+			break;
+		case 0x1b:
+			/* DCX D */
+			cpu_set_de(c, cpu_get_de(c) - 1);
+			break;
+		case 0x2b:
+			/* DCX H */
+			cpu_set_hl(c, cpu_get_hl(c) - 1);
+			break;
+		case 0x3b:
+			/* DCX SP */
+			c->sp--;
+			break;
+		case 0xeb: 
+			/* XCHG */
+			tmp32 = c->h;
+			c->h = c->d;
+			c->d = tmp32;
+			tmp32 = c->l;
+			c->l = c->e;
+			c->e = tmp32;
+			break;
+		case 0xe3:
+			/* XTHL */
+			xthl (c);
+			break;
+		case 0xf9:
+			/* SPHL */
+			sphl (c);
+			break;
 
 		/* SINGLE REGISTER */
 		case 0x3c: inr (c, REG (a)); break;
