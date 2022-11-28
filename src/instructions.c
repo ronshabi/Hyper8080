@@ -1,7 +1,7 @@
 #include "defines.h"
 
 void
-jmp(struct cpu *c, bool condition, uint16_t addr)
+inst_jmp(struct cpu *c, bool condition, uint16_t addr)
 {
 	debug_address(addr);
 	PC2;
@@ -11,7 +11,7 @@ jmp(struct cpu *c, bool condition, uint16_t addr)
 }
 
 void
-call(struct cpu *c, bool condition, uint16_t addr)
+inst_call(struct cpu *c, bool condition, uint16_t addr)
 {
 	debug_address(addr);
 	PC2;
@@ -22,14 +22,14 @@ call(struct cpu *c, bool condition, uint16_t addr)
 }
 
 void
-ret(struct cpu *c, bool condition)
+inst_ret(struct cpu *c, bool condition)
 {
 	if (condition)
 		c->pc = cpu_stack_pop(c);
 }
 
 void
-adi(struct cpu *c)
+inst_adi(struct cpu *c)
 {
 	uint16_t result = c->a + ARG8;
 	c->a = result & 0xff;
@@ -38,7 +38,7 @@ adi(struct cpu *c)
 	PC1;
 }
 void
-aci(struct cpu *c)
+inst_aci(struct cpu *c)
 {
 	uint16_t result = c->a + ARG8 + c->flag_c;
 	c->a = result & 0xff;
@@ -47,7 +47,7 @@ aci(struct cpu *c)
 	PC1;
 }
 void
-sui(struct cpu *c)
+inst_sui(struct cpu *c)
 {
 	uint16_t result = c->a + FLIP(ARG8);
 	c->a = result & 0xff;
@@ -56,7 +56,7 @@ sui(struct cpu *c)
 	PC1;
 }
 void
-sbi(struct cpu *c)
+inst_sbi(struct cpu *c)
 {
 	uint16_t result = c->a + FLIP(ARG8) + FLIP(c->flag_c);
 	c->a = result & 0xff;
@@ -65,7 +65,7 @@ sbi(struct cpu *c)
 	PC1;
 }
 void
-ani(struct cpu *c)
+inst_ani(struct cpu *c)
 {
 	uint16_t result = c->a & ARG8;
 	c->a = result & 0xff;
@@ -74,7 +74,7 @@ ani(struct cpu *c)
 	PC1;
 }
 void
-xri(struct cpu *c)
+inst_xri(struct cpu *c)
 {
 	uint16_t result = c->a ^ ARG8;
 	c->a = result & 0xff;
@@ -83,7 +83,7 @@ xri(struct cpu *c)
 	PC1;
 }
 void
-ori(struct cpu *c)
+inst_ori(struct cpu *c)
 {
 	uint16_t result = c->a | ARG8;
 	c->a = result & 0xff;
@@ -92,7 +92,7 @@ ori(struct cpu *c)
 	PC1;
 }
 void
-cpi(struct cpu *c)
+inst_cpi(struct cpu *c)
 {
 	/* A is not changed by this operation, only the FLAGS */
 	uint16_t result = c->a + FLIP(ARG8);
@@ -101,28 +101,8 @@ cpi(struct cpu *c)
 	PC1;
 }
 
-/* DATA TRANSFER */
-void
-dad_b(struct cpu *c)
-{
-	uint16_t result = cpu_get_bc(c) + cpu_get_hl(c);
-	cpu_flags_set_carry_from_word(c, result);
-	cpu_set_hl(c, result);
-}
-void
-dad_d(struct cpu *c)
-{
-	uint32_t result = cpu_get_de(c) + cpu_get_hl(c);
-	cpu_flags_set_carry_from_word(c, result & 0xffff);
-	cpu_set_hl(c, result & 0xffff);
-}
-void
-dad_h(struct cpu *c)
-{
-	uint32_t result = cpu_get_hl(c) + cpu_get_hl(c);
-	cpu_flags_set_carry_from_word(c, result & 0xffff);
-	cpu_set_hl(c, result & 0xffff);
-}
+
+
 void
 dad_sp(struct cpu *c)
 {

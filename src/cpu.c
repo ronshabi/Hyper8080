@@ -1,25 +1,7 @@
 /*
  * Hyper8080 / CPU.c
- *
- * Copyright (c) 2022 Ron Shabi.  All rights reserved.
  * 
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * Copyright (c) 2022 Ron Shabi
  */
 
 #include "defines.h"
@@ -356,6 +338,8 @@ cpu_interrupt(struct cpu *c, uint8_t intnum)
 void
 cpu_execute(struct cpu *c, uint8_t opcode)
 {
+	uint32_t tmp32;		/* Temporary u32 for calculations */
+
 	c->instructions++;
 	c->cycles += C_CYCLES[opcode];
 
@@ -376,7 +360,7 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0x38: break;
 
 		/* RET alternative, */
-		case 0xd9: ret (c, true); break;
+		case 0xd9: inst_ret (c, true); break;
 
 		/* CARRY */
 		case 0x37: c->flag_c = 1; break;
@@ -384,35 +368,35 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0x3f: c->flag_c ^= 1; break;
 
 
-		case 0xc3: jmp (c, true, ARG16); break; /* jmp */
-		case 0xda: jmp (c, c->flag_c, ARG16); break; /* jc */
-		case 0xd2: jmp (c, !c->flag_c, ARG16); break; /* jnc */
-		case 0xca: jmp (c, c->flag_z, ARG16); break; /* jz */
-		case 0xc2: jmp (c, !c->flag_z, ARG16); break; /* jnz */
-		case 0xfa: jmp (c, c->flag_s, ARG16); break; /* jm */
-		case 0xf2: jmp (c, !c->flag_s, ARG16); break; /* jp */
-		case 0xea: jmp (c, c->flag_p, ARG16); break; /* jpe */
-		case 0xe2: jmp (c, !c->flag_p, ARG16); break; /* jpo */
+		case 0xc3: inst_jmp (c, true, ARG16); break; /* jmp */
+		case 0xda: inst_jmp (c, c->flag_c, ARG16); break; /* jc */
+		case 0xd2: inst_jmp (c, !c->flag_c, ARG16); break; /* jnc */
+		case 0xca: inst_jmp (c, c->flag_z, ARG16); break; /* jz */
+		case 0xc2: inst_jmp (c, !c->flag_z, ARG16); break; /* jnz */
+		case 0xfa: inst_jmp (c, c->flag_s, ARG16); break; /* jm */
+		case 0xf2: inst_jmp (c, !c->flag_s, ARG16); break; /* jp */
+		case 0xea: inst_jmp (c, c->flag_p, ARG16); break; /* jpe */
+		case 0xe2: inst_jmp (c, !c->flag_p, ARG16); break; /* jpo */
 		
-		case 0xcd: call (c, true, ARG16); break; /* call */
-		case 0xdc: call (c, c->flag_c, ARG16); break; /* cc */
-		case 0xd4: call (c, !c->flag_c, ARG16); break; /* cnc */
-		case 0xcc: call (c, c->flag_z, ARG16); break; /* cz */
-		case 0xc4: call (c, !c->flag_z, ARG16); break; /* cnz */
-		case 0xfc: call (c, c->flag_s, ARG16); break; /* cm */
-		case 0xf4: call (c, !c->flag_s, ARG16); break; /* cp */
-		case 0xec: call (c, c->flag_p, ARG16); break; /* cpe */
-		case 0xe4: call (c, !c->flag_p, ARG16); break; /* cpo */
+		case 0xcd: inst_call (c, true, ARG16); break; /* call */
+		case 0xdc: inst_call (c, c->flag_c, ARG16); break; /* cc */
+		case 0xd4: inst_call (c, !c->flag_c, ARG16); break; /* cnc */
+		case 0xcc: inst_call (c, c->flag_z, ARG16); break; /* cz */
+		case 0xc4: inst_call (c, !c->flag_z, ARG16); break; /* cnz */
+		case 0xfc: inst_call (c, c->flag_s, ARG16); break; /* cm */
+		case 0xf4: inst_call (c, !c->flag_s, ARG16); break; /* cp */
+		case 0xec: inst_call (c, c->flag_p, ARG16); break; /* cpe */
+		case 0xe4: inst_call (c, !c->flag_p, ARG16); break; /* cpo */
 		
-		case 0xc9: ret (c, true); break; /* ret */
-		case 0xd8: ret (c, c->flag_c); break; /* rc */
-		case 0xd0: ret (c, !c->flag_c); break; /* rnc */
-		case 0xc8: ret (c, c->flag_z); break; /* rz */
-		case 0xc0: ret (c, !c->flag_z); break; /* rnz */
-		case 0xf8: ret (c, c->flag_s); break; /* rm */
-		case 0xf0: ret (c, !c->flag_s); break; /* rp */
-		case 0xe8: ret (c, c->flag_p); break; /* rpe */
-		case 0xe0: ret (c, !c->flag_p); break; /* rpo */
+		case 0xc9: inst_ret (c, true); break; /* ret */
+		case 0xd8: inst_ret (c, c->flag_c); break; /* rc */
+		case 0xd0: inst_ret (c, !c->flag_c); break; /* rnc */
+		case 0xc8: inst_ret (c, c->flag_z); break; /* rz */
+		case 0xc0: inst_ret (c, !c->flag_z); break; /* rnz */
+		case 0xf8: inst_ret (c, c->flag_s); break; /* rm */
+		case 0xf0: inst_ret (c, !c->flag_s); break; /* rp */
+		case 0xe8: inst_ret (c, c->flag_p); break; /* rpe */
+		case 0xe0: inst_ret (c, !c->flag_p); break; /* rpo */
 
 		case 0x01: cpu_set_bc (c, ARG16); PC2; break; /* LXI B */
 		case 0x11: cpu_set_de (c, ARG16); PC2; break; /* LXI D */
@@ -428,14 +412,14 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0x36: cpu_set_byte (c, cpu_get_hl (c), ARG8); PC1; break; /* MVI M */
 		case 0x3e: c->a = ARG8; PC1; break; /* MVI A */
 
-		case 0xc6: adi (c); break;
-		case 0xce: aci (c); break;
-		case 0xd6: sui (c); break;
-		case 0xde: sbi (c); break;
-		case 0xe6: ani (c); break;
-		case 0xee: xri (c); break;
-		case 0xf6: ori (c); break;
-		case 0xfe: cpi (c); break;
+		case 0xc6: inst_adi (c); break;
+		case 0xce: inst_aci (c); break;
+		case 0xd6: inst_sui (c); break;
+		case 0xde: inst_sbi (c); break;
+		case 0xe6: inst_ani (c); break;
+		case 0xee: inst_xri (c); break;
+		case 0xf6: inst_ori (c); break;
+		case 0xfe: inst_cpi (c); break;
 
 		/* DATA TRANSFER */
 		case 0x0a: c->a = cpu_deref_bc (c); break; /* LDAX B */
@@ -516,9 +500,25 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0xe1: cpu_set_hl (c, cpu_stack_pop (c)); break; /* POP H */
 		case 0xf1: cpu_stack_pop_psw (c); break; /* POP PSW */
 
-		case 0x09: dad_b (c); break;
-		case 0x19: dad_d (c); break;
-		case 0x29: dad_h (c); break;
+		case 0x09:
+			/* DAD B */
+			tmp32 = cpu_get_bc(c) + cpu_get_hl(c);
+			cpu_flags_set_carry_from_word(c, tmp32 & 0xffff);
+			cpu_set_hl(c, tmp32 & 0xffff);
+			break;
+		case 0x19:
+			/* DAD D */
+			tmp32 = cpu_get_de(c) + cpu_get_hl(c);
+			cpu_flags_set_carry_from_word(c, tmp32 & 0xffff);
+			cpu_set_hl(c, tmp32 & 0xffff);
+			break;
+		case 0x29: 
+			/* DAD H */
+			tmp32 = cpu_get_hl(c) + cpu_get_hl(c);
+			cpu_flags_set_carry_from_word(c, tmp32 & 0xffff);
+			cpu_set_hl(c, tmp32 & 0xffff);
+			break;
+
 		case 0x39: dad_sp (c); break;
 		case 0x03: inx_b (c); break;
 		case 0x13: inx_d (c); break;
@@ -637,14 +637,14 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		/* INTERRUPTS */
 		case 0xfb: c->interrupts_enabled = true; break;
 		case 0xf3: c->interrupts_enabled = false; break;
-		case 0xc7: call (c, true, 0x0); break;
-		case 0xcf: call (c, true, 0x8); break;
-		case 0xd7: call (c, true, 0x10); break;
-		case 0xdf: call (c, true, 0x18); break;
-		case 0xe7: call (c, true, 0x20); break;
-		case 0xef: call (c, true, 0x28); break;
-		case 0xf7: call (c, true, 0x30); break;
-		case 0xff: call (c, true, 0x38); break;
+		case 0xc7: inst_call (c, true, 0x0); break;
+		case 0xcf: inst_call (c, true, 0x8); break;
+		case 0xd7: inst_call (c, true, 0x10); break;
+		case 0xdf: inst_call (c, true, 0x18); break;
+		case 0xe7: inst_call (c, true, 0x20); break;
+		case 0xef: inst_call (c, true, 0x28); break;
+		case 0xf7: inst_call (c, true, 0x30); break;
+		case 0xff: inst_call (c, true, 0x38); break;
 
 		default: cpu_unimplemented (c); break;
 	}
