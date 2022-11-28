@@ -4,7 +4,7 @@ void
 inst_jmp(struct cpu *c, bool condition, uint16_t addr)
 {
 	debug_address(addr);
-	PC2;
+	c->pc += 2;
 	if (condition) {
 		c->pc = addr;
 	}
@@ -14,7 +14,7 @@ void
 inst_call(struct cpu *c, bool condition, uint16_t addr)
 {
 	debug_address(addr);
-	PC2;
+	c->pc += 2;
 	if (condition) {
 		cpu_stack_push(c, c->pc);
 		c->pc = addr;
@@ -131,52 +131,7 @@ rar(struct cpu *c)
 }
 
 /* I/O */
-void
-in(struct cpu *c)
-{
-	uint8_t device_number = ARG8;
-	PC1;
 
-	debug_device(device_number);
-
-	if (device_number == DEVICE_INP0) {
-		c->a = c->i0;
-	} else if (device_number == DEVICE_INP1) {
-		c->a = c->i1;
-	} else if (device_number == DEVICE_INP2) {
-		c->a = c->i2;
-	} else if (device_number == DEVICE_SHIFT_IN) {
-		c->a = (c->shift >> ((8 - c->shift_amt)) & 0xff);
-	}
-}
-void
-out(struct cpu *c)
-{
-	uint8_t device_number = ARG8;
-	PC1;
-
-	debug_device(device_number);
-
-	if (device_number == DEVICE_SHIFT_AMT) {
-		c->shift_amt = (c->a & 7);
-	} else if (device_number == DEVICE_SOUND1) {
-		c->o3 = c->a;
-	} else if (device_number == DEVICE_SHIFT_DATA) {
-		c->shift >>= 8;
-		c->shift |= (c->a << 8);
-	} else if (device_number == DEVICE_SOUND2) {
-		c->o5 = c->a;
-	} else if (device_number == DEVICE_WATCHDOG) {
-		c->o6 = c->a;
-	}
-}
-
-void
-hlt(struct cpu *c)
-{
-	debug_msg("CPU Halted");
-	c->halt = 1;
-}
 
 /* REGISTER OR MEMORY TO ACCUMULATOR */
 void
@@ -267,14 +222,7 @@ xra(struct cpu *c, const uint8_t *reg)
 	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
-void
-xra_m(struct cpu *c)
-{
-	uint16_t result = c->a ^ (cpu_deref_hl(c));
-	cpu_flags_set_zsp(c, result & 0xff);
-	cpu_flags_set_carry_from_word(c, result);
-	c->a = result & 0xff;
-}
+
 void
 ora(struct cpu *c, const uint8_t *reg)
 {
@@ -283,26 +231,11 @@ ora(struct cpu *c, const uint8_t *reg)
 	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
-void
-ora_m(struct cpu *c)
-{
-	uint16_t result = c->a | (cpu_deref_hl(c));
-	cpu_flags_set_zsp(c, result & 0xff);
-	cpu_flags_set_carry_from_word(c, result);
-	c->a = result & 0xff;
-}
+
 void
 cmp(struct cpu *c, const uint8_t *reg)
 {
 	uint16_t result = c->a + FLIP(*reg);
-	cpu_flags_set_zsp(c, result & 0xff);
-	cpu_flags_set_carry_from_word(c, result);
-}
-
-void
-cmp_m(struct cpu *c)
-{
-	uint16_t result = c->a + FLIP(cpu_deref_hl(c));
 	cpu_flags_set_zsp(c, result & 0xff);
 	cpu_flags_set_carry_from_word(c, result);
 }

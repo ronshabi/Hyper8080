@@ -8,6 +8,7 @@ void inst_call(struct cpu *c, bool condition, uint16_t addr);
 void inst_ret(struct cpu *c, bool condition);
 
 /* REGISTER PAIR */
+
 void xthl(struct cpu *c);/* XTHL		Exchange Stack */
 void sphl(struct cpu *c);/* SPHL		Load SP from H and L */
 
@@ -24,11 +25,6 @@ void rrc(struct cpu *c);/* RRC Rotate right */
 void ral(struct cpu *c);/* RAR Rotate left through carry */
 void rar(struct cpu *c);/* RAR Rotate right through carry */
 
-/* I/O */
-void in(struct cpu *c);/* IN */
-void out(struct cpu *c);/* OUT */
-void hlt(struct cpu *c);/* HALT */
-
 /* REGISTER OR MEMORY TO ACCUMULATOR */
 void add(struct cpu *c, const uint8_t *reg);/* ADD A		Add to accumulator */
 void add_m(struct cpu *c);/* ADD M */
@@ -42,11 +38,8 @@ void ana(struct cpu *c, const uint8_t *reg);
 /* ANA A  	And operation w/ accumulator */
 
 void ana_m(struct cpu *c); /* ANA M */
-void xra(struct cpu *c, const uint8_t *reg); /* XRA A		Logical xor w/zero accumulator */
-void xra_m(struct cpu *c);/* XRA M */
-void ora(struct cpu *c, const uint8_t *reg);/* ORA A		Logical or w/ */
-void ora_m(struct cpu *c);/* ORA M */
-void cmp(struct cpu *c, const uint8_t *reg); /* CMP A */
-void cmp_m(struct cpu *c);/* CMP M */
+void xra(struct cpu *c, const uint8_t *reg); /* XRA A Logical xor zero accumulator */
+void ora(struct cpu *c, const uint8_t *reg);/* ORA */
+void cmp(struct cpu *c, const uint8_t *reg); /* CMP */
 
 #endif /* HYPER8080_INSTRUCTIONS_H */

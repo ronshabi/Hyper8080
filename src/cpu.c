@@ -327,7 +327,6 @@ cpu_interrupt(struct cpu *c, uint8_t intnum)
  * instructions are necessary to implement to ensure correct emulation (for
  * reference, see https://pastraiser.com/cpu/i8080/i8080_opcodes.html)
  * 
- * 
  * For each instruction, increment the CPU instructions counter and add the
  * cycles required by the executed instruction to the CPU cycle counter.
  * 
@@ -338,10 +337,14 @@ cpu_interrupt(struct cpu *c, uint8_t intnum)
 void
 cpu_execute(struct cpu *c, uint8_t opcode)
 {
-	uint32_t tmp32;		/* Temporary u32 for calculations */
+	uint32_t tmp;		/* Temporary u32 for calculations */
+	uint8_t imm8;		/* Immediate byte at PC */
+	uint16_t imm16;		/* Immediate word at PC */
 
 	c->instructions++;
 	c->cycles += C_CYCLES[opcode];
+	imm8 = cpu_get_byte(c, c->pc);
+	imm16 = cpu_get_word(c, c->pc);
 
 	switch (opcode)
 	{
@@ -368,25 +371,25 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0x3f: c->flag_c ^= 1; break;
 
 
-		case 0xc3: inst_jmp (c, true, ARG16); break; /* jmp */
-		case 0xda: inst_jmp (c, c->flag_c, ARG16); break; /* jc */
-		case 0xd2: inst_jmp (c, !c->flag_c, ARG16); break; /* jnc */
-		case 0xca: inst_jmp (c, c->flag_z, ARG16); break; /* jz */
-		case 0xc2: inst_jmp (c, !c->flag_z, ARG16); break; /* jnz */
-		case 0xfa: inst_jmp (c, c->flag_s, ARG16); break; /* jm */
-		case 0xf2: inst_jmp (c, !c->flag_s, ARG16); break; /* jp */
-		case 0xea: inst_jmp (c, c->flag_p, ARG16); break; /* jpe */
-		case 0xe2: inst_jmp (c, !c->flag_p, ARG16); break; /* jpo */
+		case 0xc3: inst_jmp (c, true, imm16); break; /* jmp */
+		case 0xda: inst_jmp (c, c->flag_c, imm16); break; /* jc */
+		case 0xd2: inst_jmp (c, !c->flag_c, imm16); break; /* jnc */
+		case 0xca: inst_jmp (c, c->flag_z, imm16); break; /* jz */
+		case 0xc2: inst_jmp (c, !c->flag_z, imm16); break; /* jnz */
+		case 0xfa: inst_jmp (c, c->flag_s, imm16); break; /* jm */
+		case 0xf2: inst_jmp (c, !c->flag_s, imm16); break; /* jp */
+		case 0xea: inst_jmp (c, c->flag_p, imm16); break; /* jpe */
+		case 0xe2: inst_jmp (c, !c->flag_p, imm16); break; /* jpo */
 		
-		case 0xcd: inst_call (c, true, ARG16); break; /* call */
-		case 0xdc: inst_call (c, c->flag_c, ARG16); break; /* cc */
-		case 0xd4: inst_call (c, !c->flag_c, ARG16); break; /* cnc */
-		case 0xcc: inst_call (c, c->flag_z, ARG16); break; /* cz */
-		case 0xc4: inst_call (c, !c->flag_z, ARG16); break; /* cnz */
-		case 0xfc: inst_call (c, c->flag_s, ARG16); break; /* cm */
-		case 0xf4: inst_call (c, !c->flag_s, ARG16); break; /* cp */
-		case 0xec: inst_call (c, c->flag_p, ARG16); break; /* cpe */
-		case 0xe4: inst_call (c, !c->flag_p, ARG16); break; /* cpo */
+		case 0xcd: inst_call (c, true, imm16); break; /* call */
+		case 0xdc: inst_call (c, c->flag_c, imm16); break; /* cc */
+		case 0xd4: inst_call (c, !c->flag_c, imm16); break; /* cnc */
+		case 0xcc: inst_call (c, c->flag_z, imm16); break; /* cz */
+		case 0xc4: inst_call (c, !c->flag_z, imm16); break; /* cnz */
+		case 0xfc: inst_call (c, c->flag_s, imm16); break; /* cm */
+		case 0xf4: inst_call (c, !c->flag_s, imm16); break; /* cp */
+		case 0xec: inst_call (c, c->flag_p, imm16); break; /* cpe */
+		case 0xe4: inst_call (c, !c->flag_p, imm16); break; /* cpo */
 		
 		case 0xc9: inst_ret (c, true); break; /* ret */
 		case 0xd8: inst_ret (c, c->flag_c); break; /* rc */
@@ -398,82 +401,82 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0xe8: inst_ret (c, c->flag_p); break; /* rpe */
 		case 0xe0: inst_ret (c, !c->flag_p); break; /* rpo */
 
-		case 0x01: cpu_set_bc (c, ARG16); c->pc+=2; break; /* LXI B */
-		case 0x11: cpu_set_de (c, ARG16); c->pc+=2; break; /* LXI D */
-		case 0x21: cpu_set_hl (c, ARG16); c->pc+=2; break; /* LXI H */
-		case 0x31: c->sp = ARG16; c->pc+=2; break; /* LXI SP */
+		case 0x01: cpu_set_bc (c, imm16); c->pc+=2; break; /* LXI B */
+		case 0x11: cpu_set_de (c, imm16); c->pc+=2; break; /* LXI D */
+		case 0x21: cpu_set_hl (c, imm16); c->pc+=2; break; /* LXI H */
+		case 0x31: c->sp = imm16; c->pc+=2; break; /* LXI SP */
 
-		case 0x06: c->b = ARG8; c->pc++; break; /* MVI B */
-		case 0x0e: c->c = ARG8; c->pc++; break; /* MVI C */
-		case 0x16: c->d = ARG8;	c->pc++; break; /* MVI D */
-		case 0x1e: c->e = ARG8; c->pc++; break; /* MVI E */
-		case 0x26: c->h = ARG8;	c->pc++; break; /* MVI H */
-		case 0x2e: c->l = ARG8; c->pc++; break; /* MVI L */
-		case 0x36: cpu_set_byte (c, cpu_get_hl (c), ARG8); c->pc++; break; /* MVI M */
-		case 0x3e: c->a = ARG8; c->pc++; break; /* MVI A */
+		case 0x06: c->b = imm8; c->pc++; break; /* MVI B */
+		case 0x0e: c->c = imm8; c->pc++; break; /* MVI C */
+		case 0x16: c->d = imm8;	c->pc++; break; /* MVI D */
+		case 0x1e: c->e = imm8; c->pc++; break; /* MVI E */
+		case 0x26: c->h = imm8;	c->pc++; break; /* MVI H */
+		case 0x2e: c->l = imm8; c->pc++; break; /* MVI L */
+		case 0x36: cpu_set_byte (c, cpu_get_hl (c), imm8); c->pc++; break; /* MVI M */
+		case 0x3e: c->a = imm8; c->pc++; break; /* MVI A */
 
 		case 0xc6: 
 			/* ADI - Add immediate to accumulator */
-			tmp32 = c->a + ARG8;
-			c->a = tmp32 & 0xff;
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_flags_set_zsp(c, tmp32);
+			tmp = c->a + imm8;
+			c->a = tmp & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp);
+			cpu_flags_set_zsp(c, tmp);
 			c->pc++;
 			break;
 		case 0xce: 
 			/* ACI - Move Immediate data */
-			tmp32 = c->a + ARG8 + c->flag_c;
-			c->a = tmp32 & 0xff;
-			cpu_flags_set_carry_from_word(c, tmp32);
+			tmp = c->a + imm8 + c->flag_c;
+			c->a = tmp & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp);
 			cpu_flags_set_zsp(c, c->a);
 			c->pc++;
 			break;
 		case 0xd6:
 			/* SUI - Subtract immediate from accumulator */
-			tmp32 = c->a + FLIP(ARG8);
-			c->a = tmp32 & 0xff;
-			cpu_flags_set_carry_from_word(c, tmp32);
+			tmp = c->a + FLIP(imm8);
+			c->a = tmp & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp);
 			cpu_flags_set_zsp(c, c->a);
 			c->pc++;
 			break;
 		case 0xde:
 			/* SBI - Subtract immediate from accumulator with borrow */
-			tmp32 = c->a + FLIP(ARG8) + FLIP(c->flag_c);
-			c->a = tmp32 & 0xff;
-			cpu_flags_set_carry_from_word(c, tmp32);
+			tmp = c->a + FLIP(imm8) + FLIP(c->flag_c);
+			c->a = tmp & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp);
 			cpu_flags_set_zsp(c, c->a);
 			c->pc++;
 			break;
 		case 0xe6: 
 			/* ANI - And immediate with accumulator */
-			tmp32 = c->a & ARG8;
-			c->a = tmp32 & 0xff;
-			cpu_flags_set_carry_from_word(c, tmp32);
+			tmp = c->a & imm8;
+			c->a = tmp & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp);
 			cpu_flags_set_zsp(c, c->a);
 			c->pc++;
 			break;
 		case 0xee:
 			/* XRI - Xor immediate with accumulator */
-			tmp32 = c->a ^ ARG8;
-			c->a = tmp32;
-			cpu_flags_set_carry_from_word(c, tmp32);
+			tmp = c->a ^ imm8;
+			c->a = tmp;
+			cpu_flags_set_carry_from_word(c, tmp);
 			cpu_flags_set_zsp(c, c->a);
 			c->pc++;
 			break;
 		case 0xf6:
 			/* ORI - Or immediate with accumulator */
-			tmp32 = c->a | ARG8;
-			c->a = tmp32 & 0xff;
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_flags_set_zsp(c, tmp32);
+			tmp = c->a | imm8;
+			c->a = tmp & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp);
+			cpu_flags_set_zsp(c, tmp);
 			c->pc++;
 			break;
 		case 0xfe:
 			/* CPI - Compare immediate with accumulator */
 			/* A is not changed by this operation, only the FLAGS */
-			tmp32 = c->a + FLIP(ARG8);
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_flags_set_zsp(c, tmp32);
+			tmp = c->a + FLIP(imm8);
+			cpu_flags_set_carry_from_word(c, tmp);
+			cpu_flags_set_zsp(c, tmp);
 			c->pc++;
 			break;
 
@@ -558,28 +561,28 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 
 		case 0x09:
 			/* DAD B */
-			tmp32 = cpu_get_bc(c) + cpu_get_hl(c);
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_set_hl(c, tmp32);
+			tmp = cpu_get_bc(c) + cpu_get_hl(c);
+			cpu_flags_set_carry_from_word(c, tmp);
+			cpu_set_hl(c, tmp);
 			break;
 		case 0x19:
 			/* DAD D */
-			tmp32 = cpu_get_de(c) + cpu_get_hl(c);
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_set_hl(c, tmp32);
+			tmp = cpu_get_de(c) + cpu_get_hl(c);
+			cpu_flags_set_carry_from_word(c, tmp);
+			cpu_set_hl(c, tmp);
 			break;
 		case 0x29: 
 			/* DAD H */
-			tmp32 = cpu_get_hl(c) + cpu_get_hl(c);
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_set_hl(c, tmp32);
+			tmp = cpu_get_hl(c) + cpu_get_hl(c);
+			cpu_flags_set_carry_from_word(c, tmp);
+			cpu_set_hl(c, tmp);
 			break;
 
 		case 0x39:
 			/* DAD SP */
-			tmp32 = c->sp + cpu_get_hl(c);
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_set_hl(c, tmp32);
+			tmp = c->sp + cpu_get_hl(c);
+			cpu_flags_set_carry_from_word(c, tmp);
+			cpu_set_hl(c, tmp);
 			break;
 		case 0x03:
 			/* INX B */
@@ -615,12 +618,12 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 			break;
 		case 0xeb: 
 			/* XCHG */
-			tmp32 = c->h;
+			tmp = c->h;
 			c->h = c->d;
-			c->d = tmp32;
-			tmp32 = c->l;
+			c->d = tmp;
+			tmp = c->l;
 			c->l = c->e;
-			c->e = tmp32;
+			c->e = tmp;
 			break;
 		case 0xe3:
 			/* XTHL */
@@ -657,10 +660,48 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0x17: ral (c); break;
 
 		/* I/O */
-		case 0xdb: in (c); break;
-		case 0xd3: out (c); break;
-		case 0x76: hlt (c); break;
+		case 0xdb:
+			/* IN */
+			tmp = imm8;
+			c->pc++;
 
+			debug_device(tmp);
+
+			if (tmp == DEVICE_INP0) {
+				c->a = c->i0;
+			} else if (tmp == DEVICE_INP1) {
+				c->a = c->i1;
+			} else if (tmp == DEVICE_INP2) {
+				c->a = c->i2;
+			} else if (tmp == DEVICE_SHIFT_IN) {
+				c->a = (c->shift >> ((8 - c->shift_amt)) & 0xff);
+			}
+			break;
+		case 0xd3:
+			/* OUT */
+			tmp = imm8;
+			c->pc++;
+
+			debug_device(tmp);
+
+			if (tmp == DEVICE_SHIFT_AMT) {
+				c->shift_amt = (c->a & 7);
+			} else if (tmp == DEVICE_SOUND1) {
+				c->o3 = c->a;
+			} else if (tmp == DEVICE_SHIFT_DATA) {
+				c->shift >>= 8;
+				c->shift |= (c->a << 8);
+			} else if (tmp == DEVICE_SOUND2) {
+				c->o5 = c->a;
+			} else if (tmp == DEVICE_WATCHDOG) {
+				c->o6 = c->a;
+			}
+			break;
+		case 0x76: 
+			/* HALT */
+			debug_msg("CPU Halted");
+			c->halt = 1;
+			break;
 		/* REGISTER OR MEMORY TO ACCUMULATOR */
 		case 0x87: add (c, REG (a)); break;
 		case 0x80: add (c, REG (b)); break;
@@ -709,7 +750,13 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0xab: xra (c, REG (e)); break;
 		case 0xac: xra (c, REG (h)); break;
 		case 0xad: xra (c, REG (l)); break;
-		case 0xae: xra_m (c); break;
+		case 0xae:
+			/* XRA M */
+			tmp = c->a ^ (cpu_deref_hl(c));
+			cpu_flags_set_zsp(c, tmp & 0xff);
+			cpu_flags_set_carry_from_word(c, tmp);
+			c->a = tmp & 0xff;
+			break;
 		case 0xb7: ora (c, REG (a)); break;
 		case 0xb0: ora (c, REG (b)); break;
 		case 0xb1: ora (c, REG (c)); break;
@@ -717,20 +764,31 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0xb3: ora (c, REG (e)); break;
 		case 0xb4: ora (c, REG (h)); break;
 		case 0xb5: ora (c, REG (l)); break;
-		case 0xb6: ora_m (c); break;
+		case 0xb6: 
+			/* ORA M */
+			tmp = c->a | (cpu_deref_hl(c));
+			cpu_flags_set_zsp(c, tmp & 0xff);
+			cpu_flags_set_carry_from_word(c, tmp);
+			c->a = tmp & 0xff;
+			break;
 		case 0xb8: cmp (c, REG (b)); break;
 		case 0xb9: cmp (c, REG (c)); break;
 		case 0xba: cmp (c, REG (d)); break;
 		case 0xbb: cmp (c, REG (e)); break;
 		case 0xbc: cmp (c, REG (h)); break;
 		case 0xbd: cmp (c, REG (l)); break;
-		case 0xbe: cmp_m (c); break;
+		case 0xbe: 
+			/* CMP M */
+			tmp = c->a + FLIP(cpu_deref_hl(c));
+			cpu_flags_set_zsp(c, tmp & 0xff);
+			cpu_flags_set_carry_from_word(c, tmp);
+			break;
 		case 0xbf: cmp (c, REG (a)); break;
 
-		case 0x32: cpu_set_byte (c, ARG16, c->a); c->pc+=2; break; /* STA adr */
-		case 0x3a: c->a = cpu_get_byte (c, ARG16); c->pc+=2; break; /* LDA adr */
-		case 0x22: cpu_set_word (c, ARG16, cpu_get_hl (c)); c->pc+=2; break; /* SHLD adr */
-		case 0x2a: cpu_set_hl (c, cpu_get_word (c, ARG16)); c->pc+=2; break; /* LHLD adr */
+		case 0x32: cpu_set_byte (c, imm16, c->a); c->pc+=2; break; /* STA adr */
+		case 0x3a: c->a = cpu_get_byte (c, imm16); c->pc+=2; break; /* LDA adr */
+		case 0x22: cpu_set_word (c, imm16, cpu_get_hl (c)); c->pc+=2; break; /* SHLD adr */
+		case 0x2a: cpu_set_hl (c, cpu_get_word (c, imm16)); c->pc+=2; break; /* LHLD adr */
 		case 0xe9: c->pc = cpu_get_hl (c); break; /* PCHL */
 
 		/* INTERRUPTS */

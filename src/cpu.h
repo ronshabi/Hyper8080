@@ -1,18 +1,11 @@
 #ifndef HYPER8080_CPU_H
 #define HYPER8080_CPU_H
 
-#define PC1 c->pc += 1
-#define PC2 c->pc += 2
-
 /* Quickly access register location */
 #define REG(reg) &(c->reg)
 
-/* Quickly get immediate */
-#define ARG8 cpu_get_byte(c, c->pc)
-#define ARG16 cpu_get_word(c, c->pc)
-
 /* Twos-compliment flip sign */
-#define FLIP(n) (~(n) + 1)
+#define FLIP(n) (~n + 1)
 
 /* Device numbers */
 /* Output */
