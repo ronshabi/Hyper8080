@@ -7,15 +7,6 @@ void inst_jmp(struct cpu *c, bool condition, uint16_t addr);
 void inst_call(struct cpu *c, bool condition, uint16_t addr);
 void inst_ret(struct cpu *c, bool condition);
 
-void inst_adi(struct cpu *c); /* ADI - Add immediate to accumulator */
-void inst_aci(struct cpu *c); /* ACI - Move Immediate data */
-void inst_sui(struct cpu *c); /* SUI - Subtract immediate from accumulator */
-void inst_sbi(struct cpu *c); /* SBI - Subtract immediate from accumulator w/ borrow */
-void inst_ani(struct cpu *c); /* ANI - And immediate with accumulator */
-void inst_xri(struct cpu *c); /* XRI - Xor immediate with accumulator */
-void inst_ori(struct cpu *c); /* ORI - Or immediate with accumulator */
-void inst_cpi(struct cpu *c); /* CPI - Compare immediate with accumulator */
-
 /* REGISTER PAIR */
 void dad_sp(struct cpu *c);/* DAD SP */
 void inx_b(struct cpu *c);/* INX B		Increment register pair */

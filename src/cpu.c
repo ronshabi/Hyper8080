@@ -398,28 +398,84 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0xe8: inst_ret (c, c->flag_p); break; /* rpe */
 		case 0xe0: inst_ret (c, !c->flag_p); break; /* rpo */
 
-		case 0x01: cpu_set_bc (c, ARG16); PC2; break; /* LXI B */
-		case 0x11: cpu_set_de (c, ARG16); PC2; break; /* LXI D */
-		case 0x21: cpu_set_hl (c, ARG16); PC2; break; /* LXI H */
-		case 0x31: c->sp = ARG16; PC2; break; /* LXI SP */
+		case 0x01: cpu_set_bc (c, ARG16); c->pc+=2; break; /* LXI B */
+		case 0x11: cpu_set_de (c, ARG16); c->pc+=2; break; /* LXI D */
+		case 0x21: cpu_set_hl (c, ARG16); c->pc+=2; break; /* LXI H */
+		case 0x31: c->sp = ARG16; c->pc+=2; break; /* LXI SP */
 
-		case 0x06: c->b = ARG8; PC1; break; /* MVI B */
-		case 0x0e: c->c = ARG8; PC1; break; /* MVI C */
-		case 0x16: c->d = ARG8;	PC1; break; /* MVI D */
-		case 0x1e: c->e = ARG8; PC1; break; /* MVI E */
-		case 0x26: c->h = ARG8;	PC1; break; /* MVI H */
-		case 0x2e: c->l = ARG8; PC1; break; /* MVI L */
-		case 0x36: cpu_set_byte (c, cpu_get_hl (c), ARG8); PC1; break; /* MVI M */
-		case 0x3e: c->a = ARG8; PC1; break; /* MVI A */
+		case 0x06: c->b = ARG8; c->pc++; break; /* MVI B */
+		case 0x0e: c->c = ARG8; c->pc++; break; /* MVI C */
+		case 0x16: c->d = ARG8;	c->pc++; break; /* MVI D */
+		case 0x1e: c->e = ARG8; c->pc++; break; /* MVI E */
+		case 0x26: c->h = ARG8;	c->pc++; break; /* MVI H */
+		case 0x2e: c->l = ARG8; c->pc++; break; /* MVI L */
+		case 0x36: cpu_set_byte (c, cpu_get_hl (c), ARG8); c->pc++; break; /* MVI M */
+		case 0x3e: c->a = ARG8; c->pc++; break; /* MVI A */
 
-		case 0xc6: inst_adi (c); break;
-		case 0xce: inst_aci (c); break;
-		case 0xd6: inst_sui (c); break;
-		case 0xde: inst_sbi (c); break;
-		case 0xe6: inst_ani (c); break;
-		case 0xee: inst_xri (c); break;
-		case 0xf6: inst_ori (c); break;
-		case 0xfe: inst_cpi (c); break;
+		case 0xc6: 
+			/* ADI - Add immediate to accumulator */
+			tmp32 = c->a + ARG8;
+			c->a = tmp32 & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp32);
+			cpu_flags_set_zsp(c, tmp32);
+			c->pc++;
+			break;
+		case 0xce: 
+			/* ACI - Move Immediate data */
+			tmp32 = c->a + ARG8 + c->flag_c;
+			c->a = tmp32 & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp32);
+			cpu_flags_set_zsp(c, c->a);
+			c->pc++;
+			break;
+		case 0xd6:
+			/* SUI - Subtract immediate from accumulator */
+			tmp32 = c->a + FLIP(ARG8);
+			c->a = tmp32 & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp32);
+			cpu_flags_set_zsp(c, c->a);
+			c->pc++;
+			break;
+		case 0xde:
+			/* SBI - Subtract immediate from accumulator with borrow */
+			tmp32 = c->a + FLIP(ARG8) + FLIP(c->flag_c);
+			c->a = tmp32 & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp32);
+			cpu_flags_set_zsp(c, c->a);
+			c->pc++;
+			break;
+		case 0xe6: 
+			/* ANI - And immediate with accumulator */
+			tmp32 = c->a & ARG8;
+			c->a = tmp32 & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp32);
+			cpu_flags_set_zsp(c, c->a);
+			c->pc++;
+			break;
+		case 0xee:
+			/* XRI - Xor immediate with accumulator */
+			tmp32 = c->a ^ ARG8;
+			c->a = tmp32;
+			cpu_flags_set_carry_from_word(c, tmp32);
+			cpu_flags_set_zsp(c, c->a);
+			c->pc++;
+			break;
+		case 0xf6:
+			/* ORI - Or immediate with accumulator */
+			tmp32 = c->a | ARG8;
+			c->a = tmp32 & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp32);
+			cpu_flags_set_zsp(c, tmp32 & 0xff);
+			c->pc++;
+			break;
+		case 0xfe:
+			/* CPI - Compare immediate with accumulator */
+			/* A is not changed by this operation, only the FLAGS */
+			tmp32 = c->a + FLIP(ARG8);
+			cpu_flags_set_carry_from_word(c, tmp32);
+			cpu_flags_set_zsp(c, tmp32);
+			c->pc++;
+			break;
 
 		/* DATA TRANSFER */
 		case 0x0a: c->a = cpu_deref_bc (c); break; /* LDAX B */
@@ -628,10 +684,10 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0xbe: cmp_m (c); break;
 		case 0xbf: cmp (c, REG (a)); break;
 
-		case 0x32: cpu_set_byte (c, ARG16, c->a); PC2; break; /* STA adr */
-		case 0x3a: c->a = cpu_get_byte (c, ARG16); PC2; break; /* LDA adr */
-		case 0x22: cpu_set_word (c, ARG16, cpu_get_hl (c)); PC2; break; /* SHLD adr */
-		case 0x2a: cpu_set_hl (c, cpu_get_word (c, ARG16)); PC2; break; /* LHLD adr */
+		case 0x32: cpu_set_byte (c, ARG16, c->a); c->pc+=2; break; /* STA adr */
+		case 0x3a: c->a = cpu_get_byte (c, ARG16); c->pc+=2; break; /* LDA adr */
+		case 0x22: cpu_set_word (c, ARG16, cpu_get_hl (c)); c->pc+=2; break; /* SHLD adr */
+		case 0x2a: cpu_set_hl (c, cpu_get_word (c, ARG16)); c->pc+=2; break; /* LHLD adr */
 		case 0xe9: c->pc = cpu_get_hl (c); break; /* PCHL */
 
 		/* INTERRUPTS */
