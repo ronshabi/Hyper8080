@@ -7,23 +7,9 @@ void inst_jmp(struct cpu *c, bool condition, uint16_t addr);
 void inst_call(struct cpu *c, bool condition, uint16_t addr);
 void inst_ret(struct cpu *c, bool condition);
 
-/* REGISTER PAIR */
-
-void xthl(struct cpu *c);/* XTHL		Exchange Stack */
-void sphl(struct cpu *c);/* SPHL		Load SP from H and L */
-
 /* SINGLE REGISTER INSTRUCTIONS */
 void inr(struct cpu *c, uint8_t *reg);/* INR	Increment */
-void inr_m(struct cpu *c);/* INR M */
 void dcr(struct cpu *c, uint8_t *reg);/* DCR	Increment */
-void dcr_m(struct cpu *c);/* DCR M */
-void daa(struct cpu *c);
-
-/* ROTATE ACCUMULATOR */
-void rlc(struct cpu *c);/* RLC Rotate left */
-void rrc(struct cpu *c);/* RRC Rotate right */
-void ral(struct cpu *c);/* RAR Rotate left through carry */
-void rar(struct cpu *c);/* RAR Rotate right through carry */
 
 /* REGISTER OR MEMORY TO ACCUMULATOR */
 void add(struct cpu *c, const uint8_t *reg);/* ADD A		Add to accumulator */

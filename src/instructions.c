@@ -28,24 +28,6 @@ inst_ret(struct cpu *c, bool condition)
 		c->pc = cpu_stack_pop(c);
 }
 
-void
-xthl(struct cpu *c)
-{
-	uint8_t l = c->l;
-	uint8_t h = c->h;
-
-	c->l = cpu_deref_sp(c, 0);
-	c->h = cpu_deref_sp(c, 1);
-
-	cpu_set_byte(c, c->sp, l);
-	cpu_set_byte(c, c->sp + 1, h);
-}
-void
-sphl(struct cpu *c)
-{
-	c->sp = cpu_get_hl(c);
-}
-
 /* SINGLE REGISTER INSTRUCTIONS */
 void
 inr(struct cpu *c, uint8_t *reg)
@@ -55,14 +37,7 @@ inr(struct cpu *c, uint8_t *reg)
 	cpu_flags_set_carry_from_word(c, result);
 	*reg = result & 0xff;
 }
-void
-inr_m(struct cpu *c)
-{
-	uint16_t result = cpu_deref_hl(c) + 1;
-	cpu_set_byte(c, cpu_get_hl(c), result & 0xff);
-	cpu_flags_set_zsp(c, result & 0xff);
-	cpu_flags_set_carry_from_word(c, result);
-}
+
 void
 dcr(struct cpu *c, uint8_t *reg)
 {
@@ -71,67 +46,6 @@ dcr(struct cpu *c, uint8_t *reg)
 	cpu_flags_set_carry_from_word(c, result & 0xff);
 	*reg = result & 0xff;
 }
-void
-dcr_m(struct cpu *c)
-{
-	uint16_t result = cpu_deref_hl(c) + FLIP(1);
-	cpu_flags_set_zsp(c, result & 0xff);
-	cpu_flags_set_carry_from_word(c, result & 0xff);
-	cpu_set_byte(c, cpu_get_hl(c), result & 0xff);
-}
-void
-daa(struct cpu *c)
-{
-	uint16_t result = 0;
-	if ((c->a & 0x0f) > 9 || c->flag_ac) {
-		result += 6;
-	}
-
-	if (((c->a >> 4) > 9) || (c->flag_c)) {
-		result += 0x60;
-		c->flag_c = 1;
-		result += c->a;
-		cpu_flags_set_zsp(c, result & 0xff);
-		cpu_flags_set_carry_from_word(c, result);
-	}
-}
-
-/* ROTATE ACCUMULATOR */
-void
-rlc(struct cpu *c)
-{
-	uint8_t bit7 = (c->a & 0x80) >> 7;
-	c->a <<= 1;
-	c->a |= bit7;
-	c->flag_c = bit7;
-}
-void
-rrc(struct cpu *c)
-{
-	uint8_t bit0 = (c->a & 0x1);
-	c->a >>= 1;
-	c->a |= bit0 << 7;
-	c->flag_c = (bit0 != 0);
-}
-void
-ral(struct cpu *c)
-{
-	uint8_t bit7 = (c->a & 0x80) >> 7;
-	c->a <<= 1;
-	c->a |= c->flag_c;
-	c->flag_c = bit7;
-}
-void
-rar(struct cpu *c)
-{
-	uint8_t bit0 = c->a & 0x1;
-	c->a = c->a >> 1;
-	c->a = (c->a | (c->flag_c << 7));
-	c->flag_c = bit0;
-}
-
-/* I/O */
-
 
 /* REGISTER OR MEMORY TO ACCUMULATOR */
 void
