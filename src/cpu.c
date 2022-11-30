@@ -635,7 +635,7 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 			c->h = cpu_deref_sp(c, 1);
 
 			cpu_set_byte(c, c->sp, tmp1); /* l */
-			cpu_set_byte(c, c->sp + 1, tmp2); /* 2 */
+			cpu_set_byte(c, c->sp + 1, tmp2); /* h */
 			break;
 		case 0xf9:
 			/* SPHL */
