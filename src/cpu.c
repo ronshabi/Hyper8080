@@ -337,6 +337,7 @@ cpu_interrupt(struct cpu *c, uint8_t intnum)
 void
 cpu_execute(struct cpu *c, uint8_t opcode)
 {
+	uint32_t tmp16;		/* Temporary u16 for calculations */
 	uint32_t tmp32;		/* Temporary u32 for calculations */
 	uint8_t tmp1, tmp2;	/* Temporary u8 for register pair instructions */
 	uint8_t imm8;		/* Immediate byte at PC */
@@ -344,8 +345,12 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 
 	c->instructions++;
 	c->cycles += C_CYCLES[opcode];
+
 	imm8 = cpu_get_byte(c, c->pc);
 	imm16 = cpu_get_word(c, c->pc);
+	tmp16 = 0;
+	tmp32 = 0;
+	tmp1 = tmp2 = 0;
 
 	switch (opcode)
 	{
@@ -418,66 +423,66 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 
 		case 0xc6: 
 			/* ADI - Add immediate to accumulator */
-			tmp32 = c->a + imm8;
-			c->a = tmp32 & 0xff;
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_flags_set_zsp(c, tmp32);
+			tmp16 = c->a + imm8;
+			c->a = tmp16 & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp16);
+			cpu_flags_set_zsp(c, tmp16 & 0xff);
 			c->pc++;
 			break;
 		case 0xce: 
 			/* ACI - Move Immediate data */
-			tmp32 = c->a + imm8 + c->flag_c;
-			c->a = tmp32 & 0xff;
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_flags_set_zsp(c, c->a);
+			tmp16 = c->a + imm8 + c->flag_c;
+			c->a = tmp16 & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp16 & 0xff);
+			cpu_flags_set_zsp(c, tmp16 & 0xff);
 			c->pc++;
 			break;
 		case 0xd6:
 			/* SUI - Subtract immediate from accumulator */
-			tmp32 = c->a + FLIP(imm8);
-			c->a = tmp32 & 0xff;
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_flags_set_zsp(c, c->a);
+			tmp16 = c->a + FLIP(imm8);
+			c->a = tmp16 & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp16);
+			cpu_flags_set_zsp(c, tmp16 & 0xff);
 			c->pc++;
 			break;
 		case 0xde:
 			/* SBI - Subtract immediate from accumulator with borrow */
-			tmp32 = c->a + FLIP(imm8) + FLIP(c->flag_c);
-			c->a = tmp32 & 0xff;
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_flags_set_zsp(c, c->a);
+			tmp16 = c->a + FLIP(imm8) + FLIP(c->flag_c);
+			c->a = tmp16 & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp16);
+			cpu_flags_set_zsp(c, tmp16 & 0xff);
 			c->pc++;
 			break;
 		case 0xe6: 
 			/* ANI - And immediate with accumulator */
-			tmp32 = c->a & imm8;
-			c->a = tmp32 & 0xff;
-			cpu_flags_set_carry_from_word(c, tmp32);
+			tmp16 = c->a & imm8;
+			c->a = tmp16 & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp16);
 			cpu_flags_set_zsp(c, c->a);
 			c->pc++;
 			break;
 		case 0xee:
 			/* XRI - Xor immediate with accumulator */
-			tmp32 = c->a ^ imm8;
-			c->a = tmp32;
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_flags_set_zsp(c, c->a);
+			tmp16 = c->a ^ imm8;
+			c->a = tmp16 & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp16);
+			cpu_flags_set_zsp(c, tmp16 & 0xff);
 			c->pc++;
 			break;
 		case 0xf6:
 			/* ORI - Or immediate with accumulator */
-			tmp32 = c->a | imm8;
-			c->a = tmp32 & 0xff;
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_flags_set_zsp(c, tmp32);
+			tmp16 = c->a | imm8;
+			c->a = tmp16 & 0xff;
+			cpu_flags_set_carry_from_word(c, tmp16);
+			cpu_flags_set_zsp(c, tmp16 & 0xff);
 			c->pc++;
 			break;
 		case 0xfe:
 			/* CPI - Compare immediate with accumulator */
 			/* A is not changed by this operation, only the FLAGS */
-			tmp32 = c->a + FLIP(imm8);
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_flags_set_zsp(c, tmp32);
+			tmp16 = c->a + FLIP(imm8);
+			cpu_flags_set_carry_from_word(c, tmp16);
+			cpu_flags_set_zsp(c, tmp16 & 0xff);
 			c->pc++;
 			break;
 
@@ -563,20 +568,20 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0x09:
 			/* DAD B */
 			tmp32 = cpu_get_bc(c) + cpu_get_hl(c);
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_set_hl(c, tmp32);
+			cpu_flags_set_carry_from_word(c, tmp32 & 0xff);
+			cpu_set_hl(c, tmp32 & 0xff);
 			break;
 		case 0x19:
 			/* DAD D */
 			tmp32 = cpu_get_de(c) + cpu_get_hl(c);
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_set_hl(c, tmp32);
+			cpu_flags_set_carry_from_word(c, tmp32 & 0xffff);
+			cpu_set_hl(c, tmp32 & 0xffff);
 			break;
 		case 0x29: 
 			/* DAD H */
 			tmp32 = cpu_get_hl(c) + cpu_get_hl(c);
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_set_hl(c, tmp32);
+			cpu_flags_set_carry_from_word(c, tmp32 & 0xffff);
+			cpu_set_hl(c, tmp32 & 0xffff);
 			break;
 
 		case 0x39:
@@ -619,12 +624,12 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 			break;
 		case 0xeb: 
 			/* XCHG */
-			tmp32 = c->h;
+			tmp1 = c->h;
 			c->h = c->d;
-			c->d = tmp32;
-			tmp32 = c->l;
+			c->d = tmp1;
+			tmp1 = c->l;
 			c->l = c->e;
-			c->e = tmp32;
+			c->e = tmp1;
 			break;
 		case 0xe3:
 			/* XTHL */
@@ -652,10 +657,10 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0x2c: inr (c, REG (l)); break;
 		case 0x34:
 			/* INR M */
-			tmp32 = cpu_deref_hl(c) + 1;
-			cpu_set_byte(c, cpu_get_hl(c), tmp32);
-			cpu_flags_set_zsp(c, tmp32);
-			cpu_flags_set_carry_from_word(c, tmp32);
+			tmp16 = cpu_deref_hl(c) + 1;
+			cpu_set_byte(c, cpu_get_hl(c), tmp16 & 0xff);
+			cpu_flags_set_zsp(c, tmp16 & 0xff);
+			cpu_flags_set_carry_from_word(c, tmp16);
 			break;
 		case 0x3d: dcr (c, REG (a)); break;
 		case 0x05: dcr (c, REG (b)); break;
@@ -666,24 +671,24 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0x2d: dcr (c, REG (l)); break;
 		case 0x35:
 			/* DCR M */
-			tmp32 = cpu_deref_hl(c) + FLIP(1);
-			cpu_flags_set_zsp(c, tmp32);
-			cpu_flags_set_carry_from_word(c, tmp32);
-			cpu_set_byte(c, cpu_get_hl(c), tmp32);
+			tmp16 = cpu_deref_hl(c) + FLIP(1);
+			cpu_flags_set_zsp(c, tmp16 & 0xff);
+			cpu_flags_set_carry_from_word(c, tmp16);
+			cpu_set_byte(c, cpu_get_hl(c), tmp16 & 0xff);
 			break;
 		case 0x27:
 			/* DAA */
-			tmp32 = 0;
+			tmp16 = 0;
 			if ((c->a & 0x0f) > 9 || c->flag_ac) {
-				tmp32 += 6;
+				tmp16 += 6;
 			}
 
 			if (((c->a >> 4) > 9) || (c->flag_c)) {
-				tmp32 += 0x60;
+				tmp16 += 0x60;
 				c->flag_c = 1;
-				tmp32 += c->a;
-				cpu_flags_set_zsp(c, tmp32);
-				cpu_flags_set_carry_from_word(c, tmp32);
+				tmp16 += c->a;
+				cpu_flags_set_zsp(c, tmp16 & 0xff);
+				cpu_flags_set_carry_from_word(c, tmp16);
 			}
 			break;
 
@@ -711,7 +716,7 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 			break;
 		case 0x17:
 			/* RAL - Rotate left through carry*/
-			tmp1 = (c->a & 0x80) >> 7;
+			tmp1 = (c->a & 0x80) >> 7; /* bit 7 */
 			c->a <<= 1;
 			c->a |= c->flag_c;
 			c->flag_c = tmp1;
@@ -720,38 +725,38 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		/* I/O */
 		case 0xdb:
 			/* IN */
-			tmp32 = imm8;
+			tmp1 = imm8; /* device number */
 			c->pc++;
 
-			debug_device(tmp32);
+			debug_device(tmp1);
 
-			if (tmp32 == DEVICE_INP0) {
+			if (tmp1 == DEVICE_INP0) {
 				c->a = c->i0;
-			} else if (tmp32 == DEVICE_INP1) {
+			} else if (tmp1 == DEVICE_INP1) {
 				c->a = c->i1;
-			} else if (tmp32 == DEVICE_INP2) {
+			} else if (tmp1 == DEVICE_INP2) {
 				c->a = c->i2;
-			} else if (tmp32 == DEVICE_SHIFT_IN) {
+			} else if (tmp1 == DEVICE_SHIFT_IN) {
 				c->a = (c->shift >> ((8 - c->shift_amt)) & 0xff);
 			}
 			break;
 		case 0xd3:
 			/* OUT */
-			tmp32 = imm8;
+			tmp1 = imm8;
 			c->pc++;
 
-			debug_device(tmp32);
+			debug_device(tmp1);
 
-			if (tmp32 == DEVICE_SHIFT_AMT) {
+			if (tmp1 == DEVICE_SHIFT_AMT) {
 				c->shift_amt = (c->a & 7);
-			} else if (tmp32 == DEVICE_SOUND1) {
+			} else if (tmp1 == DEVICE_SOUND1) {
 				c->o3 = c->a;
-			} else if (tmp32 == DEVICE_SHIFT_DATA) {
+			} else if (tmp1 == DEVICE_SHIFT_DATA) {
 				c->shift >>= 8;
 				c->shift |= (c->a << 8);
-			} else if (tmp32 == DEVICE_SOUND2) {
+			} else if (tmp1 == DEVICE_SOUND2) {
 				c->o5 = c->a;
-			} else if (tmp32 == DEVICE_WATCHDOG) {
+			} else if (tmp1 == DEVICE_WATCHDOG) {
 				c->o6 = c->a;
 			}
 			break;
@@ -770,10 +775,10 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0x85: add (c, REG (l)); break;
 		case 0x86:
 			/* ADD M */
-			tmp32 = c->a + cpu_deref_hl(c);
-			cpu_flags_set_zsp(c, tmp32);
-			cpu_flags_set_carry_from_word(c, tmp32);
-			c->a = tmp32;
+			tmp16 = c->a + cpu_deref_hl(c);
+			cpu_flags_set_zsp(c, tmp16 & 0xff);
+			cpu_flags_set_carry_from_word(c, tmp16);
+			c->a = tmp16 & 0xff;
 			break;
 		case 0x8f: adc (c, REG (a)); break;
 		case 0x88: adc (c, REG (b)); break;
@@ -782,7 +787,13 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0x8b: adc (c, REG (e)); break;
 		case 0x8c: adc (c, REG (h)); break;
 		case 0x8d: adc (c, REG (l)); break;
-		case 0x8e: adc_m (c); break;
+		case 0x8e: 
+			/* ADC M */
+			tmp16 = c->a + cpu_deref_hl(c) + c->flag_c;
+			cpu_flags_set_zsp(c, tmp16 & 0xff);
+			cpu_flags_set_carry_from_word(c, tmp16);
+			c->a = tmp16 & 0xff;
+			break;
 		case 0x97: sub (c, REG (a)); break;
 		case 0x90: sub (c, REG (b)); break;
 		case 0x91: sub (c, REG (c)); break;
@@ -816,10 +827,10 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0xad: xra (c, REG (l)); break;
 		case 0xae:
 			/* XRA M */
-			tmp32 = c->a ^ (cpu_deref_hl(c));
-			cpu_flags_set_zsp(c, tmp32 & 0xff);
-			cpu_flags_set_carry_from_word(c, tmp32);
-			c->a = tmp32 & 0xff;
+			tmp16 = c->a ^ (cpu_deref_hl(c));
+			cpu_flags_set_zsp(c, tmp16 & 0xff);
+			cpu_flags_set_carry_from_word(c, tmp16);
+			c->a = tmp16 & 0xff;
 			break;
 		case 0xb7: ora (c, REG (a)); break;
 		case 0xb0: ora (c, REG (b)); break;
@@ -830,10 +841,10 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0xb5: ora (c, REG (l)); break;
 		case 0xb6: 
 			/* ORA M */
-			tmp32 = c->a | (cpu_deref_hl(c));
-			cpu_flags_set_zsp(c, tmp32 & 0xff);
-			cpu_flags_set_carry_from_word(c, tmp32);
-			c->a = tmp32 & 0xff;
+			tmp16 = c->a | (cpu_deref_hl(c));
+			cpu_flags_set_zsp(c, tmp16 & 0xff);
+			cpu_flags_set_carry_from_word(c, tmp16);
+			c->a = tmp16 & 0xff;
 			break;
 		case 0xb8: cmp (c, REG (b)); break;
 		case 0xb9: cmp (c, REG (c)); break;
@@ -843,9 +854,9 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 		case 0xbd: cmp (c, REG (l)); break;
 		case 0xbe: 
 			/* CMP M */
-			tmp32 = c->a + FLIP(cpu_deref_hl(c));
-			cpu_flags_set_zsp(c, tmp32 & 0xff);
-			cpu_flags_set_carry_from_word(c, tmp32);
+			tmp16 = c->a + FLIP(cpu_deref_hl(c));
+			cpu_flags_set_zsp(c, tmp16 & 0xff);
+			cpu_flags_set_carry_from_word(c, tmp16);
 			break;
 		case 0xbf: cmp (c, REG (a)); break;
 

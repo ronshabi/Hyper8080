@@ -56,14 +56,7 @@ add(struct cpu *c, const uint8_t *reg)
 	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
-void
-add_m(struct cpu *c)
-{
-	uint16_t result = c->a + cpu_deref_hl(c);
-	cpu_flags_set_zsp(c, result & 0xff);
-	cpu_flags_set_carry_from_word(c, result);
-	c->a = result & 0xff;
-}
+
 void
 adc(struct cpu *c, const uint8_t *reg)
 {
@@ -72,14 +65,7 @@ adc(struct cpu *c, const uint8_t *reg)
 	cpu_flags_set_carry_from_word(c, result);
 	c->a = result & 0xff;
 }
-void
-adc_m(struct cpu *c)
-{
-	uint16_t result = c->a + cpu_deref_hl(c) + c->flag_c;
-	cpu_flags_set_zsp(c, result & 0xff);
-	cpu_flags_set_carry_from_word(c, result);
-	c->a = result & 0xff;
-}
+
 void
 sub(struct cpu *c, const uint8_t *reg)
 {
