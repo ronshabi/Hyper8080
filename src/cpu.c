@@ -339,6 +339,7 @@ void
 cpu_execute(struct cpu *c, uint8_t opcode)
 {
 	uint32_t tmp32;		/* Temporary u32 for calculations */
+	uint16_t tmp16;		/* Temporary u16 for calculations */
 
 	c->instructions++;
 	c->cycles += C_CYCLES[opcode];
@@ -519,11 +520,33 @@ cpu_execute(struct cpu *c, uint8_t opcode)
 			cpu_set_hl(c, tmp32 & 0xffff);
 			break;
 
-		case 0x39: dad_sp (c); break;
-		case 0x03: inx_b (c); break;
-		case 0x13: inx_d (c); break;
-		case 0x23: inx_h (c); break;
-		case 0x33: inx_sp (c); break;
+		case 0x39:
+			/* DAD SP */
+			tmp32 = c->sp + cpu_get_hl(c);
+			cpu_flags_set_carry_from_word(c, tmp32 & 0xffff);
+			cpu_set_hl(c, tmp32 & 0xffff);
+			break;
+
+		case 0x03: 
+			/* INX B */
+			cpu_set_bc(c, cpu_get_bc(c) + 1);
+			break;
+
+		case 0x13:
+			/* INX D */
+			cpu_set_de(c, cpu_get_de(c) + 1);
+			break;
+
+		case 0x23: 
+			/* INX H */
+			cpu_set_hl(c, cpu_get_hl(c) + 1);
+			break;
+
+		case 0x33: 
+			/* INX SP */
+			c->sp++;
+			break;
+			
 		case 0x0b: dcx_b (c); break;
 		case 0x1b: dcx_d (c); break;
 		case 0x2b: dcx_h (c); break;
