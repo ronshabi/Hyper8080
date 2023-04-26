@@ -1,10 +1,10 @@
 # intel8080
 
-An Intel 8080 emulator written in c99.
+An Intel 8080 emulator written in C99.
 
 <p align="center">
-  <img src="https://github.com/ronshabi/8080C/blob/master/doc/screenshots/8080c-screenshot-demo2.png?raw=true" width="300" alt="8080C emulating Space Invaders - main menu"/>
-  <img src="https://github.com/ronshabi/8080C/blob/master/doc/screenshots/8080c-screenshot-demo1.png?raw=true" width="300" alt="8080C emulating Space Invaders - game view"/>
+  <img src="https://github.com/ronshabi/8080C/blob/master/doc/screenshots/8080c-screenshot-demo2.png?raw=true" width="200" alt="8080C emulating Space Invaders - main menu"/>
+  <img src="https://github.com/ronshabi/8080C/blob/master/doc/screenshots/8080c-screenshot-demo1.png?raw=true" width="200" alt="8080C emulating Space Invaders - game view"/>
   <p align="center">Emulating Space Invaders</p>
 </p>
 
@@ -32,17 +32,17 @@ Create a `build` directory and run: `cmake -B. -S <SOURCE_PATH> && make`
 
 
 ## Debugging
-`debug.h` is your goto file to apply debug macros!
 ### Activating the disassembler
-Enable `DEBUG_MODE_REGULAR` in `debug.h`
+Enable `DEBUG_MODE_REGULAR`
 ### Stopping at instruction
-Enable `DEBUG_MODE_STOP` in `debug.h`, edit `DEBUG_MODE_STOP_AT_INSTRUCTION` to your liking.
+Enable `DEBUG_MODE_STOP`, define `DEBUG_MODE_STOP_AT_INSTRUCTION` to your liking.
 
 
 ## Creating tests
 In order to make the process of CPU testing a little bit easier, use `create_new_test.py` in `scripts`: `python3 create_new_test.py <TEST_NAME>`
-
 This will generate a `test_<TEST_NAME>.c` file in `tests/` with `test_base.c` as the template.
+
+_Testing is being revamped and polished for upcoming versions. See this testing API as deprecated._
 
 ## Author
 Ron Shabi
