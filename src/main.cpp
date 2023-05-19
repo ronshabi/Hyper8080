@@ -1,4 +1,22 @@
-#include "defs.h"
+
+#include <SDL2/SDL.h>
+
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <ctime>
+
+#include "cpu.h"
+#include "debug.h"
+#include "instructions.h"
+#include "render.h"
+#include "sys.h"
+
+constexpr auto window_height = 256;
+constexpr auto window_width = 224;
+constexpr auto window_scale = 2;
+constexpr auto window_title = "Hyper8080 v0.4";
+
 
 int main(int argc, char *argv[]) {
     //
@@ -37,8 +55,8 @@ int main(int argc, char *argv[]) {
     // Create window
     //
     R_Init();
-    R_CreateWindow(&Window, &Renderer, WINDOW_TITLE, WINDOW_WIDTH,
-                   WINDOW_HEIGHT, WINDOW_SCALE);
+    R_CreateWindow(&Window, &Renderer, window_title, window_width,
+                   window_height, window_scale);
     R_ClearScreen(&Renderer);
     R_Update(&Renderer);
 

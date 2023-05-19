@@ -23,7 +23,7 @@ void Sys_LoadROM(FILE *fptr, char *filename, unsigned char *memptr) {
 }
 
 void Sys_AllocateMemory(unsigned char **ptr, int howmuch) {
-    *ptr = calloc(howmuch, 1);
+    *ptr = (unsigned char*)(calloc(howmuch, 1));
 }
 
 void Sys_HandleInputs(cpu *c, const uint8_t **keyboard, bool *quitcond) {
