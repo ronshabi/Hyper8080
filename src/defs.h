@@ -9,7 +9,7 @@
 
 #include "cpu.h"
 #include "debug.h"
-#include "instructions.h"
+#include "instructions_C.h"
 #include "render.h"
 #include "sys.h"
 
