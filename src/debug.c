@@ -21,11 +21,11 @@ void D_GlobalMessage(const char *msg) {
 void D_Disasm(cpu *c) {
 #ifdef DEBUG_MODE_REGULAR
     printf(
-        "0x%04x\t%02x\t\t%02x|%02x|%02x|%02x|%02x|%02x|%02x|%04x|%d%d%d%d%d|%"
-        "04x\t%s",
-        c->pc, C_GetByte(c, c->pc), c->a, c->b, c->c, c->d, c->e, c->h, c->l,
-        c->sp, c->flag_z, c->flag_s, c->flag_p, c->flag_c, c->flag_ac, c->shift,
-        C_INSTRUCTIONS[C_GetByte(c, c->pc)]);
+            "0x%04x\t%02x\t\t%02x|%02x|%02x|%02x|%02x|%02x|%02x|%04x|%d%d%d%d%d|%"
+            "04x\t%s",
+            c->pc, C_GetByte(c, c->pc), c->a, c->b, c->c, c->d, c->e, c->h, c->l,
+            c->sp, c->flag_z, c->flag_s, c->flag_p, c->flag_c, c->flag_ac, c->shift,
+            C_INSTRUCTIONS[C_GetByte(c, c->pc)]);
 #endif
 }
 

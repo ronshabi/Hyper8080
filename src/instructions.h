@@ -1,8 +1,11 @@
 #pragma once
+
 #include "defs.h"
 
 void jmp(cpu *c, bool condition, uint16_t addr);
+
 void call(cpu *c, bool condition, uint16_t addr);
+
 void ret(cpu *c, bool condition);
 
 void adi(cpu *c); // ADI - Add immediate to accumulator
@@ -52,24 +55,24 @@ void hlt(cpu *c); // HALT
 /* REGISTER OR MEMORY TO ACCUMULATOR */
 void add(cpu *c, const uint8_t *reg); // ADD A		Add to accumulator
 void add_m(cpu *c);                   // ADD M
-void adc(cpu           *c,
+void adc(cpu *c,
          const uint8_t *reg);         // ADC A		Add to accumulator w/ carry
 void adc_m(cpu *c);                   // ADC M
 void sub(cpu *c, const uint8_t *reg); // SUB A		Subtract from
-                                      // accumulator
+// accumulator
 void sub_m(cpu *c);                   // SUB M
 void sbb(cpu *c,
          const uint8_t
-             *reg); // SBB A		Subtract from accumulator w/ borrow
+         *reg); // SBB A		Subtract from accumulator w/ borrow
 void sbb_m(cpu *c); // SBB M
-void ana(cpu           *c,
+void ana(cpu *c,
          const uint8_t *reg); // ANA A  	And operation w/ accumulator
 void ana_m(cpu *c);           // ANA M
-void xra(cpu           *c,
+void xra(cpu *c,
          const uint8_t *reg);         // XRA A		Logical xor w/zero accumulator
 void xra_m(cpu *c);                   // XRA M
 void ora(cpu *c, const uint8_t *reg); // ORA A		Logical or w/
-                                      // accumulator
+// accumulator
 void ora_m(cpu *c);                   // ORA M
 void cmp(cpu *c, const uint8_t *reg); // CMP A
 void cmp_m(cpu *c);                   // CMP M

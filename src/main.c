@@ -9,23 +9,23 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    FILE          *f;
-    cpu            c;
+    FILE *f;
+    cpu c;
     unsigned char *buffer;
-    uint8_t        c_currentOpcode;
-    bool           quit                      = false;
-    SDL_Window    *Window                    = NULL;
-    SDL_Renderer  *Renderer                  = NULL;
-    uint64_t       now                       = 0;
-    uint64_t       ms_Interrupt_Last         = 0;
-    uint64_t       ms_Input_Last             = 0;
-    uint64_t       ms_ClockSpeedMeasure_Last = 0;
-    const uint8_t *keyboard                  = SDL_GetKeyboardState(NULL);
+    uint8_t c_currentOpcode;
+    bool quit = false;
+    SDL_Window *Window = NULL;
+    SDL_Renderer *Renderer = NULL;
+    uint64_t now = 0;
+    uint64_t ms_Interrupt_Last = 0;
+    uint64_t ms_Input_Last = 0;
+    uint64_t ms_ClockSpeedMeasure_Last = 0;
+    const uint8_t *keyboard = SDL_GetKeyboardState(NULL);
 
     int interrupt = 1;
 
     uint64_t cyclesLast = 0;
-    uint64_t cyclesNow  = 0;
+    uint64_t cyclesNow = 0;
 
     Sys_AllocateMemory(&buffer, 65535);
     Sys_LoadROM(f, argv[1], buffer);
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 
         now = SDL_GetTicks();
 
-        if ((double)(now - ms_Interrupt_Last) > HZ(120)) {
+        if ((double) (now - ms_Interrupt_Last) > HZ(120)) {
             if (interrupt ^= 1) {
                 R_Render(&c, 0x2400, &Renderer);
                 // Send RST 2
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
             ms_Interrupt_Last = now;
         }
 
-        if ((double)(now - ms_Input_Last) > HZ(30)) {
+        if ((double) (now - ms_Input_Last) > HZ(30)) {
             Sys_HandleInputs(&c, &keyboard, &quit);
             ms_Input_Last = now;
         }
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
         cyclesNow = c.cycles;
         if (now - ms_ClockSpeedMeasure_Last > 1000) {
             printf("Running @ %.2f MHz\n", (cyclesNow - cyclesLast) / 10E6);
-            cyclesLast                = cyclesNow;
+            cyclesLast = cyclesNow;
             ms_ClockSpeedMeasure_Last = now;
         }
 

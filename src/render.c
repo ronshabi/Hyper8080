@@ -17,8 +17,8 @@ void R_Init(void) {
 void R_CreateWindow(SDL_Window **win, SDL_Renderer **ren, const char *title,
                     int w, int h, float scale) {
     *win = SDL_CreateWindow(title, SDL_WINDOWPOS_UNDEFINED,
-                            SDL_WINDOWPOS_UNDEFINED, w * (int)scale,
-                            h * (int)scale, SDL_WINDOW_SHOWN);
+                            SDL_WINDOWPOS_UNDEFINED, w * (int) scale,
+                            h * (int) scale, SDL_WINDOW_SHOWN);
     if (*win == NULL) {
         R_SDLError("Failed to create window");
     }
@@ -58,12 +58,15 @@ void R_ClearScreen(SDL_Renderer **ren) {
 void R_SetColorBlack(SDL_Renderer **ren) {
     SDL_SetRenderDrawColor(*ren, 0, 0, 0, 0);
 }
+
 void R_SetColorWhite(SDL_Renderer **ren) {
     SDL_SetRenderDrawColor(*ren, 0xff, 0xff, 0xff, 0);
 }
+
 void R_SetColorGreen(SDL_Renderer **ren) {
     SDL_SetRenderDrawColor(*ren, 0, 0xff, 0, 0);
 }
+
 void R_SetColorRed(SDL_Renderer **ren) {
     SDL_SetRenderDrawColor(*ren, 0xff, 0, 0, 0);
 }
@@ -82,7 +85,7 @@ void R_Render(cpu *c, int vramOffset, SDL_Renderer **ren) {
         for (int y = 0; y < WINDOW_HEIGHT; y += 8) {
 
             uint8_t pixel =
-                c->memory[vramOffset + (x * (WINDOW_HEIGHT / 8)) + (y / 8)];
+                    c->memory[vramOffset + (x * (WINDOW_HEIGHT / 8)) + (y / 8)];
 
             for (int bit = 0; bit < 8; bit++) {
                 if (WINDOW_HEIGHT - 32 > y && WINDOW_HEIGHT - 64 < y) {
