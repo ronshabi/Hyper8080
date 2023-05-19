@@ -1,4 +1,6 @@
-# intel8080
+# Hyper8080 - an Intel 8080 CPU emulator, written in C++23
+
+![Hyper8080-logo.png](docs/Hyper8080-logo.png)
 
 ## Build
 This project uses CMake, and requires no extra configuration in order to build.
