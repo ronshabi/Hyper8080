@@ -3,21 +3,22 @@ project(Hyper8080 C CXX)
 
 set(CMAKE_C_STANDARD 99)
 find_package(SDL2 REQUIRED)
+find_package(spdlog REQUIRED)
 
 add_executable(${CMAKE_PROJECT_NAME}
-        src/core/types.h
+        src/Core/Types.hpp
 
-        src/emulation/CPU.cpp
-        src/emulation/CPU.h
-        src/emulation/instructions.h
+        src/Emulation/CPU.cpp
+        src/Emulation/CPU.hpp
+        src/Emulation/Instructions.hpp
 
-        src/gui/Backend.cpp
-        src/gui/Backend.h
-        src/gui/Window.cpp
-        src/gui/Window.h
+        src/GUI/Backend.cpp
+        src/GUI/Backend.hpp
+        src/GUI/Window.cpp
+        src/GUI/Window.hpp
 
 
-        src/main.cpp
+        src/Main.cpp
         src/cpu.cpp
         src/cpu.h
         src/instructions_C.cpp
@@ -29,12 +30,12 @@ add_executable(${CMAKE_PROJECT_NAME}
         src/sys.cpp
         src/sys.h
         src/defs.h
-        src/gui/Window.cpp
-        src/gui/Window.h
-        src/gui/Backend.cpp src/gui/Backend.h src/emulation/CPU.cpp src/emulation/CPU.h src/core/types.h src/emulation/instructions.h)
+        src/GUI/Window.cpp
+        src/GUI/Window.hpp
+        src/GUI/Backend.cpp src/GUI/Backend.hpp src/Emulation/CPU.cpp src/Emulation/CPU.hpp src/Core/Types.hpp src/Emulation/Instructions.hpp)
 
 
-target_link_libraries(${CMAKE_PROJECT_NAME} SDL2::SDL2)
-target_link_libraries(${CMAKE_PROJECT_NAME} m)
+target_link_libraries(Hyper8080 SDL2::SDL2)
+target_link_libraries(Hyper8080 spdlog::spdlog)
 
-target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC "src/")
+target_include_directories(Hyper8080 PUBLIC "src/")
