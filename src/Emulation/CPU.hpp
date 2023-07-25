@@ -1,8 +1,16 @@
 #pragma once
 
+#include <Core/Types.hpp>
+#include <Emulation/Instructions.hpp>
+
+
 #include <array>
-#include <core/types.h>
-#include <emulation/instructions.h>
+#include <string>
+#include <fstream>
+#include <stdexcept>
+
+#include <spdlog/spdlog.h>
+
 class CPU {
 public:
     explicit CPU() = default;
@@ -23,23 +31,35 @@ public:
     [[nodiscard]] u16 PSW() const { return static_cast<u16>(m_A << 8) | static_cast<u16>(FLAGS()); }
     [[nodiscard]] u8 FLAGS() const;
 
-    [[nodiscard]] inline u8 get_byte(u16 address) const;
-    [[nodiscard]] inline u16 get_word(u16 address) const;
+    [[nodiscard]] inline u8 GetByte(u16 address) const;
+    [[nodiscard]] inline u16 GetWord(u16 address) const;
 
-    inline void set_byte(u16 address, u8 value);
-    void set_word(u16 address, u16 value);
-    inline void set_BC(u16 to);
-    inline void set_DE(u16 to);
-    inline void set_HL(u16 to);
-    inline void set_flags_ZSP(u8 value);
+    inline void SetByte(u16 address, u8 value);
+    void SetWord(u16 address, u16 value);
+    inline void SetBC(u16 to);
+    inline void SetDE(u16 to);
+    inline void SetHL(u16 to);
+    inline void SetFlagsZSP(u8 value);
 
-    void push(u16 value);
-    [[nodiscard]] u16 pop();
-    void pop_PSW();
+    void Push(u16 value);
+    [[nodiscard]] u16 Pop();
+    void PopPSW();
 
+    void LoadProgram(const std::string& path);
+    [[nodiscard]] u8 GetInputPort(int portNumber) const;
+    void SetInputPort(int portNumber, u8 value);
 private:
-    u8 fetch();
-    void decode();
+    u8 Fetch();
+    void Decode();
+    u8 Read8() const;
+    u8 Read16() const;
+
+    void Jump(u16 address);
+    void Jump(u16 address, bool condition);
+    void Call(u16 address);
+    void Call(u16 address, bool condition);
+    void Ret();
+    void Ret(bool condition);
 
     static inline bool flag_Z_check(u8 value);
     static inline bool flag_S_check(u8 value);
