@@ -36,7 +36,4 @@ int main(int argc, const char* argv[])
     // Initialize backend
     GUI::Backend backend;
     GUI::Window mainWindow("Hyper8080", 2);
-
-    mainWindow.SetPixelBuffer(cpu.GetMemoryAtOffset(0), 1000);
-
 }

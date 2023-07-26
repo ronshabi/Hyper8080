@@ -1,4 +1,7 @@
 #include "Window.hpp"
+#include "Core/Rendering.hpp"
+#include <SDL_video.h>
+#include <spdlog/spdlog.h>
 
 namespace GUI {
 Window::Window(std::string&& title, int scale)
@@ -28,6 +31,8 @@ Window::Window(std::string&& title, int scale)
 
     // If all is successful, run the window thread loop
     std::thread windowThreadLoop([&]() {
+        SDL_Surface* surface = SDL_GetWindowSurface(m_sdlWindowPtr);
+        SDL_Event e;
         u64 ticksStart {};
         u64 ticksEnd {};
         u64 ticksDelta {};
@@ -36,27 +41,29 @@ Window::Window(std::string&& title, int scale)
             ticksEnd = SDL_GetTicks();
 
             m_mutex.lock();
-            while (SDL_PollEvent(&m_sdlEvent)) {
-                if (m_sdlEvent.key.keysym.sym == SDLK_q) {
+            while (SDL_PollEvent(&e)) {
+                if (e.key.keysym.sym == SDLK_q) {
                     spdlog::debug("Window thread of '{}': Quit requested", m_title);
                     m_isRunning = false;
                 }
             }
             m_mutex.unlock();
 
-            Clear();
-
-            if (m_pixelBuffer != 0) {
-                Render();
+            for (u32 y = 0; y < surface->h; y++) {
+                for (u32 x = 0; x < surface->w; x++) {
+                    reinterpret_cast<u32*>(surface->pixels)[y * surface->w + x] = ticksEnd >> x;
+                }
             }
-            Blit();
+
             //            std::this_thread::sleep_for(std::chrono::milliseconds(500));
             //            spdlog::debug("ticksDelta = {}", ticksDelta);
 
             ticksDelta = ticksEnd - ticksStart;
-            if (ticksDelta > 1000) {
+            if (ticksDelta > FpsToHz(60)) {
+                m_mutex.lock();
+                SDL_UpdateWindowSurface(m_sdlWindowPtr);
                 ticksStart = SDL_GetTicks();
-                spdlog::debug("Tick");
+                m_mutex.unlock();
             }
         }
     });

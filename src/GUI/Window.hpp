@@ -27,7 +27,6 @@ private:
     u8* m_pixelBuffer{};
     u32 m_pixelBufferSize{};
 
-    SDL_Event m_sdlEvent;
     bool m_isRunning{true};
     std::string m_title;
     const int m_width;
