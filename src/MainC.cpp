@@ -18,7 +18,7 @@ constexpr auto window_scale = 2;
 constexpr auto window_title = "Hyper8080 v0.4";
 
 
-int main(int argc, char *argv[]) {
+int main2(int argc, char *argv[]) {
     //
     // Check arguments
     //

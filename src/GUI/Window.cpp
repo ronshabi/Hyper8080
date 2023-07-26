@@ -1,6 +1,4 @@
 #include "Window.hpp"
-#include <SDL_render.h>
-#include <stdexcept>
 
 namespace GUI {
 Window::Window(std::string&& title, int scale)
@@ -28,6 +26,43 @@ Window::Window(std::string&& title, int scale)
     if (SDL_RenderSetLogicalSize(m_sdlRendererPtr, m_width, m_height) < 0)
         throw std::runtime_error("Could not set renderer logical size");
 
+    // If all is successful, run the window thread loop
+    std::thread windowThreadLoop([&]() {
+        u64 ticksStart {};
+        u64 ticksEnd {};
+        u64 ticksDelta {};
+
+        while (m_isRunning) {
+            ticksEnd = SDL_GetTicks();
+
+            m_mutex.lock();
+            while (SDL_PollEvent(&m_sdlEvent)) {
+                if (m_sdlEvent.key.keysym.sym == SDLK_q) {
+                    spdlog::debug("Window thread of '{}': Quit requested", m_title);
+                    m_isRunning = false;
+                }
+            }
+            m_mutex.unlock();
+
+            Clear();
+
+            if (m_pixelBuffer != 0) {
+                Render();
+            }
+            Blit();
+            //            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            //            spdlog::debug("ticksDelta = {}", ticksDelta);
+
+            ticksDelta = ticksEnd - ticksStart;
+            if (ticksDelta > 1000) {
+                ticksStart = SDL_GetTicks();
+                spdlog::debug("Tick");
+            }
+        }
+    });
+
+    spdlog::debug("Window thread created for window '{}'", m_title);
+    windowThreadLoop.join();
 }
 Window::~Window()
 {
@@ -40,19 +75,24 @@ Window::~Window()
     spdlog::debug("Destroyed window '{}' ({}x{})", m_title, m_width, m_height);
 }
 
-void Window::PlacePixel(const int x, const int y) {
+void Window::PlacePixel(const int x, const int y)
+{
     SDL_RenderDrawPoint(m_sdlRendererPtr, x, y);
 }
-void Window::Blit() {
+void Window::Blit()
+{
     SDL_RenderPresent(m_sdlRendererPtr);
 }
-void Window::Clear() {
+void Window::Clear()
+{
     SDL_RenderClear(m_sdlRendererPtr);
 }
-void Window::RenderVRam(u8* vramPtr) {
+
+void Window::Render()
+{
     for (int x = 0; x < m_width; x++) {
         for (int y = 0; x < m_height; y += 8) {
-            u8 pixel = vramPtr[(x * m_height / 8) + y/8];
+            u8 pixel = m_pixelBuffer[(x * m_height / 8) + y / 8];
 
             for (u8 bit = 0; bit < 8; bit++) {
                 if (y < m_height - 32 && y > m_width - 64) {
@@ -72,8 +112,17 @@ void Window::RenderVRam(u8* vramPtr) {
         }
     }
 }
-void Window::SetRendererColor(const u8 r, const u8 g, const u8 b) {
+void Window::SetRendererColor(const u8 r, const u8 g, const u8 b)
+{
     SDL_SetRenderDrawColor(m_sdlRendererPtr, r, g, b, 0);
+}
+
+void Window::SetPixelBuffer(u8* address, u32 size)
+{
+    std::lock_guard lockGuard { m_mutex };
+    m_pixelBuffer = address;
+    m_pixelBufferSize = size;
+    spdlog::debug("Window {}: set pixel buffer to {} (size {})", m_title, reinterpret_cast<void*>(m_pixelBuffer), m_pixelBufferSize);
 }
 
 } // namespace GUI

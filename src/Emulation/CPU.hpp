@@ -39,18 +39,19 @@ public:
     void LoadProgram(const std::string& path);
     [[nodiscard]] u8 GetInputPort(int portNumber) const;
     void SetInputPort(int portNumber, u8 value);
+    [[nodiscard]] u8* GetMemoryAtOffset(u16 offset);
+
 private:
     static constexpr auto DEVICE_SHIFT_IN = 3;
     static constexpr auto DEVICE_SHIFT_AMT = 2;
     static constexpr auto DEVICE_SHIFT_DATA = 2;
 
-
     u8 Fetch();
     void Decode();
-    inline u8 Read8() const;
-    inline u16 Read16() const;
-    inline u8 ReadAndAdvance8();
-    inline u16 ReadAndAdvance16();
+    [[nodiscard]] inline u8 Read8() const;
+    [[nodiscard]] inline u16 Read16() const;
+    [[nodiscard]] inline u8 ReadAndAdvance8();
+    [[nodiscard]] inline u16 ReadAndAdvance16();
 
     void SetAWithFlags(u16 value);
 
@@ -76,11 +77,11 @@ private:
     void RAR();
     void CMP(u8 srcRegister);
 
-    static inline bool SetFlagZ(u8 value);
-    static inline bool SetFlagS(u8 value);
-    static inline bool SetFlagP(u8 value);
-    static inline bool SetFlagC(u8 a, u8 b, u8 carry);
-    static inline bool SetFlagC(u16 value);
+    static inline bool GetFlagZ(u8 value);
+    static inline bool GetFlagS(u8 value);
+    static inline bool GetFlagP(u8 value);
+    inline void SetFlagC(u8 a, u8 b, u8 carry);
+    inline void SetFlagC(u16 value);
     inline void SetFlagsZSP(u8 value);
     static inline u8 TwoComp8(u8 value);
     static inline u16 TwoComp16(u16 value);
@@ -94,21 +95,21 @@ private:
     u8 m_L { 0 };
     u16 m_PC { 0 };
     u16 m_SP { 0 };
-    u8 m_flag_z { 0 };
-    u8 m_flag_s { 0 };
-    u8 m_flag_p { 0 };
-    u8 m_flag_c { 0 };
-    u8 m_flag_ac { 0 };
+    u8 m_flagZ { 0 };
+    u8 m_flagS { 0 };
+    u8 m_flagP { 0 };
+    u8 m_flagC { 0 };
+    u8 m_flagAC { 0 };
 
-    std::array<u8, 4> m_input_ports {};
-    std::array<u8, 6> m_output_ports {};
+    std::array<u8, 4> m_inputPorts {};
+    std::array<u8, 6> m_outputPorts {};
 
     u64 m_cycles { 0 };
-    u16 m_shift_register { 0 };
-    u8 m_shift_register_amt { 0 };
-    bool m_interrupts_enabled { false };
-    bool m_is_halted { false };
+    u16 m_shiftRegister { 0 };
+    u8 m_shiftRegisterAmount { 0 };
+    bool m_isInterruptsEnabled { false };
+    bool m_isHalted { false };
 
-    static constexpr auto allocated_memory = 0x10000;
-    std::array<u8, allocated_memory> m_memory {};
+    static constexpr auto ALLOCATED_MEMORY = 0x10000;
+    std::array<u8, ALLOCATED_MEMORY> m_memory {};
 };

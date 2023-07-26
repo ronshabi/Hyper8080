@@ -17,8 +17,7 @@ add_executable(${CMAKE_PROJECT_NAME}
         src/GUI/Window.cpp
         src/GUI/Window.hpp
 
-
-        src/Main.cpp
+        src/MainC.cpp
         src/cpu.cpp
         src/cpu.h
         src/instructions_C.cpp
@@ -32,7 +31,14 @@ add_executable(${CMAKE_PROJECT_NAME}
         src/defs.h
         src/GUI/Window.cpp
         src/GUI/Window.hpp
-        src/GUI/Backend.cpp src/GUI/Backend.hpp src/Emulation/CPU.cpp src/Emulation/CPU.hpp src/Core/Types.hpp src/Emulation/Instructions.hpp)
+        src/GUI/Backend.cpp
+        src/GUI/Backend.hpp
+        src/Emulation/CPU.cpp
+        src/Emulation/CPU.hpp
+        src/Core/Types.hpp
+        src/Emulation/Instructions.hpp
+        src/Main.cpp
+        src/Core/Rendering.hpp)
 
 
 target_link_libraries(Hyper8080 SDL2::SDL2)

@@ -7,10 +7,7 @@ inline u16 CPU::GetWord(u16 address) const
     return static_cast<u16>(m_memory.at(address + 1) << 8) | static_cast<u16>(m_memory.at(address));
 }
 
-inline void CPU::SetByte(u16 address, u8 value)
-{
-    m_memory[address] = value;
-}
+inline void CPU::SetByte(u16 address, u8 value) { m_memory[address] = value; }
 
 inline void CPU::SetWord(u16 address, u16 value)
 {
@@ -38,31 +35,25 @@ inline void CPU::SetHL(u16 to)
 u8 CPU::FLAGS() const
 {
     u8 ret = 0;
-    ret |= (m_flag_s << 7);
-    ret |= (m_flag_z << 6);
-    ret |= (m_flag_ac << 4);
-    ret |= (m_flag_p << 2);
+    ret |= (m_flagS << 7);
+    ret |= (m_flagZ << 6);
+    ret |= (m_flagAC << 4);
+    ret |= (m_flagP << 2);
     ret |= (1 << 1);
-    ret |= (m_flag_c);
+    ret |= (m_flagC);
     return ret;
 }
 
 inline void CPU::SetFlagsZSP(u8 value)
 {
-    m_flag_z = SetFlagZ(value);
-    m_flag_s = SetFlagS(value);
-    m_flag_p = SetFlagP(value);
+    m_flagZ = GetFlagZ(value);
+    m_flagS = GetFlagS(value);
+    m_flagP = GetFlagP(value);
 }
 
-inline bool CPU::SetFlagZ(u8 value)
-{
-    return value == 0;
-}
-inline bool CPU::SetFlagS(u8 value)
-{
-    return (value & 0x80) == 0x80;
-}
-inline bool CPU::SetFlagP(u8 value)
+inline bool CPU::GetFlagZ(u8 value) { return value == 0; }
+inline bool CPU::GetFlagS(u8 value) { return (value & 0x80) == 0x80; }
+inline bool CPU::GetFlagP(u8 value)
 {
     u8 parity = 0;
     while (value) {
@@ -72,16 +63,13 @@ inline bool CPU::SetFlagP(u8 value)
     return 1 - parity;
 }
 
-inline bool CPU::SetFlagC(u8 a, u8 b, u8 carry)
+inline void CPU::SetFlagC(u8 a, u8 b, u8 carry)
 {
     u16 sum = a + b + carry;
-    return (sum > 0xff);
+    m_flagC = (sum > 0xff);
 }
 
-inline bool CPU::SetFlagC(u16 value)
-{
-    return (value > 0xff);
-}
+inline void CPU::SetFlagC(u16 value) { m_flagC = (value > 0xff); }
 
 void CPU::Push(u16 value)
 {
@@ -99,11 +87,11 @@ void CPU::PopPSW()
 {
     const auto psw = Pop();
     m_A = psw >> 8;
-    m_flag_s = psw >> 7 & 0x1;
-    m_flag_z = psw >> 6 & 0x1;
-    m_flag_ac = psw >> 4 & 0x1;
-    m_flag_p = psw >> 2 & 0x1;
-    m_flag_c = psw & 0x1;
+    m_flagS = psw >> 7 & 0x1;
+    m_flagZ = psw >> 6 & 0x1;
+    m_flagAC = psw >> 4 & 0x1;
+    m_flagP = psw >> 2 & 0x1;
+    m_flagC = psw & 0x1;
 }
 u8 CPU::Fetch()
 {
@@ -129,37 +117,37 @@ void CPU::Decode()
     case 0xfd:
     case 0x38:
         break; // NOP
-    case Instructions::stc: m_flag_c = 1; break;
+    case Instructions::stc: m_flagC = 1; break;
     case Instructions::cma: m_A = ~m_A; break;
-    case Instructions::cmc: m_flag_c ^= 1; break;
+    case Instructions::cmc: m_flagC ^= 1; break;
     case Instructions::jmp: JMP(Read16()); break;
-    case Instructions::jc: JMP(Read16(), m_flag_c); break;
-    case Instructions::jnc: JMP(Read16(), !m_flag_c); break;
-    case Instructions::jz: JMP(Read16(), m_flag_z); break;
-    case Instructions::jnz: JMP(Read16(), !m_flag_z); break;
-    case Instructions::jm: JMP(Read16(), m_flag_s); break;
-    case Instructions::jp: JMP(Read16(), !m_flag_s); break;
-    case Instructions::jpe: JMP(Read16(), m_flag_p); break;
-    case Instructions::jpo: JMP(Read16(), !m_flag_p); break;
+    case Instructions::jc: JMP(Read16(), m_flagC); break;
+    case Instructions::jnc: JMP(Read16(), !m_flagC); break;
+    case Instructions::jz: JMP(Read16(), m_flagZ); break;
+    case Instructions::jnz: JMP(Read16(), !m_flagZ); break;
+    case Instructions::jm: JMP(Read16(), m_flagS); break;
+    case Instructions::jp: JMP(Read16(), !m_flagS); break;
+    case Instructions::jpe: JMP(Read16(), m_flagP); break;
+    case Instructions::jpo: JMP(Read16(), !m_flagP); break;
     case Instructions::call: CALL(Read16()); break;
-    case Instructions::cc: CALL(Read16(), m_flag_c); break;
-    case Instructions::cnc: CALL(Read16(), !m_flag_c); break;
-    case Instructions::cz: CALL(Read16(), m_flag_z); break;
-    case Instructions::cnz: CALL(Read16(), !m_flag_z); break;
-    case Instructions::cm: CALL(Read16(), m_flag_s); break;
-    case Instructions::cp: CALL(Read16(), !m_flag_s); break;
-    case Instructions::cpe: CALL(Read16(), m_flag_p); break;
-    case Instructions::cpo: CALL(Read16(), !m_flag_p); break;
+    case Instructions::cc: CALL(Read16(), m_flagC); break;
+    case Instructions::cnc: CALL(Read16(), !m_flagC); break;
+    case Instructions::cz: CALL(Read16(), m_flagZ); break;
+    case Instructions::cnz: CALL(Read16(), !m_flagZ); break;
+    case Instructions::cm: CALL(Read16(), m_flagS); break;
+    case Instructions::cp: CALL(Read16(), !m_flagS); break;
+    case Instructions::cpe: CALL(Read16(), m_flagP); break;
+    case Instructions::cpo: CALL(Read16(), !m_flagP); break;
 
     case Instructions::ret: RET(); break;
-    case Instructions::rc: RET(m_flag_c); break;
-    case Instructions::rnc: RET(!m_flag_c); break;
-    case Instructions::rz: RET(m_flag_z); break;
-    case Instructions::rnz: RET(!m_flag_z); break;
-    case Instructions::rm: RET(m_flag_s); break;
-    case Instructions::rp: RET(!m_flag_s); break;
-    case Instructions::rpe: RET(m_flag_p); break;
-    case Instructions::rpo: RET(!m_flag_p); break;
+    case Instructions::rc: RET(m_flagC); break;
+    case Instructions::rnc: RET(!m_flagC); break;
+    case Instructions::rz: RET(m_flagZ); break;
+    case Instructions::rnz: RET(!m_flagZ); break;
+    case Instructions::rm: RET(m_flagS); break;
+    case Instructions::rp: RET(!m_flagS); break;
+    case Instructions::rpe: RET(m_flagP); break;
+    case Instructions::rpo: RET(!m_flagP); break;
 
     case Instructions::lxi_b: SetBC(ReadAndAdvance16()); break;
     case Instructions::lxi_d: SetDE(ReadAndAdvance16()); break;
@@ -183,7 +171,7 @@ void CPU::Decode()
         break;
     }
     case Instructions::aci: {
-        const u16 result = static_cast<u16>(m_A + Read8() + m_flag_c);
+        const u16 result = static_cast<u16>(m_A + Read8() + m_flagC);
         m_A = result & 0xff;
         SetFlagC(result);
         SetFlagsZSP(m_A);
@@ -199,7 +187,7 @@ void CPU::Decode()
         break;
     }
     case Instructions::sbi: {
-        const u16 result = static_cast<u16>(m_A + TwoComp8(Read8()) + TwoComp8(m_flag_c));
+        const u16 result = static_cast<u16>(m_A + TwoComp8(Read8()) + TwoComp8(m_flagC));
         m_A = result & 0xff;
         SetFlagC(result);
         SetFlagsZSP(m_A);
@@ -316,7 +304,7 @@ void CPU::Decode()
     case Instructions::dad_b: DAD(BC()); break;
     case Instructions::dad_d: DAD(DE()); break;
     case Instructions::dad_h: DAD(HL()); break;
-    case Instructions::dad_sp: DAD(SP()); break;
+    case Instructions::dad_sp: DAD(m_SP); break;
     case Instructions::inx_b: SetBC(BC() + 1); break;
     case Instructions::inx_d: SetDE(DE() + 1); break;
     case Instructions::inx_h: SetHL(HL() + 1); break;
@@ -384,9 +372,9 @@ void CPU::Decode()
     case Instructions::in: {
         u8 deviceNumber = ReadAndAdvance8();
         if (deviceNumber == DEVICE_SHIFT_IN) {
-            m_A  = ((m_shift_register >> (8 - m_shift_register_amt)) & 0xff);
+            m_A  = ((m_shiftRegister >> (8 - m_shiftRegisterAmount)) & 0xff);
         } else {
-            m_A = m_input_ports.at(deviceNumber);
+            m_A = m_inputPorts.at(deviceNumber);
         }
 
         break;
@@ -396,19 +384,19 @@ void CPU::Decode()
         u8 deviceNumber = ReadAndAdvance8();
 
         if (deviceNumber == DEVICE_SHIFT_AMT) {
-            m_shift_register_amt = (m_A & 7);
+            m_shiftRegisterAmount = (m_A & 7);
         } else if (deviceNumber == DEVICE_SHIFT_DATA) {
-            m_shift_register >>= 8;
-            m_shift_register |= (static_cast<u16>(m_A) << 8);
+            m_shiftRegister >>= 8;
+            m_shiftRegister |= (static_cast<u16>(m_A) << 8);
         } else {
-            m_output_ports[deviceNumber] = m_A;
+            m_outputPorts[deviceNumber] = m_A;
         }
 
         break;
     }
 
     case Instructions::hlt:
-        m_is_halted = true;
+        m_isHalted = true;
         break;
 
     case Instructions::add_a: SetAWithFlags(static_cast<u16>(m_A) + m_A); break;
@@ -420,14 +408,14 @@ void CPU::Decode()
     case Instructions::add_l: SetAWithFlags(static_cast<u16>(m_A) + m_L); break;
     case Instructions::add_m: SetAWithFlags(static_cast<u16>(m_A) + GetByte(HL())); break;
 
-    case Instructions::adc_a: SetAWithFlags(static_cast<u16>(m_A) + m_A + m_flag_c); break;
-    case Instructions::adc_b: SetAWithFlags(static_cast<u16>(m_A) + m_B + m_flag_c); break;
-    case Instructions::adc_c: SetAWithFlags(static_cast<u16>(m_A) + m_C + m_flag_c); break;
-    case Instructions::adc_d: SetAWithFlags(static_cast<u16>(m_A) + m_D + m_flag_c); break;
-    case Instructions::adc_e: SetAWithFlags(static_cast<u16>(m_A) + m_E + m_flag_c); break;
-    case Instructions::adc_h: SetAWithFlags(static_cast<u16>(m_A) + m_H + m_flag_c); break;
-    case Instructions::adc_l: SetAWithFlags(static_cast<u16>(m_A) + m_L + m_flag_c); break;
-    case Instructions::adc_m: SetAWithFlags(static_cast<u16>(m_A) + GetByte(HL()) + m_flag_c); break;
+    case Instructions::adc_a: SetAWithFlags(static_cast<u16>(m_A) + m_A + m_flagC); break;
+    case Instructions::adc_b: SetAWithFlags(static_cast<u16>(m_A) + m_B + m_flagC); break;
+    case Instructions::adc_c: SetAWithFlags(static_cast<u16>(m_A) + m_C + m_flagC); break;
+    case Instructions::adc_d: SetAWithFlags(static_cast<u16>(m_A) + m_D + m_flagC); break;
+    case Instructions::adc_e: SetAWithFlags(static_cast<u16>(m_A) + m_E + m_flagC); break;
+    case Instructions::adc_h: SetAWithFlags(static_cast<u16>(m_A) + m_H + m_flagC); break;
+    case Instructions::adc_l: SetAWithFlags(static_cast<u16>(m_A) + m_L + m_flagC); break;
+    case Instructions::adc_m: SetAWithFlags(static_cast<u16>(m_A) + GetByte(HL()) + m_flagC); break;
 
     case Instructions::sub_a: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_A)); break;
     case Instructions::sub_b: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_B)); break;
@@ -438,14 +426,14 @@ void CPU::Decode()
     case Instructions::sub_l: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_L)); break;
     case Instructions::sub_m: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(GetByte(HL()))); break;
 
-    case Instructions::sbb_a: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_A) + TwoComp8(m_flag_c)); break;
-    case Instructions::sbb_b: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_B) + TwoComp8(m_flag_c)); break;
-    case Instructions::sbb_c: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_C) + TwoComp8(m_flag_c)); break;
-    case Instructions::sbb_d: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_D) + TwoComp8(m_flag_c)); break;
-    case Instructions::sbb_e: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_E) + TwoComp8(m_flag_c)); break;
-    case Instructions::sbb_h: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_H) + TwoComp8(m_flag_c)); break;
-    case Instructions::sbb_l: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_L) + TwoComp8(m_flag_c)); break;
-    case Instructions::sbb_m: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(GetByte(HL())) + TwoComp8(m_flag_c)); break;
+    case Instructions::sbb_a: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_A) + TwoComp8(m_flagC)); break;
+    case Instructions::sbb_b: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_B) + TwoComp8(m_flagC)); break;
+    case Instructions::sbb_c: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_C) + TwoComp8(m_flagC)); break;
+    case Instructions::sbb_d: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_D) + TwoComp8(m_flagC)); break;
+    case Instructions::sbb_e: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_E) + TwoComp8(m_flagC)); break;
+    case Instructions::sbb_h: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_H) + TwoComp8(m_flagC)); break;
+    case Instructions::sbb_l: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(m_L) + TwoComp8(m_flagC)); break;
+    case Instructions::sbb_m: SetAWithFlags(static_cast<u16>(m_A) + TwoComp8(GetByte(HL())) + TwoComp8(m_flagC)); break;
 
     case Instructions::ana_a: SetAWithFlags(static_cast<u16>(m_A) & TwoComp8(m_A)); break;
     case Instructions::ana_b: SetAWithFlags(static_cast<u16>(m_A) & TwoComp8(m_B)); break;
@@ -481,7 +469,7 @@ void CPU::Decode()
     case Instructions::cmp_e: CMP(m_E); break;
     case Instructions::cmp_h: CMP(m_H); break;
     case Instructions::cmp_l: CMP(m_L); break;
-    case Instructions::cmp_m: CMP(GetByte(HL())); break; break;
+    case Instructions::cmp_m: CMP(GetByte(HL())); break;
 
     case Instructions::sta: SetByte(ReadAndAdvance16(), m_A); break;
     case Instructions::lda: m_A = GetByte(ReadAndAdvance16()); break;
@@ -489,8 +477,8 @@ void CPU::Decode()
     case Instructions::lhld: SetHL(GetWord(ReadAndAdvance16())); break;
     case Instructions::pchl: m_PC = HL(); break;
 
-    case Instructions::ei: m_interrupts_enabled = true; break;
-    case Instructions::di: m_interrupts_enabled = false; break;
+    case Instructions::ei: m_isInterruptsEnabled = true; break;
+    case Instructions::di: m_isInterruptsEnabled = false; break;
 
     case Instructions::interrupt0: CALL(0x00); break;
     case Instructions::interrupt1: CALL(0x08); break;
@@ -524,8 +512,8 @@ void CPU::LoadProgram(const std::string& path)
     spdlog::debug("Loaded program {} to emulator memory (size {} bytes)", path, file_size);
 }
 
-inline u8 CPU::GetInputPort(int portNumber) const { return m_input_ports.at(portNumber); }
-inline void CPU::SetInputPort(int portNumber, u8 value) { m_input_ports[portNumber] = value; }
+inline u8 CPU::GetInputPort(int portNumber) const { return m_inputPorts.at(portNumber); }
+inline void CPU::SetInputPort(int portNumber, u8 value) { m_inputPorts[portNumber] = value; }
 
 void CPU::JMP(u16 address) { JMP(address, true); }
 
@@ -547,10 +535,7 @@ void CPU::CALL(u16 address, bool condition)
     }
 }
 
-void CPU::RET()
-{
-    RET(true);
-}
+void CPU::RET() { RET(true); }
 
 void CPU::RET(bool condition)
 {
@@ -576,94 +561,97 @@ inline u16 CPU::ReadAndAdvance16()
     return ret;
 }
 
-inline void CPU::MOV(u8& dest, const u8 src) {
-    dest = src;
-}
+inline void CPU::MOV(u8& dest, const u8 src) { dest = src; }
 
-inline void CPU::MVI(u8& dest) {
-    dest = ReadAndAdvance8();
-}
+inline void CPU::MVI(u8& dest) { dest = ReadAndAdvance8(); }
 
-inline u8 CPU::TwoComp8(const u8 value) {
-    return static_cast<u8>(~value + 1);
-}
+inline u8 CPU::TwoComp8(const u8 value) { return static_cast<u8>(~value + 1); }
 
-inline u16 CPU::TwoComp16(const u16 value) {
-    return static_cast<u16>(~value + 1);
-}
+inline u16 CPU::TwoComp16(const u16 value) { return static_cast<u16>(~value + 1); }
 
-void CPU::DAD(const u16 registerPair) {
+void CPU::DAD(const u16 registerPair)
+{
     const u32 result = static_cast<u32>(registerPair) + HL();
     SetFlagC(result & 0xffff);
     SetHL(result & 0xffff);
 }
 
-void CPU::MOVM(const u8 srcRegister) {
-    SetByte(HL(), srcRegister);
-}
+void CPU::MOVM(const u8 srcRegister) { SetByte(HL(), srcRegister); }
 
-void CPU::INR(u8& srcRegister) {
+void CPU::INR(u8& srcRegister)
+{
     const u16 result = static_cast<u16>(srcRegister) + 1;
     SetFlagsZSP(srcRegister);
     SetFlagC(result);
     srcRegister = result & 0xff;
 }
 
-void CPU::DCR(u8& srcRegister) {
+void CPU::DCR(u8& srcRegister)
+{
     const u16 result = static_cast<u16>(srcRegister) + TwoComp8(1);
     SetFlagsZSP(srcRegister);
     SetFlagC(result);
     srcRegister = result & 0xff;
 }
-void CPU::DAA() {
+void CPU::DAA()
+{
     u16 result = 0;
-    if ((m_A & 0x0f) > 9 || m_flag_ac) {
+    if ((m_A & 0x0f) > 9 || m_flagAC) {
         result += 6;
     }
 
-    if ((m_A >> 4) > 9 || m_flag_c) {
+    if ((m_A >> 4) > 9 || m_flagC) {
         result += 0x60;
-        m_flag_c = 1;
+        m_flagC = 1;
         result += m_A;
         SetFlagsZSP(result & 0xff);
         SetFlagC(result);
     }
 }
-void CPU::RLC() {
+void CPU::RLC()
+{
     const u8 bit7 = (m_A & 0x80) >> 7;
     m_A <<= 1;
     m_A |= bit7;
-    m_flag_c = bit7;
+    m_flagC = bit7;
 }
 
-void CPU::RRC() {
+void CPU::RRC()
+{
     const u8 bit0 = (m_A & 0x01);
     m_A >>= 1;
     m_A |= (bit0 << 7);
-    m_flag_c = (bit0 != 0);
+    m_flagC = (bit0 != 0);
 }
-void CPU::RAL() {
+void CPU::RAL()
+{
     const u8 bit7 = (m_A & 0x80) >> 7;
     m_A <<= 1;
-    m_A |= m_flag_c;
-    m_flag_c = bit7;
+    m_A |= m_flagC;
+    m_flagC = bit7;
 }
 
-void CPU::RAR() {
+void CPU::RAR()
+{
     const u8 bit0 = (m_A & 0x01);
     m_A >>= 1;
-    m_A |= (m_flag_c << 7);
-    m_flag_c = bit0;
+    m_A |= (m_flagC << 7);
+    m_flagC = bit0;
 }
 
-void CPU::SetAWithFlags(u16 value) {
+void CPU::SetAWithFlags(u16 value)
+{
     SetFlagsZSP(value & 0xff);
     SetFlagC(value);
     m_A = value & 0xff;
 }
 
-void CPU::CMP(u8 srcRegister) {
+void CPU::CMP(u8 srcRegister)
+{
     const u16 value = static_cast<u16>(m_A) + TwoComp8(srcRegister);
     SetFlagsZSP(value & 0xff);
     SetFlagC(value);
+}
+u8* CPU::GetMemoryAtOffset(u16 offset) {
+    return m_memory.data() + offset;
 }
