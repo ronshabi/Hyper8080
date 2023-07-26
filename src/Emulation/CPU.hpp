@@ -3,18 +3,15 @@
 #include <Core/Types.hpp>
 #include <Emulation/Instructions.hpp>
 
-
 #include <array>
 #include <string>
 #include <fstream>
 #include <stdexcept>
-
 #include <spdlog/spdlog.h>
 
 class CPU {
 public:
     explicit CPU() = default;
-
 public:
     [[nodiscard]] u8 A() const { return m_A; }
     [[nodiscard]] u8 B() const { return m_B; }
@@ -33,17 +30,11 @@ public:
 
     [[nodiscard]] inline u8 GetByte(u16 address) const;
     [[nodiscard]] inline u16 GetWord(u16 address) const;
-
     inline void SetByte(u16 address, u8 value);
-    void SetWord(u16 address, u16 value);
+    inline void SetWord(u16 address, u16 value);
     inline void SetBC(u16 to);
     inline void SetDE(u16 to);
     inline void SetHL(u16 to);
-    inline void SetFlagsZSP(u8 value);
-
-    void Push(u16 value);
-    [[nodiscard]] u16 Pop();
-    void PopPSW();
 
     void LoadProgram(const std::string& path);
     [[nodiscard]] u8 GetInputPort(int portNumber) const;
@@ -51,21 +42,43 @@ public:
 private:
     u8 Fetch();
     void Decode();
-    u8 Read8() const;
-    u8 Read16() const;
+    inline u8 Read8() const;
+    inline u16 Read16() const;
+    inline u8 ReadAndAdvance8();
+    inline u16 ReadAndAdvance16();
 
-    void Jump(u16 address);
-    void Jump(u16 address, bool condition);
-    void Call(u16 address);
-    void Call(u16 address, bool condition);
-    void Ret();
-    void Ret(bool condition);
+    void SetAWithFlags(u16 value);
 
-    static inline bool flag_Z_check(u8 value);
-    static inline bool flag_S_check(u8 value);
-    static inline bool flag_P_check(u8 value);
-    static inline bool flag_C_check(u8 a, u8 b, u8 carry);
-    static inline bool flag_C_check(u16 value);
+    void Push(u16 value);
+    [[nodiscard]] u16 Pop();
+    void PopPSW();
+    void JMP(u16 address);
+    void JMP(u16 address, bool condition);
+    void CALL(u16 address);
+    void CALL(u16 address, bool condition);
+    void RET();
+    void RET(bool condition);
+    void MOV(u8& dest, u8 src);
+    void MOVM(u8 srcRegister);
+    void MVI(u8& dest);
+    void DAD(u16 registerPair);
+    void INR(u8& srcRegister);
+    void DCR(u8& srcRegister);
+    void DAA();
+    void RLC();
+    void RRC();
+    void RAL();
+    void RAR();
+    void CMP(u8 srcRegister);
+
+    static inline bool SetFlagZ(u8 value);
+    static inline bool SetFlagS(u8 value);
+    static inline bool SetFlagP(u8 value);
+    static inline bool SetFlagC(u8 a, u8 b, u8 carry);
+    static inline bool SetFlagC(u16 value);
+    inline void SetFlagsZSP(u8 value);
+    static inline u8 TwoComp8(u8 value);
+    static inline u16 TwoComp16(u16 value);
 
     u8 m_A { 0 };
     u8 m_B { 0 };
@@ -76,7 +89,6 @@ private:
     u8 m_L { 0 };
     u16 m_PC { 0 };
     u16 m_SP { 0 };
-
     u8 m_flag_z { 0 };
     u8 m_flag_s { 0 };
     u8 m_flag_p { 0 };
