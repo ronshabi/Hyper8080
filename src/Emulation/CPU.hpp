@@ -40,6 +40,11 @@ public:
     [[nodiscard]] u8 GetInputPort(int portNumber) const;
     void SetInputPort(int portNumber, u8 value);
 private:
+    static constexpr auto DEVICE_SHIFT_IN = 3;
+    static constexpr auto DEVICE_SHIFT_AMT = 2;
+    static constexpr auto DEVICE_SHIFT_DATA = 2;
+
+
     u8 Fetch();
     void Decode();
     inline u8 Read8() const;

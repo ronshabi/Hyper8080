@@ -262,12 +262,12 @@ constexpr auto pchl = 0xe9;
 constexpr auto ei = 0xfb;
 constexpr auto di = 0xf3;
 
-constexpr auto rsi0 = 0xc7;
-constexpr auto rsi1 = 0xcf;
-constexpr auto rsi2 = 0xd7;
-constexpr auto rsi3 = 0xdf;
-constexpr auto rsi4 = 0xe7;
-constexpr auto rsi5 = 0xef;
-constexpr auto rsi6 = 0xf7;
-constexpr auto rsi7 = 0xff;
+constexpr auto interrupt0 = 0xc7;
+constexpr auto interrupt1 = 0xcf;
+constexpr auto interrupt2 = 0xd7;
+constexpr auto interrupt3 = 0xdf;
+constexpr auto interrupt4 = 0xe7;
+constexpr auto interrupt5 = 0xef;
+constexpr auto interrupt6 = 0xf7;
+constexpr auto interrupt7 = 0xff;
 } // namespace Instructions

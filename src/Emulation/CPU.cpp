@@ -1,6 +1,4 @@
 #include "CPU.hpp"
-#include "cpu.h"
-#include <bitset>
 
 inline u8 CPU::GetByte(u16 address) const { return m_memory.at(address); }
 
@@ -305,8 +303,8 @@ void CPU::Decode()
     case Instructions::mov_m_e: MOVM(m_E); break;
     case Instructions::mov_m_h: MOVM(m_H); break;
     case Instructions::mov_m_l: MOVM(m_L); break;
-    case Instructions::stax_b: SetByte(BC(), A()); break;
-    case Instructions::stax_d: SetByte(DE(), A()); break;
+    case Instructions::stax_b: SetByte(BC(), m_A); break;
+    case Instructions::stax_d: SetByte(DE(), m_A); break;
     case Instructions::push_b: Push(BC()); break;
     case Instructions::push_d: Push(DE()); break;
     case Instructions::push_h: Push(HL()); break;
@@ -340,10 +338,10 @@ void CPU::Decode()
     case Instructions::xthl: {
         u8 tempL = m_L;
         u8 tempH = m_H;
-        m_L = GetByte(SP());
-        m_H = GetByte(SP() + 1);
-        SetByte(SP(), tempL);
-        SetByte(SP()+1, tempH);
+        m_L = GetByte(m_SP);
+        m_H = GetByte(m_SP + 1);
+        SetByte(m_SP, tempL);
+        SetByte(m_SP+1, tempH);
         break;
     }
 
@@ -383,11 +381,34 @@ void CPU::Decode()
     case Instructions::rar: RAR(); break;
     case Instructions::ral: RAL(); break;
 
-    case Instructions::in:
+    case Instructions::in: {
+        u8 deviceNumber = ReadAndAdvance8();
+        if (deviceNumber == DEVICE_SHIFT_IN) {
+            m_A  = ((m_shift_register >> (8 - m_shift_register_amt)) & 0xff);
+        } else {
+            m_A = m_input_ports.at(deviceNumber);
+        }
+
         break;
-    case Instructions::out:
+    }
+
+    case Instructions::out: {
+        u8 deviceNumber = ReadAndAdvance8();
+
+        if (deviceNumber == DEVICE_SHIFT_AMT) {
+            m_shift_register_amt = (m_A & 7);
+        } else if (deviceNumber == DEVICE_SHIFT_DATA) {
+            m_shift_register >>= 8;
+            m_shift_register |= (static_cast<u16>(m_A) << 8);
+        } else {
+            m_output_ports[deviceNumber] = m_A;
+        }
+
         break;
+    }
+
     case Instructions::hlt:
+        m_is_halted = true;
         break;
 
     case Instructions::add_a: SetAWithFlags(static_cast<u16>(m_A) + m_A); break;
@@ -462,36 +483,23 @@ void CPU::Decode()
     case Instructions::cmp_l: CMP(m_L); break;
     case Instructions::cmp_m: CMP(GetByte(HL())); break; break;
 
-    case Instructions::sta:
-        break;
-    case Instructions::lda:
-        break;
-    case Instructions::shld:
-        break;
-    case Instructions::lhld:
-        break;
-    case Instructions::pchl:
-        break;
-    case Instructions::ei:
-        break;
-    case Instructions::di:
-        break;
-    case Instructions::rsi0:
-        break;
-    case Instructions::rsi1:
-        break;
-    case Instructions::rsi2:
-        break;
-    case Instructions::rsi3:
-        break;
-    case Instructions::rsi4:
-        break;
-    case Instructions::rsi5:
-        break;
-    case Instructions::rsi6:
-        break;
-    case Instructions::rsi7:
-        break;
+    case Instructions::sta: SetByte(ReadAndAdvance16(), m_A); break;
+    case Instructions::lda: m_A = GetByte(ReadAndAdvance16()); break;
+    case Instructions::shld: SetWord(ReadAndAdvance16(), HL()); break;
+    case Instructions::lhld: SetHL(GetWord(ReadAndAdvance16())); break;
+    case Instructions::pchl: m_PC = HL(); break;
+
+    case Instructions::ei: m_interrupts_enabled = true; break;
+    case Instructions::di: m_interrupts_enabled = false; break;
+
+    case Instructions::interrupt0: CALL(0x00); break;
+    case Instructions::interrupt1: CALL(0x08); break;
+    case Instructions::interrupt2: CALL(0x10); break;
+    case Instructions::interrupt3: CALL(0x18); break;
+    case Instructions::interrupt4: CALL(0x20); break;
+    case Instructions::interrupt5: CALL(0x28); break;
+    case Instructions::interrupt6: CALL(0x30); break;
+    case Instructions::interrupt7: CALL(0x38); break;
     }
 }
 // clang-format on
