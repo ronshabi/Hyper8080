@@ -38,7 +38,7 @@ add_executable(${CMAKE_PROJECT_NAME}
         src/Core/Types.hpp
         src/Emulation/Instructions.hpp
         src/Main.cpp
-        src/Core/Rendering.hpp)
+        src/Rendering/Common.hpp)
 
 
 target_link_libraries(Hyper8080 SDL2::SDL2)

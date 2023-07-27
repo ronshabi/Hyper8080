@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Core/Types.hpp>
+#include <Rendering/Common.hpp>
 
 #include <SDL2/SDL.h>
 #include <SDL_events.h>
@@ -9,32 +10,33 @@
 #include <stdexcept>
 #include <memory>
 #include <thread>
+#include <cstring>
+#include <atomic>
+#include <cstdlib>
 
 namespace GUI {
 class Window {
 public:
-    explicit Window(std::string&& title, int scale = 1);
-    void SetPixelBuffer(u8* address, u32 size);
+    explicit Window(std::string&& title);
     ~Window();
-
+    void Stop();
+    bool isRunning() const;
 private:
-    void SetRendererColor(u8 r, u8 g, u8 b);
-    void PlacePixel(int x, int y);
+
+    void ThreadLoop();
     void Render();
-    void Blit();
-    void Clear();
+    void Update();
+    void HandleInputs();
 
-    u8* m_pixelBuffer{};
-    u32 m_pixelBufferSize{};
-
-    bool m_isRunning{true};
     std::string m_title;
     const int m_width;
     const int m_height;
-    const int m_scale{2};
+    std::atomic<bool> m_isRunning{ true };
 
-    std::mutex m_mutex;
-    SDL_Window* m_sdlWindowPtr{ nullptr };
-    SDL_Renderer* m_sdlRendererPtr{ nullptr };
+    SDL_Window* m_windowPtr { nullptr };
+    SDL_Surface* m_windowSurfacePtr { nullptr };
+
+    std::mutex m_mutex{};
+    std::thread m_thread{};
 };
 } // namespace GUI

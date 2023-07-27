@@ -3,13 +3,16 @@
 #include <GUI/Backend.hpp>
 #include <GUI/Window.hpp>
 
+#include <chrono>
 #include <spdlog/common.h>
 #include <spdlog/spdlog.h>
 
 
 #include <iostream>
+#include <thread>
 
-void PrintUsage() {
+void PrintUsage()
+{
     std::cerr << "usage: Hyper8080 <file>\n";
 }
 
@@ -35,5 +38,19 @@ int main(int argc, const char* argv[])
 
     // Initialize backend
     GUI::Backend backend;
-    GUI::Window mainWindow("Hyper8080", 2);
+    SDL_Event e;
+
+    GUI::Window mainWindow("Hyper8080");
+
+    while (mainWindow.isRunning()) {
+        // If SDL_PollEvent returns zero, there are no events left on queue
+        if (SDL_PollEvent(&e)) {
+            if (e.key.keysym.sym == SDLK_q) {
+                spdlog::debug("Main thread: quit requested by pressing q key");
+                mainWindow.Stop();
+            }
+        }
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(16));
+    }
 }
