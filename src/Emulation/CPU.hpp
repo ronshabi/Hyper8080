@@ -40,6 +40,9 @@ public:
     [[nodiscard]] u8 GetInputPort(int portNumber) const;
     void SetInputPort(int portNumber, u8 value);
     [[nodiscard]] u8* GetMemoryAtOffset(u16 offset);
+    void Execute();
+    void Interrupt(u8 number);
+
 
 private:
     static constexpr auto DEVICE_SHIFT_IN = 3;

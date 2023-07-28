@@ -509,7 +509,7 @@ void CPU::LoadProgram(const std::string& path)
 
     file.read(reinterpret_cast<char*>(m_memory.data()), file_size);
 
-    spdlog::debug("Loaded program {} to emulator memory (size {} bytes)", path, file_size);
+    spdlog::debug("Loaded program {} to emulator memory (size {:x} bytes)", path, file_size);
 }
 
 inline u8 CPU::GetInputPort(int portNumber) const { return m_inputPorts.at(portNumber); }
@@ -653,5 +653,17 @@ void CPU::CMP(u8 srcRegister)
     SetFlagC(value);
 }
 u8* CPU::GetMemoryAtOffset(u16 offset) {
+    spdlog::debug("Returning memory at offset {} from CPU", reinterpret_cast<void*>(m_memory.data()+ offset));
     return m_memory.data() + offset;
+}
+void CPU::Execute() {
+    Fetch();
+    Decode();
+}
+void CPU::Interrupt(u8 number) {
+    if (m_isInterruptsEnabled) {
+        m_isInterruptsEnabled = false;
+        Push(m_PC);
+        m_PC = static_cast<u16>(number) * 8;
+    }
 }

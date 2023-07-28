@@ -17,10 +17,12 @@
 namespace GUI {
 class Window {
 public:
-    explicit Window(std::string&& title);
+    explicit Window(std::string&& title, int width, int height);
     ~Window();
     void Stop();
-    bool isRunning() const;
+    [[nodiscard]] bool isRunning() const;
+    void SetBitmapSource(u8* ptr);
+    void setDrawFromBitmapSource(bool val);
 private:
 
     void ThreadLoop();
@@ -31,6 +33,10 @@ private:
     std::string m_title;
     const int m_width;
     const int m_height;
+
+    std::atomic<bool> m_drawFromBitmapSource{false};
+    u8* m_bitmapSourcePtr{ nullptr };
+
     std::atomic<bool> m_isRunning{ true };
 
     SDL_Window* m_windowPtr { nullptr };
