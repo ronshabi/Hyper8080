@@ -5,39 +5,16 @@ set(CMAKE_C_STANDARD 99)
 find_package(SDL2 REQUIRED)
 find_package(spdlog REQUIRED)
 
-add_executable(${CMAKE_PROJECT_NAME}
-        src/Core/Types.hpp
-
-        src/Emulation/CPU.cpp
-        src/Emulation/CPU.hpp
-        src/Emulation/Instructions.hpp
-
-        src/GUI/Backend.cpp
-        src/GUI/Backend.hpp
-        src/GUI/Window.cpp
-        src/GUI/Window.hpp
-
-        src/MainC.cpp
-        src/cpu.cpp
-        src/cpu.h
-        src/instructions_C.cpp
-        src/instructions_C.h
-        src/debug.cpp
-        src/debug.h
-        src/render.cpp
-        src/render.h
-        src/sys.cpp
-        src/sys.h
-        src/defs.h
-        src/GUI/Window.cpp
-        src/GUI/Window.hpp
-        src/GUI/Backend.cpp
-        src/GUI/Backend.hpp
-        src/Emulation/CPU.cpp
-        src/Emulation/CPU.hpp
-        src/Core/Types.hpp
-        src/Emulation/Instructions.hpp
+add_executable(Hyper8080
         src/Main.cpp
+        src/Core/Types.hpp
+        src/Emulation/CPU.cpp
+        src/Emulation/CPU.hpp
+        src/Emulation/Instructions.hpp
+        src/GUI/Backend.cpp
+        src/GUI/Backend.hpp
+        src/GUI/Window.cpp
+        src/GUI/Window.hpp
         src/Rendering/Common.hpp)
 
 
